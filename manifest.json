@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+
+  "name": "GDocs Line Numbering",
+  "description": "This extension add the line numbering functionallity to a google doc.",
+  "version": "1.0",
+
+  "browser_action": {
+   "default_icon": "icon.png",
+   "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://docs.google.com/document/d/*",
+        "http://docs.google.com/document/d/*"
+      ],
+      "css": [
+        "linenumbering.css"
+      ],
+      "js": [
+        "jquery.min.js",
+        "linenumbering.js"
+      ]
+    }
+  ],
+  "permissions": [
+   "https://docs.google.com/document/d/*",
+   "http://docs.google.com/document/d/*"
+   ]
+}

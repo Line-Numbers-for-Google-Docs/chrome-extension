@@ -1,0 +1,19 @@
+body {
+  counter-reset: ln;
+}
+
+.kix-lineview {
+  counter-increment: ln;
+}
+
+.kix-lineview.numbered::before {
+  content: counter(ln);
+  position: relative;
+  left: -4em;
+  float: left;
+  color: #999;
+}
+
+.linenumberhover .kix-lineview.numbered:hover::before {
+  color: black;
+}
