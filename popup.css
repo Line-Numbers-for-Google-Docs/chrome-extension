@@ -1,0 +1,141 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:700,400,300);
+
+body {
+  width: 300px;
+  font-family: 'Lato', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+}
+h1 {
+  font-size: 20px;
+  color: rgb(76,76,76);
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+}
+h1::after {
+  content: "";
+  display: block;
+  height: 1px;
+  width: 200%;
+  margin-top: 3px;
+  margin-left: -10px;
+  background: rgb(240,240,240);
+}
+h1 img {
+  height: 48px;
+  width: 48px;
+}
+h1 span{
+  position: relative;
+  bottom: 16px;
+  left: 5px;
+}
+.option {
+  display: inline-block;
+}
+.option::after {
+  content: "";
+  display: block;
+  height: 1px;
+  width: 270;
+  margin: 15px 15px 15px 15px;
+  background: rgb(240,240,240);
+}
+.option .option_labal {
+  width: 250px;
+  float: left;
+  position: relative;
+  bottom: 10px;
+}
+.option .option_labal .info {
+  font-weight: 300;
+  font-size: 12px;
+}
+.offDocumentShow {
+  display: none;
+}
+
+
+input {
+  max-width: 42px;
+}
+/*TOGGLE SWITCHES*/
+.switch {
+    border-radius: 18px;
+    cursor: pointer;
+    display: inline-block;
+    height: 20px;
+    padding: 3px;
+    position: relative;
+    vertical-align: top;
+    width: 42px;
+}
+.switch-input {
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+}
+.switch-label {
+    background: rgb(172,172,171) none repeat scroll 0 0;
+    border-radius: inherit;
+    display: block;
+    font-size: 10px;
+    height: inherit;
+    position: relative;
+    text-transform: uppercase;
+    transition: all 0.15s ease-out 0s;
+}
+.switch-label::before, .switch-label::after {
+    line-height: 1;
+    margin-top: -0.5em;
+    position: absolute;
+    top: 50%;
+    transition: inherit;
+}
+.switch-input:checked ~ .switch-label {
+    background: #47a8d8 none repeat scroll 0 0;
+}
+.switch-handle {
+    background-color: #fff;
+    border-radius: 10px;
+    height: 16px;
+    width: 16px;
+    left: 5px;
+    position: absolute;
+    top: 5px;
+    transition: left 0.15s ease-out 0s;
+}
+.switch-handle::before {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    content: "";
+    height: 12px;
+    left: 50%;
+    margin: -6px 0 0 -6px;
+    position: absolute;
+    top: 50%;
+    width: 12px;
+}
+.switch-input:checked ~ .switch-handle {
+    left: 27px;
+}
+.switch-green > .switch-input:checked ~ .switch-label {
+    background-color: rgb(40,180,115);
+}
+
+/*TEXT AND NUMBER INPUT*/
+input {
+  outline: none;
+  display: block;
+  background: rgba(0, 0, 0, 0.1);
+  width: 30px;
+  margin: 0;
+  border: 0;
+  border-radius: 3px;
+  background-clip: padding-box;
+  padding: 5px;
+  color: #999;
+  font-size: 12px;
+  font-weight: 700;
+}

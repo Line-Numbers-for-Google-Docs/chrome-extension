@@ -2,29 +2,44 @@
 <html>
   <head>
     <title>GTmetrix Analyzer</title>
-    <link rel="stylesheet" type="text/css" href="material.min.css">
+    <link rel="stylesheet" type="text/css" href="popup.css">
     <script src="jquery.min.js"></script>
-    <script src="material.min.js"></script>
     <script src="popup.js"></script>
-    <style type="text/css" media="screen">
-      body {
-        width: 300px;
-        padding: 15px;
-      }
-    </style>
   </head>
   <body>
-    <p>GDocs Line Numbering</p>
-    <input type="checkbox" id="enabled" class="mdl-checkbox__input">
-    <span class="mdl-checkbox__label">Enabled?</span>
+    <h1><img src="icon.png" alt=""><span>GDocs Line Numbering</span></h1>
 
-    <div class="mdl-textfield mdl-js-textfield">
-      <label for="everyXLine">Number Every How Many Lines?</label>
-      <input class="mdl-textfield__input" type="number" id="everyXLine" min="1" max="100">
-      <span class="mdl-textfield__error">Please input an integer between 1 and 100</span>
+    <div class="option">
+      <p class="option_labal">Enabled the Extension</p>
+      <label class="switch switch-green">
+        <input type="checkbox" class="switch-input" id="enabled">
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
     </div>
 
-    <br><button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="refresh">Force Refresh</button>
+    <!-- <div class="option onDocumentShow">
+      <p class="option_labal">Enable on this Document</p>
+      <label class="switch">
+        <input type="checkbox" class="switch-input" id="documentEnabled">
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
+    </div> -->
+
+    <div class="option onDocumentShow">
+      <p class="option_labal">
+        Number Every How Many Lines?<br>
+        <span class="info">Please input an integer greater than 0</span>
+      </p>
+      <input type="number" id="everyXLine" min="1" style="margin-top: 8px;"><br>
+    </div>
+
+    <div class="offDocumentShow">
+      <p>For additional options your must have a Google Document in your active tab.</p>
+    </div>
+
+    <br><a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="refresh" href="">Refresh Extension</a>
 
   </body>
 </html>
