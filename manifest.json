@@ -1,9 +1,10 @@
 {
   "manifest_version": 2,
 
-  "name": "GDocs Line Numbering",
-  "description": "This extension add the line numbering functionallity to a google doc.",
-  "version": "1.0",
+  "name": "Line Numbers for Google Docs",
+  "short_name": "Line Numbers",
+  "description": "The simplest way to add line numbers to any Google Docs document",
+  "version": "1.1",
 
   "browser_action": {
    "default_icon": "icon.png",
@@ -11,6 +12,7 @@
   },
   "background": {
     "scripts": [
+      "jquery.min.js",
       "background.js"
     ]
   },

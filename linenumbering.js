@@ -55,6 +55,9 @@ function refresh() {
   });
 }
 
+//Refresh on load to show pages
+refresh();
+
 function autorefresh(){
   chrome.storage.local.get(["enabled"], function (result) {
     if (result["enabled"] == true) {

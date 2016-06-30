@@ -65,6 +65,16 @@ $(document).ready(function(){
     refresh();
   });
 
+  $("#reloadpage").click(function(){
+    chrome.tabs.query({
+      url: "*://docs.google.com/document/d/*"
+    }, function(tabs) {
+      for (var i = 0; i < tabs.length; i++) {
+        chrome.tabs.reload(tabs[i].id);
+      }
+    });
+  });
+
 
   //********************************//
   //EXTENSION SETTINGS MODIFICATIONS//
