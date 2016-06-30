@@ -2,11 +2,29 @@
 <html>
   <head>
     <title>GTmetrix Analyzer</title>
+    <link rel="stylesheet" type="text/css" href="material.min.css">
+    <script src="jquery.min.js"></script>
+    <script src="material.min.js"></script>
     <script src="popup.js"></script>
+    <style type="text/css" media="screen">
+      body {
+        width: 300px;
+        padding: 15px;
+      }
+    </style>
   </head>
   <body>
-    <h1>GDocs Line Numbering</h1>
-    
-    <button id="checkPage"></button>
+    <p>GDocs Line Numbering</p>
+    <input type="checkbox" id="enabled" class="mdl-checkbox__input">
+    <span class="mdl-checkbox__label">Enabled?</span>
+
+    <div class="mdl-textfield mdl-js-textfield">
+      <label for="everyXLine">Number Every How Many Lines?</label>
+      <input class="mdl-textfield__input" type="number" id="everyXLine" min="1" max="100">
+      <span class="mdl-textfield__error">Please input an integer between 1 and 100</span>
+    </div>
+
+    <br><button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="refresh">Force Refresh</button>
+
   </body>
 </html>
