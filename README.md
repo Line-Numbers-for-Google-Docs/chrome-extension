@@ -16,3 +16,5 @@ This lightweight chrome extension allows you to add line numbers to any google d
 ## Download
 
 **Download it now on the [Chrome Store](https://chrome.google.com/webstore/detail/line-numbers-for-google-d/mblodabbcapnkgcfnddfpfaamjckjlik)**
+
+![](https://lh3.googleusercontent.com/X_Vb72pWs3Fj0OXYbzncVxzeAx2sX9m-u2h9ALYEvdXkH3e1jD5cTHlR5rXVPlVNWYnuRTPzxL0=s640-h400-e365-rw)
