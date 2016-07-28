@@ -1,112 +1,149 @@
-$(document).ready(function(){
+$( document ).ready( function() {
 
-  //**********//
-  //INITIALIZE//
-  //**********//
+	//**********//
+	//INITIALIZE//
+	//**********//
 
-  //Set all saved values
-  chrome.storage.local.get(["enabled"], function (result) {
+	//Set all saved values
+	chrome.storage.local.get( [ "enabled" ], function( result ) {
 
-    if (result["enabled"] == false) {
-      //if no data saved for enabled keep default html unchecked
-    } else {
-      //if no data saved for enabled (result["enabled"] == null) by default or saved to true
-      $("#enabled").attr('checked', 'checked');
-    }
+		if ( result[ "enabled" ] !== false ) {
+			//if no data saved for enabled (ex: result["enabled"] == null) by default or saved to true
+			$( "#enabled" ).attr( 'checked', 'checked' );
+		}
 
-  });
+	} );
 
-  function setEveryXLineInput() {
-    chrome.storage.local.get(["everyXLine"], function (result) {
+	chrome.storage.local.get( [ "numberHeaderFooter" ], function( result ) {
+		if ( result[ "numberHeaderFooter" ] ) {
+			$( "#number-header-footer" ).attr( 'checked', 'checked' );
+		}
+	} );
 
-      if (result["everyXLine"] == null || result["everyXLine"] < 1) {
-        //if no data saved saved set default to 5
-        $("#everyXLine").val("5");
-      } else {
-        //set to saved value
-        $("#everyXLine").val( result["everyXLine"] );
-      }
+	function setEveryXLineInput() {
+		chrome.storage.local.get( [ "everyXLine" ], function( result ) {
 
-    });
-  }
-  setEveryXLineInput();
+			if ( result[ "everyXLine" ] == null || result[ "everyXLine" ] < 1 ) {
+				//if no data saved saved set default to 5
+				$( "#everyXLine" ).val( "5" );
+			} else {
+				//set to saved value
+				$( "#everyXLine" ).val( result[ "everyXLine" ] );
+			}
 
-  chrome.tabs.query({
-    active: true,
-    lastFocusedWindow: true,
-    url: "*://docs.google.com/document/d/*"
-  }, function(tabs) {
-    if (tabs.length == 0) {
-      $(".onDocumentShow").hide();
-      $(".offDocumentShow").show();
-    }
-  });
+		} );
+	}
+	setEveryXLineInput();
 
-  //**********************************************//
-  //REFRESH GDOCS LINE NUMBERING WITH NEW SETTINGS//
-  //**********************************************//
+	chrome.tabs.query( {
+		active: true,
+		lastFocusedWindow: true,
+		url: "*://docs.google.com/document/d/*"
+	}, function( tabs ) {
+		if ( tabs.length == 0 ) {
+			$( ".onDocumentShow" ).hide();
+			$( ".offDocumentShow" ).show();
+		}
+	} );
 
-  function refresh(){
-    chrome.tabs.query({
-      url: "*://docs.google.com/document/d/*"
-    }, function(tabs) {
-      for (var i = 0; i < tabs.length; i++) {
-        chrome.tabs.sendMessage(
-          tabs[i].id, 
-          {from: 'popup', subject: 'refresh'}, 
-        function(response) {
-          console.log('GDocs Line Numbering Refreshed');
-        });
-      }
-    });
-  }
+	//**********************************************//
+	//REFRESH GDOCS LINE NUMBERING WITH NEW SETTINGS//
+	//**********************************************//
 
-  $("#refresh").click(function(){
-    refresh();
-  });
+	function refresh() {
+		chrome.tabs.query( {
+			url: "*://docs.google.com/document/d/*"
+		}, function( tabs ) {
+			for ( var i = 0; i < tabs.length; i++ ) {
+				chrome.tabs.sendMessage(
+					tabs[ i ].id, {
+						from: 'popup',
+						subject: 'refresh'
+					},
+					function( response ) {
+						console.log( 'GDocs Line Numbering Refreshed' );
+					} );
+			}
+		} );
+	}
 
-  $("#reloadpage").click(function(){
-    chrome.tabs.query({
-      url: "*://docs.google.com/document/d/*"
-    }, function(tabs) {
-      for (var i = 0; i < tabs.length; i++) {
-        chrome.tabs.reload(tabs[i].id);
-      }
-    });
-  });
+	$( "#refresh" ).click( function() {
+		refresh();
+	} );
+
+	$( "#reloadpage" ).click( function() {
+		chrome.tabs.query( {
+			url: "*://docs.google.com/document/d/*"
+		}, function( tabs ) {
+			for ( var i = 0; i < tabs.length; i++ ) {
+				chrome.tabs.reload( tabs[ i ].id );
+			}
+		} );
+	} );
 
 
-  //********************************//
-  //EXTENSION SETTINGS MODIFICATIONS//
-  //********************************//
+	//********************************//
+	//EXTENSION SETTINGS MODIFICATIONS//
+	//********************************//
 
-  function getCurrentPageUrl(){
-    chrome.tabs.query({
-      active: true,
-      lastFocusedWindow: true
-    }, function(tabs) {
-      return tabs[0].url
-    });
-  }
+	function getCurrentPageUrl() {
+		chrome.tabs.query( {
+			active: true,
+			lastFocusedWindow: true
+		}, function( tabs ) {
+			return tabs[ 0 ].url
+		} );
+	}
 
-  $("#enabled").change(function(){
-    //Save enabled boolean
-    chrome.storage.local.set({ "enabled": $("#enabled").is(':checked') }, function(){
-      console.log('enabled value saved locally.');
-      refresh();
-    });
-  });
+	$( "#enabled" ).change( function() {
+		//Save enabled boolean
+		chrome.storage.local.set( {
+			"enabled": $( "#enabled" ).is( ':checked' )
+		}, function() {
+			console.log( 'enabled value saved locally.' );
+			refresh();
+		} );
+	} );
 
-  $("#everyXLine").change(function(){
-    //Save everyXLine value
-    if ($("#everyXLine").val() > 0){
-      chrome.storage.local.set({ "everyXLine": $("#everyXLine").val() }, function(){
-        console.log('everyXLine value saved locally.');
-        refresh();
-      });
-    } else {
-      setEveryXLineInput();
-    }
-  });
+	$( "#number-header-footer" ).change( function() {
+		//Save enabled boolean
+		chrome.storage.local.set( {
+			"numberHeaderFooter": $( "#number-header-footer" ).is( ':checked' )
+		}, function() {
+			console.log( 'numberHeaderFooter value saved locally.' );
+			refresh();
+		} );
+	} );
 
-});
+	$( "#everyXLine" ).change( function() {
+		//Save everyXLine value
+		if ( $( "#everyXLine" ).val() > 0 ) {
+			chrome.storage.local.set( {
+				"everyXLine": $( "#everyXLine" ).val()
+			}, function() {
+				console.log( 'everyXLine value saved locally.' );
+				refresh();
+			} );
+		} else {
+			setEveryXLineInput();
+		}
+	} );
+
+} );
+
+//****************//
+//GOOGLE ANALYTICS//
+//****************//
+
+var _gaq = _gaq || [];
+_gaq.push( [ '_setAccount', 'UA-44179721-6' ] );
+_gaq.push( [ '_trackPageview' ] );
+
+( function() {
+	var ga = document.createElement( 'script' );
+	ga.type = 'text/javascript';
+	ga.async = true;
+	ga.src = 'https://ssl.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName( 'script' )[ 0 ];
+	s.parentNode.insertBefore( ga, s );
+} )();
