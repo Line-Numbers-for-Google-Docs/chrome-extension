@@ -24,12 +24,6 @@ $( document ).ready( function() {
 
 	} );
 
-	chrome.storage.local.get( [ "numberHeaderFooter" ], function( result ) {
-		if ( result[ "numberHeaderFooter" ] ) {
-			$( "#number-header-footer" ).attr( 'checked', 'checked' );
-		}
-	} );
-
 	function setEveryXLineInput() {
 		chrome.storage.local.get( [ "everyXLine" ], function( result ) {
 
@@ -44,6 +38,24 @@ $( document ).ready( function() {
 		} );
 	}
 	setEveryXLineInput();
+
+	chrome.storage.local.get( [ "numberBlancLines" ], function( result ) {
+		if ( result[ "numberBlancLines" ] ) {
+			$( "#number-blanc-lines" ).attr( 'checked', 'checked' );
+		}
+	} );
+
+	chrome.storage.local.get( [ "numberParagraphsOnly" ], function( result ) {
+		if ( result[ "numberParagraphsOnly" ] !== false ) {
+			$( "#number-paragraphs-only" ).attr( 'checked', 'checked' );
+		}
+	} );
+
+	chrome.storage.local.get( [ "numberHeaderFooter" ], function( result ) {
+		if ( result[ "numberHeaderFooter" ] ) {
+			$( "#number-header-footer" ).attr( 'checked', 'checked' );
+		}
+	} );
 
 	chrome.tabs.query( {
 		active: true,
@@ -101,7 +113,7 @@ $( document ).ready( function() {
 			active: true,
 			lastFocusedWindow: true
 		}, function( tabs ) {
-			return tabs[ 0 ].url
+			return tabs[ 0 ].url;
 		} );
 	}
 
@@ -115,12 +127,32 @@ $( document ).ready( function() {
 		} );
 	} );
 
+	$( "#number-blanc-lines" ).change( function() {
+		//Save enabled boolean
+		chrome.storage.local.set( {
+			"numberBlancLines": $( "#number-blanc-lines" ).is( ':checked' )
+		}, function() {
+			console.log( 'numberBlancLines value saved locally.' );
+			refresh();
+		} );
+	} );
+
 	$( "#number-header-footer" ).change( function() {
 		//Save enabled boolean
 		chrome.storage.local.set( {
 			"numberHeaderFooter": $( "#number-header-footer" ).is( ':checked' )
 		}, function() {
 			console.log( 'numberHeaderFooter value saved locally.' );
+			refresh();
+		} );
+	} );
+
+	$( "#number-paragraphs-only" ).change( function() {
+		//Save enabled boolean
+		chrome.storage.local.set( {
+			"numberParagraphsOnly": $( "#number-paragraphs-only" ).is( ':checked' )
+		}, function() {
+			console.log( 'numberParagraphsOnly value saved locally.' );
 			refresh();
 		} );
 	} );
