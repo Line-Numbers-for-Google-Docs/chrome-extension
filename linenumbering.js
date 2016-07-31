@@ -25,7 +25,7 @@ function updateNumberBlancLines() {
 	chrome.storage.local.get( [ "numberBlancLines" ], function( result ) {
 		//update everyXLine value if change
 		if ( result[ "numberBlancLines" ] ) {
-			numberHeaderFooter = result[ "numberBlancLines" ];
+			numberBlancLines = result[ "numberBlancLines" ];
 		} else {
 			numberBlancLines = false;
 		}
@@ -70,7 +70,7 @@ function numberLine( $lineview ) {
 	} else if ( !numberBlancLines && $lineview.find( "span.kix-wordhtmlgenerator-word-node" ).text().replace( /\s/g, "" ) === "" ) {
 		// Blanc Lines?
 		return false;
-	} else if ( numberParagraphsOnly && $lineview.parent().attr( "id" ) !== undefined ) {
+	} else if ( numberParagraphsOnly && $lineview.parent().attr( "id" ) ) {
 		if ( $lineview.parent().attr( "id" ).replace( /\.[^]*/, "" ) === "h" ) {
 			// Not Pragraph?
 			return false;
