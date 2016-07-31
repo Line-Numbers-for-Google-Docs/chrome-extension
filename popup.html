@@ -18,13 +18,8 @@
       </label>
     </div>
 
-    <div class="option">
-      <p class="option_labal">Number Headers and Footers</p>
-      <label class="switch switch-green">
-        <input type="checkbox" class="switch-input" id="number-header-footer">
-        <span class="switch-label" data-on="On" data-off="Off"></span>
-        <span class="switch-handle"></span>
-      </label>
+    <div class="offDocumentShow">
+      <p>For additional options your must have a Google Document open in your active tab.</p>
     </div>
 
     <!-- <div class="option onDocumentShow">
@@ -44,9 +39,41 @@
       <input type="number" id="everyXLine" min="1" style="margin-top: 8px;"><br>
     </div>
 
-    <div class="offDocumentShow">
-      <p>For additional options your must have a Google Document open in your active tab.</p>
+    <div class="show-more-options onDocumentShow">
+      Show More Options
     </div>
+
+    <section id="more-options" class="closed">
+      <div class="option onDocumentShow">
+        <p class="option_labal">Number headers and footers</p>
+        <label class="switch switch-green">
+          <input type="checkbox" class="switch-input" id="number-header-footer">
+          <span class="switch-label" data-on="On" data-off="Off"></span>
+          <span class="switch-handle"></span>
+        </label>
+      </div>
+
+      <div class="option onDocumentShow">
+        <p class="option_labal">Number blanc lines</p>
+        <label class="switch switch-green">
+          <input type="checkbox" class="switch-input" id="number-blanc-lines">
+          <span class="switch-label" data-on="On" data-off="Off"></span>
+          <span class="switch-handle"></span>
+        </label>
+      </div>
+
+      <div class="option onDocumentShow">
+        <p class="option_labal">
+          Number pragraphs only <br>
+          <span class="info">Ignore titles and headings in line numbering</span>
+        </p>
+        <label class="switch switch-green">
+          <input type="checkbox" class="switch-input" id="number-paragraphs-only">
+          <span class="switch-label" data-on="On" data-off="Off"></span>
+          <span class="switch-handle"></span>
+        </label>
+      </div>
+    </section>
 
     <br><a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="refresh" href="">Refresh Extension</a> |
     <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="reloadpage" href="">Reload Google Docs Page</a>

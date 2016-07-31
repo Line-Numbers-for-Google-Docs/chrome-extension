@@ -4,6 +4,16 @@ $( document ).ready( function() {
 	//INITIALIZE//
 	//**********//
 
+	$( ".show-more-options" ).click( function() {
+		if ( $( "#more-options" ).hasClass( "closed" ) ) {
+			$( "#more-options" ).show();
+			$( "#more-options" ).removeClass( "closed" );
+		} else {
+			$( "#more-options" ).hide();
+			$( "#more-options" ).addClass( "closed" );
+		}
+	} );
+
 	//Set all saved values
 	chrome.storage.local.get( [ "enabled" ], function( result ) {
 

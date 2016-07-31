@@ -61,7 +61,13 @@ h1 .subtitle {
 .offDocumentShow {
   display: none;
 }
-
+.show-more-options{
+  font-size: 12px;
+  text-align: center;
+}
+#more-options.closed {
+  display: none;
+}
 
 input {
   max-width: 42px;

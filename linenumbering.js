@@ -2,9 +2,11 @@
 //INITIALIZE//
 //**********//
 
+// Default Values
 var everyXLine = 5;
-// TODO: Add to storage
 var numberHeaderFooter = false;
+var numberBlancLines = false;
+var numberOnlyParagraphs = true;
 
 function updateEveryXLine() {
 	chrome.storage.local.get( [ "everyXLine" ], function( result ) {
@@ -35,13 +37,31 @@ updateNumberHeaderFooter();
 // var lineCount = $(".kix-lineview").length;
 var ln = 0;
 
+function numberLine( $lineview ) {
+	if ( !numberHeaderFooter && ( $lineview.closest( ".kix-page-header" ).length > 0 || $lineview.closest( ".kix-page-bottom" ).length > 0 ) ) {
+		// Header Footer?
+		return false;
+	} else if ( !numberBlancLines && $lineview.find( "span.kix-wordhtmlgenerator-word-node" ).text().replace( /\s/g, "" ) === "" ) {
+		// Blanc Lines?
+		return false;
+	} else if ( numberOnlyParagraphs && $lineview.parent().attr( "id" ) !== "" ) {
+		// TODO: This causes page 2 to not work
+		if ( $lineview.parent().attr( "id" ).replace( /\.[^]*/, "" ) === "h" ) {
+			// Not Pragraph?
+			return false;
+		}
+	}
+
+	return true;
+}
+
 function numberLines() {
 	ln = 0;
 	// console.log( "Numbering lines every " + everyXLine + " line(s)." );
 	$( 'body' ).find( ".kix-lineview" ).each( function() {
 		ln++;
 		if ( ln % everyXLine === 0 ) {
-			if ( !numberHeaderFooter && ( $( this ).closest( ".kix-page-header" ).length > 0 || $( this ).closest( ".kix-page-bottom" ).length > 0 ) ) {
+			if ( !numberLine( $( this ) ) ) {
 				ln--;
 				$( this ).removeClass( "numbered" );
 			} else {
