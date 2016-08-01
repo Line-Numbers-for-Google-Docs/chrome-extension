@@ -41,9 +41,9 @@ $( document ).ready( function() {
 	}
 	setEveryXLineInput();
 
-	chrome.storage.local.get( [ "numberBlancLines" ], function( result ) {
-		if ( result[ "numberBlancLines" ] ) {
-			$( "#number-blanc-lines" ).attr( 'checked', 'checked' );
+	chrome.storage.local.get( [ "numberblankLines" ], function( result ) {
+		if ( result[ "numberblankLines" ] ) {
+			$( "#number-blank-lines" ).attr( 'checked', 'checked' );
 		}
 	} );
 
@@ -129,12 +129,12 @@ $( document ).ready( function() {
 		} );
 	} );
 
-	$( "#number-blanc-lines" ).change( function() {
+	$( "#number-blank-lines" ).change( function() {
 		//Save enabled boolean
 		chrome.storage.local.set( {
-			"numberBlancLines": $( "#number-blanc-lines" ).is( ':checked' )
+			"numberblankLines": $( "#number-blank-lines" ).is( ':checked' )
 		}, function() {
-			console.log( 'numberBlancLines value saved locally.' );
+			console.log( 'numberblankLines value saved locally.' );
 			refresh();
 		} );
 	} );
