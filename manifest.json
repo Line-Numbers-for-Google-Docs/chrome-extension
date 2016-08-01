@@ -18,7 +18,8 @@
     "scripts": [
       "libs/jquery.min.js",
       "libs/dexie.min.js",
-      "js/background.js"
+      "js/background.js",
+      "js/storage.js"
     ]
   },
   "content_scripts": [

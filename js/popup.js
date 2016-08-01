@@ -41,8 +41,8 @@ $( document ).ready( function() {
 	}
 	setEveryXLineInput();
 
-	chrome.storage.local.get( [ "numberblankLines" ], function( result ) {
-		if ( result[ "numberblankLines" ] ) {
+	chrome.storage.local.get( [ "numberBlankLines" ], function( result ) {
+		if ( result[ "numberBlankLines" ] ) {
 			$( "#number-blank-lines" ).attr( 'checked', 'checked' );
 		}
 	} );
@@ -132,9 +132,9 @@ $( document ).ready( function() {
 	$( "#number-blank-lines" ).change( function() {
 		//Save enabled boolean
 		chrome.storage.local.set( {
-			"numberblankLines": $( "#number-blank-lines" ).is( ':checked' )
+			"numberBlankLines": $( "#number-blank-lines" ).is( ':checked' )
 		}, function() {
-			console.log( 'numberblankLines value saved locally.' );
+			console.log( 'numberBlankLines value saved locally.' );
 			refresh();
 		} );
 	} );

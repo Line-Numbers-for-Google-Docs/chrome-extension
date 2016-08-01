@@ -5,7 +5,7 @@
 // Default Values
 var everyXLine = 5;
 var numberHeaderFooter = false;
-var numberblankLines = false;
+var numberBlankLines = false;
 var numberParagraphsOnly = true;
 
 function updateEveryXLine() {
@@ -21,18 +21,18 @@ function updateEveryXLine() {
 }
 updateEveryXLine();
 
-function updateNumberblankLines() {
-	chrome.storage.local.get( [ "numberblankLines" ], function( result ) {
+function updateNumberBlankLines() {
+	chrome.storage.local.get( [ "numberBlankLines" ], function( result ) {
 		//update everyXLine value if change
-		if ( result[ "numberblankLines" ] ) {
-			numberblankLines = result[ "numberblankLines" ];
+		if ( result[ "numberBlankLines" ] ) {
+			numberBlankLines = result[ "numberBlankLines" ];
 		} else {
-			numberblankLines = false;
+			numberBlankLines = false;
 		}
 		console.log( "Updated numberHeaderFooter to " + numberHeaderFooter );
 	} );
 }
-updateNumberblankLines();
+updateNumberBlankLines();
 
 function updateNumberHeaderFooter() {
 	chrome.storage.local.get( [ "numberHeaderFooter" ], function( result ) {
@@ -67,7 +67,7 @@ function numberLine( $lineview ) {
 	if ( !numberHeaderFooter && ( $lineview.closest( ".kix-page-header" ).length > 0 || $lineview.closest( ".kix-page-bottom" ).length > 0 ) ) {
 		// Header Footer?
 		return false;
-	} else if ( !numberblankLines && $lineview.find( "span.kix-wordhtmlgenerator-word-node" ).text().replace( /\s/g, "" ) === "" ) {
+	} else if ( !numberBlankLines && $lineview.find( "span.kix-wordhtmlgenerator-word-node" ).text().replace( /\s/g, "" ) === "" ) {
 		// blank Lines?
 		return false;
 	} else if ( numberParagraphsOnly && $lineview.parent().attr( "id" ) ) {
@@ -111,7 +111,7 @@ function refresh() {
 			//If extension still enabled
 			updateEveryXLine();
 			updateNumberHeaderFooter();
-			updateNumberblankLines();
+			updateNumberBlankLines();
 			updateNumberParagraphsOnly();
 
 			numberLines();
