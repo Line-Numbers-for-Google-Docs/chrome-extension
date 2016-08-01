@@ -16,8 +16,9 @@
   },
   "background": {
     "scripts": [
-      "jquery.min.js",
-      "background.js"
+      "libs/jquery.min.js",
+      "libs/dexie.min.js",
+      "js/background.js"
     ]
   },
   "content_scripts": [
@@ -27,11 +28,11 @@
         "http://docs.google.com/document/d/*"
       ],
       "css": [
-        "linenumbering.css"
+        "css/linenumbering.css"
       ],
       "js": [
-        "jquery.min.js",
-        "linenumbering.js"
+        "libs/jquery.min.js",
+        "js/linenumbering.js"
       ]
     }
   ],
