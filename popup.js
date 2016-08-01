@@ -8,9 +8,11 @@ $( document ).ready( function() {
 		if ( $( "#more-options" ).hasClass( "closed" ) ) {
 			$( "#more-options" ).show();
 			$( "#more-options" ).removeClass( "closed" );
+			$( ".show-more-options" ).text( "Hide More Options" );
 		} else {
 			$( "#more-options" ).hide();
 			$( "#more-options" ).addClass( "closed" );
+			$( ".show-more-options" ).text( "Show More Options" );
 		}
 	} );
 

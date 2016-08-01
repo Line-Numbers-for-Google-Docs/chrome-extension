@@ -34,11 +34,6 @@ function onInstall() {
 		console.log( 'enabled value set to default value' );
 		reloadGDocs();
 	} );
-	chrome.storage.local.set( {
-		"numberHeaderFooter": false
-	}, function() {
-		console.log( 'numberHeaderFooter value set to default value' );
-	} );
 }
 
 function onUpdate() {

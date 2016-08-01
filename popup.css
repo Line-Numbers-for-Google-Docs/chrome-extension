@@ -64,9 +64,13 @@ h1 .subtitle {
 .show-more-options{
   font-size: 12px;
   text-align: center;
+  cursor: pointer;
 }
 #more-options.closed {
   display: none;
+}
+#more-options div.option:first-child{
+  margin-top: 15px;
 }
 
 input {
