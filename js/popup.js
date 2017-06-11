@@ -159,6 +159,16 @@ $( document ).ready( function() {
 		} );
 	} );
 
+	$( "#new-page-count-reset" ).change( function() {
+		//Save enabled boolean
+		chrome.storage.local.set( {
+			"newPageCountReset": $( "#new-page-count-reset" ).is( ':checked' )
+		}, function() {
+			console.log( 'newPageCountReset value saved locally.' );
+			refresh();
+		} );
+	} );
+
 	$( "#everyXLine" ).change( function() {
 		//Save everyXLine value
 		if ( $( "#everyXLine" ).val() > 0 ) {

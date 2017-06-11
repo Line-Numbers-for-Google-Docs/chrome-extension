@@ -7,6 +7,14 @@ var everyXLine = 5;
 var numberHeaderFooter = false;
 var numberBlankLines = false;
 var numberParagraphsOnly = true;
+var newPageCountReset = false;
+
+chrome.runtime.sendMessage( {
+	for: 'storage',
+	action: 'getSettings'
+} );
+
+// alert( "RUNNING" );
 
 function updateEveryXLine() {
 	chrome.storage.local.get( [ "everyXLine" ], function( result ) {
@@ -60,19 +68,31 @@ function updateNumberParagraphsOnly() {
 }
 updateNumberParagraphsOnly();
 
+function updateNewPageCountReset() {
+	chrome.storage.local.get( ["newPageCountReset"], function( result) {
+		// update newPageCountReset value if change
+		if (result[ "newPageCountReset" ] ) {
+			newPageCountReset = result[ "newPageCountReset" ];
+		} else {
+			newPageCountReset = false;
+		}
+		console.log( "Updated updateNewPageCountReset to " + numberParagraphsOnly );
+	});
+}
+
 // var lineCount = $(".kix-lineview").length;
 var ln = 0;
 
 function numberLine( $lineview ) {
 	if ( !numberHeaderFooter && ( $lineview.closest( ".kix-page-header" ).length > 0 || $lineview.closest( ".kix-page-bottom" ).length > 0 ) ) {
-		// Header Footer?
+		// Header/Footer?
 		return false;
 	} else if ( !numberBlankLines && $lineview.find( "span.kix-wordhtmlgenerator-word-node" ).text().replace( /\s/g, "" ) === "" ) {
-		// blank Lines?
+		// Blank line?
 		return false;
 	} else if ( numberParagraphsOnly && $lineview.parent().attr( "id" ) ) {
 		if ( $lineview.parent().attr( "id" ).replace( /\.[^]*/, "" ) === "h" ) {
-			// Not Pragraph?
+			// Not pragraph?
 			return false;
 		}
 	}
@@ -81,9 +101,22 @@ function numberLine( $lineview ) {
 }
 
 function numberLines() {
+	console.log( "Numbering lines every " + everyXLine + " line(s)." );
+	if (newPageCountReset) {
+		$( 'body' ).find( ".kix-page" ).each( function() {
+			var lines = $(this).find( ".kix-lineview" );
+			numberSelectedLines(lines);
+		});
+	} else {
+		var lines = $( 'body' ).find( ".kix-lineview" );
+		numberSelectedLines(lines);
+	}
+}
+
+function numberSelectedLines(lines) { // lines should be an array of found elements to number
 	ln = 0;
-	// console.log( "Numbering lines every " + everyXLine + " line(s)." );
-	$( 'body' ).find( ".kix-lineview" ).each( function() {
+	// TODO: This should allow easy implementation of selection of were to start and stop line numbering
+	lines.each( function() {
 		var numberThisLine = numberLine( $( this ) );
 		if ( numberThisLine ) ln++;
 		if ( ln % everyXLine === 0 && numberThisLine ) {
@@ -113,6 +146,7 @@ function refresh() {
 			updateNumberHeaderFooter();
 			updateNumberBlankLines();
 			updateNumberParagraphsOnly();
+			updateNewPageCountReset();
 
 			numberLines();
 		}

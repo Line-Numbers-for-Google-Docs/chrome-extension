@@ -48,13 +48,13 @@ h1 .subtitle {
   margin: 15px 15px 15px 15px;
   background: rgb(240,240,240);
 }
-.option .option_labal {
+.option .option-label {
   width: 250px;
   float: left;
   position: relative;
   bottom: 10px;
 }
-.option .option_labal .info {
+.option .option-label .info {
   font-weight: 300;
   font-size: 12px;
 }
