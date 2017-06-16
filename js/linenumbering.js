@@ -2,9 +2,15 @@
 if ( $( 'body' ).find( ".kix-lineview" ).length == 0 ) {
 	// pop-up that let's use know that extension won't work with this document and let user know of possible reasons
 	// ask user if he wishes to send data to the developer to see if he can build in a fix for his document
-	$( 'body' )
-	'<a href="mailto:pablogamito@gmail.com?subject=&body=' + $("body")
-  '</a>'
+	
+	// Temporary alert till popup is designed
+	alert("The Line Numbers for Google Docs extension will not work with this document");
+
+	var popupHTML = '<a href="mailto:pablogamito@gmail.com?subject=&body=' + $("body") + '</a>'
+
+	// TODO: Make this work
+	// $( 'body' )
+	
 }
 
 //**********//
@@ -45,6 +51,8 @@ chrome.storage.local.get( [ "enabled" ], function( result ) {
 			} );
 			if (timesUsed == 88) {
 				// TODO: Run popup asking to rate the extension
+				var popupHTML = 
+				$('body').append(popupHTML);
 			}
 		} );
 
