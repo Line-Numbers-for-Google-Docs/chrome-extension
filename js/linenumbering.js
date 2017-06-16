@@ -1,3 +1,12 @@
+// Check document code is compatible with way linenumbering works
+if ( $( 'body' ).find( ".kix-lineview" ).length == 0 ) {
+	// pop-up that let's use know that extension won't work with this document and let user know of possible reasons
+	// ask user if he wishes to send data to the developer to see if he can build in a fix for his document
+	$( 'body' )
+	'<a href="mailto:pablogamito@gmail.com?subject=&body=' + $("body")
+  '</a>'
+}
+
 //**********//
 //INITIALIZE//
 //**********//
@@ -8,10 +17,45 @@ var numberHeaderFooter = false;
 var numberBlankLines = false;
 var numberParagraphsOnly = true;
 var newPageCountReset = false;
+var lineBorder = false;
 
 chrome.runtime.sendMessage( {
 	for: 'storage',
 	action: 'getSettings'
+} );
+
+//
+// CHECKS IF EXTENSION IS ENABLED TO RUN ALL NECESSARY COMMAND //
+//
+chrome.storage.local.get( [ "enabled" ], function( result ) {
+	if ( result[ "enabled" ] == true ) {
+		// Update times used number
+		chrome.storage.local.get( [ "timesUsed" ], function( result ) {
+			var timesUsed;
+			if (parseInt(result["timesUsed"]) != result["timesUsed"] || result["timesUsed"] == null) {
+				timesUsed = 1;
+			} else {
+				timesUsed = parseInt(result["timesUsed"]) + 1;
+			}
+			chrome.storage.local.set( {
+				"timesUsed": timesUsed
+			}, function() {
+				console.log( 'timesUsed value updated to ' + timesUsed );
+				refresh();
+			} );
+			if (timesUsed == 88) {
+				// TODO: Run popup asking to rate the extension
+			}
+		} );
+
+		updateEveryXLine();
+		updateNumberBlankLines();
+		updateNumberHeaderFooter();
+		updateNumberParagraphsOnly();
+		updateLineBorder();
+		// Number lines
+		numberLines();
+	}
 } );
 
 // alert( "RUNNING" );
@@ -27,7 +71,6 @@ function updateEveryXLine() {
 		console.log( "Updated everyXLine to " + everyXLine );
 	} );
 }
-updateEveryXLine();
 
 function updateNumberBlankLines() {
 	chrome.storage.local.get( [ "numberBlankLines" ], function( result ) {
@@ -40,7 +83,6 @@ function updateNumberBlankLines() {
 		console.log( "Updated numberHeaderFooter to " + numberHeaderFooter );
 	} );
 }
-updateNumberBlankLines();
 
 function updateNumberHeaderFooter() {
 	chrome.storage.local.get( [ "numberHeaderFooter" ], function( result ) {
@@ -53,7 +95,6 @@ function updateNumberHeaderFooter() {
 		console.log( "Updated numberHeaderFooter to " + numberHeaderFooter );
 	} );
 }
-updateNumberHeaderFooter();
 
 function updateNumberParagraphsOnly() {
 	chrome.storage.local.get( [ "numberParagraphsOnly" ], function( result ) {
@@ -66,7 +107,6 @@ function updateNumberParagraphsOnly() {
 		console.log( "Updated numberParagraphsOnly to " + numberParagraphsOnly );
 	} );
 }
-updateNumberParagraphsOnly();
 
 function updateNewPageCountReset() {
 	chrome.storage.local.get( ["newPageCountReset"], function( result) {
@@ -77,6 +117,24 @@ function updateNewPageCountReset() {
 			newPageCountReset = false;
 		}
 		console.log( "Updated updateNewPageCountReset to " + numberParagraphsOnly );
+	});
+}
+
+function updateLineBorder() {
+	chrome.storage.local.get( ["lineBorder"], function( result) {
+		// update newPageCountReset value if change
+		if (result[ "lineBorder" ] ) {
+			lineBorder = result[ "lineBorder" ];
+		} else {
+			lineBorder = false;
+		}
+		console.log( "Updated lineBorder to " + lineBorder );
+		// Add or remove line border
+		if (lineBorder) {
+			$('body').addClass("text-border");
+		} else {
+			$('body').removeClass("text-border");
+		}
 	});
 }
 
@@ -127,12 +185,6 @@ function numberSelectedLines(lines) { // lines should be an array of found eleme
 	} );
 }
 
-chrome.storage.local.get( [ "enabled" ], function( result ) {
-	if ( result[ "enabled" ] == true ) {
-		numberLines();
-	}
-} );
-
 //*****************//
 //REFRESH or UPDATE//
 //*****************//
@@ -147,6 +199,7 @@ function refresh() {
 			updateNumberBlankLines();
 			updateNumberParagraphsOnly();
 			updateNewPageCountReset();
+			updateLineBorder();
 
 			numberLines();
 		}

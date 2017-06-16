@@ -48,7 +48,7 @@ $( document ).ready( function() {
 	} );
 
 	chrome.storage.local.get( [ "numberParagraphsOnly" ], function( result ) {
-		if ( result[ "numberParagraphsOnly" ] !== false ) {
+		if ( result[ "numberParagraphsOnly" ] ) {
 			$( "#number-paragraphs-only" ).attr( 'checked', 'checked' );
 		}
 	} );
@@ -56,6 +56,18 @@ $( document ).ready( function() {
 	chrome.storage.local.get( [ "numberHeaderFooter" ], function( result ) {
 		if ( result[ "numberHeaderFooter" ] ) {
 			$( "#number-header-footer" ).attr( 'checked', 'checked' );
+		}
+	} );
+
+	chrome.storage.local.get( [ "newPageCountReset" ], function( result ) {
+		if ( result[ "newPageCountReset" ] ) {
+			$( "#new-page-count-reset" ).attr( 'checked', 'checked' );
+		}
+	} );
+
+	chrome.storage.local.get( [ "lineBorder" ], function( result ) {
+		if ( result[ "lineBorder" ] ) {
+			$( "#line-border" ).attr( 'checked', 'checked' );
 		}
 	} );
 
@@ -182,6 +194,17 @@ $( document ).ready( function() {
 			setEveryXLineInput();
 		}
 	} );
+
+	$( "#line-border" ).change( function() {
+		//Save enabled boolean
+		chrome.storage.local.set( {
+			"lineBorder": $( "#line-border" ).is( ':checked' )
+		}, function() {
+			console.log( 'lineBorder value saved locally.' );
+			refresh();
+		} );
+	} );
+
 
 } );
 
