@@ -2,7 +2,7 @@
 if ( $( 'body' ).find( ".kix-lineview" ).length == 0 ) {
 	// pop-up that let's use know that extension won't work with this document and let user know of possible reasons
 	// ask user if he wishes to send data to the developer to see if he can build in a fix for his document
-	
+
 	// Temporary alert till popup is designed
 	alert("The Line Numbers for Google Docs extension will not work with this document");
 
@@ -10,7 +10,7 @@ if ( $( 'body' ).find( ".kix-lineview" ).length == 0 ) {
 
 	// TODO: Make this work
 	// $( 'body' )
-	
+
 }
 
 //**********//
@@ -51,7 +51,7 @@ chrome.storage.local.get( [ "enabled" ], function( result ) {
 			} );
 			if (timesUsed == 88) {
 				// TODO: Run popup asking to rate the extension
-				var popupHTML = 
+				var popupHTML =
 				$('body').append(popupHTML);
 			}
 		} );
@@ -150,6 +150,7 @@ function updateLineBorder() {
 var ln = 0;
 
 function numberLine( $lineview ) {
+	console.log('Parents', );
 	if ( !numberHeaderFooter && ( $lineview.closest( ".kix-page-header" ).length > 0 || $lineview.closest( ".kix-page-bottom" ).length > 0 ) ) {
 		// Header/Footer?
 		return false;
@@ -161,6 +162,9 @@ function numberLine( $lineview ) {
 			// Not pragraph?
 			return false;
 		}
+	} else if ($lineview.parents('.kix-tablerenderer').length) {
+		// Part of table
+		return false;
 	}
 
 	return true;
@@ -170,11 +174,12 @@ function numberLines() {
 	console.log( "Numbering lines every " + everyXLine + " line(s)." );
 	if (newPageCountReset) {
 		$( 'body' ).find( ".kix-page" ).each( function() {
-			var lines = $(this).find( ".kix-lineview" );
+			var lines = $(this).find( ".kix-lineview" )
 			numberSelectedLines(lines);
 		});
 	} else {
-		var lines = $( 'body' ).find( ".kix-lineview" );
+		var lines = $( 'body' ).find( ".kix-lineview" )//.filter(':parents(.kix-tablerenderer)');
+		console.log("Lines", lines)
 		numberSelectedLines(lines);
 	}
 }
