@@ -1,36 +1,16 @@
-/*body {
-  counter-reset: ln;
+body {
+    counter-reset: gdln;
 }
 
-.kix-lineview {
-  counter-increment: ln;
-}*/
-
-/*Adding border line*/
-.text-border .kix-page-content-wrapper .kix-paragraphrenderer::before {
-  content: '';
-  position: absolute;
-  height: 100%;
-  width: 1px;
-  left: -1em;
-  float: left;
-  border-left: 3px double black;
-}
-.kix-page-content-wrapper .kix-page-bottom .kix-paragraphrenderer::before {
-  border: none;
+.kix-lineview::before {
+    counter-increment: gdln;
+    content: counter(gdln);
+    position: relative;
+    left: -4em;
+    float: left;
+    color: #999;
 }
 
-/* Line numbering */
-.kix-lineview.numbered::before {
-  content: attr(ln-number);
-  position: relative;
-  left: -4em;
-  width: 2em;
-  text-align: right;
-  float: left;
-  color: #626871;
-}
-
-.linenumberhover .kix-lineview.numbered:hover::before {
-  color: black;
+.kix-lineview:hover::before {
+    color: black;
 }
