@@ -30,10 +30,6 @@
       ],
       "css": [
         "css/linenumbering.css"
-      ],
-      "js": [
-        "libs/jquery.min.js",
-        "js/linenumbering.js"
       ]
     }
   ],
