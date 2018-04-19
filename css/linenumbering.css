@@ -23,7 +23,7 @@
 /* Line numbering */
 .kix-lineview.numbered::before {
   content: attr(ln-number);
-  position: relative;
+  position: absolute;
   left: -4em;
   width: 2em;
   text-align: right;
