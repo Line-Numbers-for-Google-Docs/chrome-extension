@@ -192,6 +192,66 @@ function generateVerticalMenu() {
   return $('<div class="goog-menu goog-menu-vertical docs-material goog-menu-noaccel docs-menu-hide-mnemonics" style="user-select: none; display: none;" role="menu" aria-haspopup="true"></div>');
 }
 
+function generateDialogBackground() {
+  return $('<div class="modal-dialog-bg" style="opacity: 0.75; width: 100vw; height: 100vh;" aria-hidden="true"></div>');
+}
+
+/**
+ * @function
+ * @param {string} title the title of the dialog
+ * @param {DOMElement} dialogBackground background to apply to body (such as a
+ *        blur background)
+ * @param {function} applyCallback the function will run when apply button is
+ *        clicked
+ */
+function generateDialog(title, $dialogBackground, applyCallback) {
+  const $dialog = $(
+    '<div class="modal-dialog docs-dialog" tabindex="0" role="dialog" style="position: fixed; top: 50%; left: 50%;transform: translate(-50%, -50%); opacity: 1;">' + 
+      '<div class="modal-dialog-title modal-dialog-title-draggable">' +
+        '<span class="modal-dialog-title-text" id=":703" role="heading">' + title + '</span>' +
+        '<span class="modal-dialog-title-close" role="button" tabindex="0" aria-label="Close"></span>' +
+      '</div>' +
+      '<div class="modal-dialog-content">' +
+        '<div class="kix-columnoptionsdialog-content">' +
+          '<div class="kix-columnoptionsdialog-content-left-side goog-inline-block">' +
+            '<div class="kix-columnoptionsdialog-section">' +
+              '<div class="kix-columnoptionsdialog-title goog-inline-block">' +
+                // Options labels will be inserted here +
+              '</div>' +
+              '<div class="kix-columnoptionsdialog-control goog-inline-block">' +
+                // Options control items will be inserted here
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="modal-dialog-buttons">' +
+        '<button name="apply" class="goog-buttonset-default goog-buttonset-action">Apply</button>' +
+        '<button name="cancel">Cancel</button>' +
+      '</div>' +
+    '</div>'
+  );
+
+  $dialog.find(".modal-dialog-title-close").click(function() {
+    closeDialog($dialog, $dialogBackground);
+  });
+
+  $dialog.find("button[name='apply']").click(function() {
+    closeDialog($dialog, $dialogBackground);
+    applyCallback();
+  });
+
+  $dialog.find("button[name='cancel']").click(function() {
+    closeDialog($dialog, $dialogBackground);
+  })
+
+  return $dialog;
+}
+
+function closeDialog($dialog, $dialogBackground) {
+  $dialog.remove();
+  $dialogBackground.remove();
+}
 
 /**
  * Line Numbering Menu Generation Functions
@@ -204,11 +264,20 @@ function generateLineNumberingVerticalMenu() {
   $verticalMenu.append(generateMenuItem("Number selection"));
 
   $verticalMenu.append(generateMenuSeparator());
-  
+
   $verticalMenu.append(generateCheckboxMenuItem("Number blank lines", false));
   $verticalMenu.append(generateCheckboxMenuItem("Restart line numbering on each page", false));
   $verticalMenu.append(generateMenuItem("Add number/content divider"));
-  $verticalMenu.append(generateMenuItem("More options..."));
+
+  const $moreOptionsMenuItem = generateMenuItem("More options...");
+  $moreOptionsMenuItem.click(function() {
+    const $dialogBackground = generateDialogBackground()
+    $('body').append(generateDialog("Line numbering options", $dialogBackground, function() {
+
+    }));
+    $('body').append($dialogBackground);
+  });
+  $verticalMenu.append($moreOptionsMenuItem);
 
   return $verticalMenu;
 }
