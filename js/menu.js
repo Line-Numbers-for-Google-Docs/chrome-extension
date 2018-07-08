@@ -139,13 +139,21 @@ function forceHideVerticalMenu($verticalMenu, $parentMenu) {
  * @param {string} label serves as a description of the menu item
  */
 function generateMenuItem(label) {
-  return $(
+  const $menuItem = $(
     '<div class="goog-menuitem apps-menuitem" role="menuitem" style="user-select: none;">' +
       '<div class="goog-menuitem-content" style="user-select: none;">' +
         '<span class="goog-menuitem-label" style="user-select: none;">' + label + '</span>' +
       '</div>' +
     '</div>'
   );
+
+  $menuItem.hover(function() {
+    $(this).addClass("goog-menuitem-highlight");
+  }, function() {
+    $(this).removeClass("goog-menuitem-highlight");
+  });
+
+  return $menuItem;
 }
 
 /**
@@ -154,7 +162,7 @@ function generateMenuItem(label) {
  * @param {boolean} checked is set to true is option is/has been selected
  */
 function generateCheckboxMenuItem(label, checked) {
-  return $(
+  const $checkboxMenuItem = $(
     '<div class="goog-menuitem goog-option-selected apps-menuitem goog-option" role="menuitemcheckbox" aria-checked="' + checked + '" style="user-select: none;">' +
       '<div class="goog-menuitem-content" style="user-select: none;">' +
         '<div class="goog-menuitem-checkbox" style="user-select: none;"></div>' +
@@ -162,6 +170,14 @@ function generateCheckboxMenuItem(label, checked) {
       '</div>' +
     '</div>'
   );
+
+  $checkboxMenuItem.hover(function() {
+    $(this).addClass("goog-menuitem-highlight");
+  }, function() {
+    $(this).removeClass("goog-menuitem-highlight");
+  });
+
+  return $checkboxMenuItem;
 }
 
 function generateMenuSeparator() {
