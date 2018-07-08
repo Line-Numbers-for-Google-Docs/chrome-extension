@@ -33,6 +33,8 @@
       ],
       "js": [
         "libs/jquery.min.js",
+        "libs/jquery.waituntilexists.js",
+        "js/menu.js",
         "js/linenumbering.js"
       ]
     }

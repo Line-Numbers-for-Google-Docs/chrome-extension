@@ -1,4 +1,4 @@
-// Check document code is compatible with way linenumbering works
+// Check document code is compatible with way line numbering works
 if ( $( 'body' ).find( ".kix-lineview" ).length == 0 ) {
 	// pop-up that let's use know that extension won't work with this document and let user know of possible reasons
 	// ask user if he wishes to send data to the developer to see if he can build in a fix for his document
