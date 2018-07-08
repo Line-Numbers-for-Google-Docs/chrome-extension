@@ -163,13 +163,17 @@ function generateMenuItem(label) {
  */
 function generateCheckboxMenuItem(label, checked) {
   const $checkboxMenuItem = $(
-    '<div class="goog-menuitem goog-option-selected apps-menuitem goog-option" role="menuitemcheckbox" aria-checked="' + checked + '" style="user-select: none;">' +
+    '<div class="goog-menuitem apps-menuitem goog-option" role="menuitemcheckbox" aria-checked="' + checked + '" style="user-select: none;">' +
       '<div class="goog-menuitem-content" style="user-select: none;">' +
         '<div class="goog-menuitem-checkbox" style="user-select: none;"></div>' +
         '<span class="goog-menuitem-label" style="user-select: none;">' + label + '</span>' +
       '</div>' +
     '</div>'
   );
+
+  if (checked) {
+    $checkboxMenuItem.addClass('goog-option-selected');
+  }
 
   $checkboxMenuItem.hover(function() {
     $(this).addClass("goog-menuitem-highlight");
@@ -196,10 +200,14 @@ function generateVerticalMenu() {
 function generateLineNumberingVerticalMenu() {
   const $verticalMenu = generateVerticalMenu();
 
-  $verticalMenu.append(generateCheckboxMenuItem("Activate", true));
+  $verticalMenu.append(generateCheckboxMenuItem("Number entire document", false));
+  $verticalMenu.append(generateMenuItem("Number selection"));
 
   $verticalMenu.append(generateMenuSeparator());
-
+  
+  $verticalMenu.append(generateCheckboxMenuItem("Number blank lines", false));
+  $verticalMenu.append(generateCheckboxMenuItem("Restart line numbering on each page", false));
+  $verticalMenu.append(generateMenuItem("Add number/content divider"));
   $verticalMenu.append(generateMenuItem("More options..."));
 
   return $verticalMenu;
