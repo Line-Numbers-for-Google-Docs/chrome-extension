@@ -51,8 +51,6 @@ chrome.storage.local.get( [ "enabled" ], function( result ) {
 			} );
 			if (timesUsed == 88) {
 				// TODO: Run popup asking to rate the extension
-				var popupHTML =
-				$('body').append(popupHTML);
 			}
 		} );
 
