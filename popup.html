@@ -1,26 +1,30 @@
 <!doctype html>
 <html style="max-height: 80vh; overflow: auto;">
-  <head>
-    <title>GTmetrix Analyzer</title>
-    <link rel="stylesheet" type="text/css" href="css/popup.css">
-  </head>
-  <body>
-    <h1><img src="icons/icon128.png" alt=""><span class="title">Line Numbers </span><br><span class="subtitle">For Google Docs</span></h1>
 
-    <div class="option">
-      <p class="option-label">Enabled the Extension</p>
-      <label class="switch switch-green">
-        <input type="checkbox" class="switch-input" id="enabled">
-        <span class="switch-label" data-on="On" data-off="Off"></span>
-        <span class="switch-handle"></span>
-      </label>
-    </div>
+<head>
+  <title>GTmetrix Analyzer</title>
+  <link rel="stylesheet" type="text/css" href="css/popup.css">
+</head>
 
-    <div class="offDocumentShow">
-      <p>For additional options your must have a Google Document open in your active tab.</p>
-    </div>
+<body>
+  <h1><img src="icons/icon128.png" alt=""><span class="title">Line Numbers
+    </span><br><span class="subtitle">For Google Docs</span></h1>
 
-    <!-- <div class="option onDocumentShow">
+  <div class="option">
+    <p class="option-label">Enabled the Extension</p>
+    <label class="switch switch-green">
+      <input type="checkbox" class="switch-input" id="enabled">
+      <span class="switch-label" data-on="On" data-off="Off"></span>
+      <span class="switch-handle"></span>
+    </label>
+  </div>
+
+  <div class="offDocumentShow">
+    <p>For additional options your must have a Google Document open in your
+      active tab.</p>
+  </div>
+
+  <!-- <div class="option onDocumentShow">
       <p class="option-label">Enable on this Document</p>
       <label class="switch">
         <input type="checkbox" class="switch-input" id="documentEnabled">
@@ -29,75 +33,87 @@
       </label>
     </div> -->
 
+  <div class="option onDocumentShow">
+    <p class="option-label">
+      Number Every How Many Lines?<br>
+      <span class="info">Please input an integer greater than 0</span>
+    </p>
+    <input type="number" id="everyXLine" min="1" style="margin-top: 8px;"><br>
+  </div>
+
+  <div class="show-more-options onDocumentShow">
+    Show More Options
+  </div>
+
+  <section id="more-options" class="closed">
+
+    <div class="option onDocumentShow">
+      <p class="option-label">Number blank lines</p>
+      <label class="switch switch-green">
+        <input type="checkbox" class="switch-input" id="number-blank-lines">
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
+    </div>
+
     <div class="option onDocumentShow">
       <p class="option-label">
-        Number Every How Many Lines?<br>
-        <span class="info">Please input an integer greater than 0</span>
+        Number paragraphs only <br>
+        <span class="info">Ignore titles and headings in line numbering</span>
       </p>
-      <input type="number" id="everyXLine" min="1" style="margin-top: 8px;"><br>
+      <label class="switch switch-green">
+        <input type="checkbox" class="switch-input" id="number-paragraphs-only">
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
     </div>
 
-    <div class="show-more-options onDocumentShow">
-      Show More Options
+    <div class="option onDocumentShow">
+      <p class="option-label">Number headers and footers</p>
+      <label class="switch switch-green">
+        <input type="checkbox" class="switch-input" id="number-header-footer">
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
     </div>
 
-    <section id="more-options" class="closed">
+    <div class="option onDocumentShow">
+      <p class="option-label">Restart Line Numbering on each new page</p>
+      <label class="switch switch-green">
+        <input type="checkbox" class="switch-input" id="new-page-count-reset">
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
+    </div>
 
-      <div class="option onDocumentShow">
-        <p class="option-label">Number blank lines</p>
-        <label class="switch switch-green">
-          <input type="checkbox" class="switch-input" id="number-blank-lines">
-          <span class="switch-label" data-on="On" data-off="Off"></span>
-          <span class="switch-handle"></span>
-        </label>
-      </div>
+    <div class="option onDocumentShow">
+      <p class="option-label">Add number/content divider</p>
+      <label class="switch switch-green">
+        <input type="checkbox" class="switch-input" id="line-border">
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
+    </div>
 
-      <div class="option onDocumentShow">
-        <p class="option-label">
-          Number paragraphs only <br>
-          <span class="info">Ignore titles and headings in line numbering</span>
-        </p>
-        <label class="switch switch-green">
-          <input type="checkbox" class="switch-input" id="number-paragraphs-only">
-          <span class="switch-label" data-on="On" data-off="Off"></span>
-          <span class="switch-handle"></span>
-        </label>
-      </div>
+    <div class="option onDocumentShow">
+      <p class="option-label">Numbers on right</p>
+      <label class="switch switch-green">
+        <input type="checkbox" class="switch-input" id="right-numbering">
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
+    </div>
 
-      <div class="option onDocumentShow">
-        <p class="option-label">Number headers and footers</p>
-        <label class="switch switch-green">
-          <input type="checkbox" class="switch-input" id="number-header-footer">
-          <span class="switch-label" data-on="On" data-off="Off"></span>
-          <span class="switch-handle"></span>
-        </label>
-      </div>
+  </section>
 
-      <div class="option onDocumentShow">
-        <p class="option-label">Restart Line Numbering on each new page</p>
-        <label class="switch switch-green">
-          <input type="checkbox" class="switch-input" id="new-page-count-reset">
-          <span class="switch-label" data-on="On" data-off="Off"></span>
-          <span class="switch-handle"></span>
-        </label>
-      </div>
+  <br><a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+    id="refresh" href="">Refresh Extension</a> |
+  <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="reloadpage"
+    href="">Reload Google Docs Page</a>
 
-      <div class="option onDocumentShow">
-        <p class="option-label">Add number/content divider</p>
-        <label class="switch switch-green">
-          <input type="checkbox" class="switch-input" id="line-border">
-          <span class="switch-label" data-on="On" data-off="Off"></span>
-          <span class="switch-handle"></span>
-        </label>
-      </div>
+  <script src="libs/jquery.min.js"></script>
+  <script src="js/popup.js"></script>
 
-    </section>
+</body>
 
-    <br><a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="refresh" href="">Refresh Extension</a> |
-    <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="reloadpage" href="">Reload Google Docs Page</a>
-
-    <script src="libs/jquery.min.js"></script>
-    <script src="js/popup.js"></script>
-
-  </body>
 </html>

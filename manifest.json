@@ -1,18 +1,18 @@
 {
   "manifest_version": 2,
-
   "name": "Line Numbers for Google Docs",
   "short_name": "Line Numbers",
   "description": "The simplest way to add line numbers to any Google Docs document",
   "author": "Pablo Gamito",
   "version": "1.3.3",
-
   "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
-  "icons": {"48": "icons/icon48.png",
-          "128": "icons/icon128.png" },
+  "icons": {
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "browser_action": {
-   "default_icon": "icons/icon128.png",
-   "default_popup": "popup.html"
+    "default_icon": "icons/icon128.png",
+    "default_popup": "popup.html"
   },
   "background": {
     "scripts": [
@@ -34,15 +34,14 @@
       "js": [
         "libs/jquery.min.js",
         "libs/jquery.waituntilexists.js",
-        "js/menu.js",
         "js/linenumbering.js"
       ]
     }
   ],
   "permissions": [
-   "https://docs.google.com/document/d/*",
-   "http://docs.google.com/document/d/*",
-   "tabs",
-   "storage"
-   ]
+    "https://docs.google.com/document/d/*",
+    "http://docs.google.com/document/d/*",
+    "tabs",
+    "storage"
+  ]
 }

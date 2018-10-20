@@ -31,6 +31,16 @@
   color: #626871;
 }
 
+.kix-lineview.numbered-right::before {
+  content: attr(ln-number);
+  position: relative;
+  right: -4em;
+  width: 2em;
+  text-align: left;
+  float: right;
+  color: #626871;
+}
+
 .linenumberhover .kix-lineview.numbered:hover::before {
   color: black;
 }

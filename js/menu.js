@@ -1,13 +1,13 @@
 // var letters = [];
 // TODO: Move local storage variable names to global variables
-chrome.storage.local.get( ["enabled", "everyXLine", "numberBlankLines", "numberHeaderFooter", "numberParagraphsOnly", "newPageCountReset", "lineBorder"], function( results ) {
+chrome.storage.local.get(["enabled", "everyXLine", "numberBlankLines", "numberHeaderFooter", "numberParagraphsOnly", "newPageCountReset", "lineBorder"], function (results) {
 
   console.log(results);
-  
+
   var inserted = false;
   var $subMenus = $('.goog-menuitem.apps-menuitem.goog-submenu');
 
-  $subMenus.waitUntilExists(function() {
+  $subMenus.waitUntilExists(function () {
 
     // var letter = $(this).find(".goog-menuitem-label").attr("aria-label").split(' ').slice(-1)[0];
     // letters.push(letter);
@@ -42,23 +42,23 @@ chrome.storage.local.get( ["enabled", "everyXLine", "numberBlankLines", "numberH
  *        has to close all children menu
  */
 function generateSubMenu(labelArr, $verticalMenu, $mainMenuContainer) {
-  const pre      = labelArr[0];
+  const pre = labelArr[0];
   const mnemonic = labelArr[1];
-  const post     = labelArr[2];
+  const post = labelArr[2];
 
   const label = pre + mnemonic + post;
 
   var $subMenu = $(
-    '<div class="goog-menuitem apps-menuitem goog-submenu" role="menuitem" aria-disabled="false" aria-haspopup="true" style="user-select: none;">' + 
-      '<div class="goog-menuitem-content" style="user-select: none;">' + 
-        '<div class="docs-icon goog-inline-block goog-menuitem-icon" aria-hidden="true" style="user-select: none;">' + 
-          '<div class="docs-icon-img-container docs-icon-img docs-icon-list-number" style="user-select: none;"></div>' + 
-        '</div>' + 
-        '<span aria-label="' + label + ' ' +  mnemonic.toLowerCase() + '" class="goog-menuitem-label" style="user-select: none;">' + 
-          pre + '<span class="goog-menuitem-mnemonic-hint" style="user-select: none;">' + mnemonic + '</span>' + post + 
-        '</span>' +
-        '<span class="goog-submenu-arrow" style="user-select: none;">►</span>' +
-      '</div>' + 
+    '<div class="goog-menuitem apps-menuitem goog-submenu" role="menuitem" aria-disabled="false" aria-haspopup="true" style="user-select: none;">' +
+    '<div class="goog-menuitem-content" style="user-select: none;">' +
+    '<div class="docs-icon goog-inline-block goog-menuitem-icon" aria-hidden="true" style="user-select: none;">' +
+    '<div class="docs-icon-img-container docs-icon-img docs-icon-list-number" style="user-select: none;"></div>' +
+    '</div>' +
+    '<span aria-label="' + label + ' ' + mnemonic.toLowerCase() + '" class="goog-menuitem-label" style="user-select: none;">' +
+    pre + '<span class="goog-menuitem-mnemonic-hint" style="user-select: none;">' + mnemonic + '</span>' + post +
+    '</span>' +
+    '<span class="goog-submenu-arrow" style="user-select: none;">►</span>' +
+    '</div>' +
     '</div>');
 
   /**
@@ -66,19 +66,19 @@ function generateSubMenu(labelArr, $verticalMenu, $mainMenuContainer) {
    */
 
   $subMenu.hover(
-    function() {
+    function () {
       $(this).addClass("goog-menuitem-highlight");
       setTimeout(showVerticalMenu, 300, $verticalMenu, $(this));
-    }, function() {
+    }, function () {
       $(this).removeClass("goog-menuitem-highlight");
       setTimeout(hideVerticalMenu, 300, $verticalMenu, $(this));
     }
   );
 
   $verticalMenu.hover(
-    function() {
+    function () {
       $subMenu.addClass("goog-menuitem-highlight");
-    }, function() {
+    }, function () {
       if ($(".goog-menu.goog-menu-vertical:hover").length > 0) {
         $subMenu.removeClass("goog-menuitem-highlight");
         setTimeout(hideVerticalMenu, 300, $(this), $subMenu);
@@ -90,30 +90,30 @@ function generateSubMenu(labelArr, $verticalMenu, $mainMenuContainer) {
    * Force hide menu
    */
 
-  $("#docs-menubars .menu-button").hover(function() {
+  $("#docs-menubars .menu-button").hover(function () {
     if ($(this).text() != "Format") {
       forceHideVerticalMenu($verticalMenu, $subMenu);
     }
-  }, function() {});
+  }, function () { });
 
-  $mainMenuContainer.children(".goog-menuitem.goog-submenu").not($subMenu).hover(function(e) {
+  $mainMenuContainer.children(".goog-menuitem.goog-submenu").not($subMenu).hover(function (e) {
     $subMenu.removeClass("goog-menuitem-highlight");
     setTimeout(hideVerticalMenu, 200, $verticalMenu, $subMenu);
-  }, function() {});
+  }, function () { });
 
-  $verticalMenu.click(function() {
+  $verticalMenu.click(function () {
     forceHideVerticalMenu($verticalMenu, $subMenu);
   });
 
-  $verticalMenu.contextmenu(function() {
+  $verticalMenu.contextmenu(function () {
     forceHideVerticalMenu($verticalMenu, $subMenu);
   });
 
-  $(document).click(function() {
+  $(document).click(function () {
     forceHideVerticalMenu($verticalMenu, $subMenu);
   });
 
-  $subMenu.click(function() {
+  $subMenu.click(function () {
     showVerticalMenu($verticalMenu, $subMenu);
   });
 
@@ -146,15 +146,15 @@ function forceHideVerticalMenu($verticalMenu, $parentMenu) {
 function generateMenuItem(label) {
   const $menuItem = $(
     '<div class="goog-menuitem apps-menuitem" role="menuitem" style="user-select: none;">' +
-      '<div class="goog-menuitem-content" style="user-select: none;">' +
-        '<span class="goog-menuitem-label" style="user-select: none;">' + label + '</span>' +
-      '</div>' +
+    '<div class="goog-menuitem-content" style="user-select: none;">' +
+    '<span class="goog-menuitem-label" style="user-select: none;">' + label + '</span>' +
+    '</div>' +
     '</div>'
   );
 
-  $menuItem.hover(function() {
+  $menuItem.hover(function () {
     $(this).addClass("goog-menuitem-highlight");
-  }, function() {
+  }, function () {
     $(this).removeClass("goog-menuitem-highlight");
   });
 
@@ -169,10 +169,10 @@ function generateMenuItem(label) {
 function generateCheckboxMenuItem(label, checked) {
   var $checkboxMenuItem = $(
     '<div class="goog-menuitem apps-menuitem goog-option" role="menuitemcheckbox" aria-checked="' + checked + '" style="user-select: none;">' +
-      '<div class="goog-menuitem-content" style="user-select: none;">' +
-        '<div class="goog-menuitem-checkbox" style="user-select: none;"></div>' +
-        '<span class="goog-menuitem-label" style="user-select: none;">' + label + '</span>' +
-      '</div>' +
+    '<div class="goog-menuitem-content" style="user-select: none;">' +
+    '<div class="goog-menuitem-checkbox" style="user-select: none;"></div>' +
+    '<span class="goog-menuitem-label" style="user-select: none;">' + label + '</span>' +
+    '</div>' +
     '</div>'
   );
 
@@ -180,13 +180,13 @@ function generateCheckboxMenuItem(label, checked) {
     $checkboxMenuItem.addClass('goog-option-selected');
   }
 
-  $checkboxMenuItem.hover(function() {
+  $checkboxMenuItem.hover(function () {
     $(this).addClass("goog-menuitem-highlight");
-  }, function() {
+  }, function () {
     $(this).removeClass("goog-menuitem-highlight");
   });
 
-  $checkboxMenuItem.click(function() {
+  $checkboxMenuItem.click(function () {
     var isChecked = $(this).hasClass("goog-option-selected");
     if (isChecked) {
       $(this).removeClass("goog-option-selected");
@@ -202,27 +202,27 @@ function generateCheckboxMenuItem(label, checked) {
   return $checkboxMenuItem;
 }
 
-$.fn.uncheck = function(callback) {
+$.fn.uncheck = function (callback) {
   // data is the argument passed to doSomething
-  return this.each(function() {
+  return this.each(function () {
     this.uncheckCallback = callback;
   });
 };
 
-$.fn.uncheckCallback = function() {
-  this.each(function() {
+$.fn.uncheckCallback = function () {
+  this.each(function () {
     this.uncheckCallback();
   });
 };
 
-$.fn.check = function(callback) {
-  return this.each(function() {
+$.fn.check = function (callback) {
+  return this.each(function () {
     this.checkCallback = callback;
   });
 };
 
-$.fn.checkCallback = function() {
-  this.each(function() {
+$.fn.checkCallback = function () {
+  this.each(function () {
     this.checkCallback();
   });
 };
@@ -247,50 +247,50 @@ function generateDialogBackground() {
  */
 function generateDialog(title, applyCallback) {
   const $dialog = $(
-    '<div class="modal-dialog docs-dialog" tabindex="0" role="dialog" style="position: fixed; top: 50%; left: 50%;transform: translate(-50%, -50%); opacity: 1;">' + 
-      '<div class="modal-dialog-title modal-dialog-title-draggable">' +
-        '<span class="modal-dialog-title-text" id=":703" role="heading">' + title + '</span>' +
-        '<span class="modal-dialog-title-close" role="button" tabindex="0" aria-label="Close"></span>' +
-      '</div>' +
-      '<div class="modal-dialog-content">' +
-        '<div class="kix-columnoptionsdialog-content">' +
-          '<div class="kix-columnoptionsdialog-content-left-side goog-inline-block">' +
-            // Options will be inserted here 
-          '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="modal-dialog-buttons">' +
-        '<button name="apply" class="goog-buttonset-default goog-buttonset-action">Apply</button>' +
-        '<button name="cancel">Cancel</button>' +
-      '</div>' +
+    '<div class="modal-dialog docs-dialog" tabindex="0" role="dialog" style="position: fixed; top: 50%; left: 50%;transform: translate(-50%, -50%); opacity: 1;">' +
+    '<div class="modal-dialog-title modal-dialog-title-draggable">' +
+    '<span class="modal-dialog-title-text" id=":703" role="heading">' + title + '</span>' +
+    '<span class="modal-dialog-title-close" role="button" tabindex="0" aria-label="Close"></span>' +
+    '</div>' +
+    '<div class="modal-dialog-content">' +
+    '<div class="kix-columnoptionsdialog-content">' +
+    '<div class="kix-columnoptionsdialog-content-left-side goog-inline-block">' +
+    // Options will be inserted here 
+    '</div>' +
+    '</div>' +
+    '</div>' +
+    '<div class="modal-dialog-buttons">' +
+    '<button name="apply" class="goog-buttonset-default goog-buttonset-action">Apply</button>' +
+    '<button name="cancel">Cancel</button>' +
+    '</div>' +
     '</div>'
   ).add(generateDialogBackground());
 
-  $dialog.find(".modal-dialog-title-close").click(function() {
+  $dialog.find(".modal-dialog-title-close").click(function () {
     $dialog.remove();
   });
 
-  $dialog.find("button[name='apply']").click(function() {
+  $dialog.find("button[name='apply']").click(function () {
     $dialog.remove();
   });
 
-  $dialog.find("button[name='cancel']").click(function() {
+  $dialog.find("button[name='cancel']").click(function () {
     $dialog.remove();
   })
 
   return $dialog;
 }
 
-jQuery.fn.outerHTML = function() {
+jQuery.fn.outerHTML = function () {
   return jQuery('<div />').append(this.eq(0).clone()).html();
 };
 
 function generateCheckboxControl(checked) {
   const $checkBox = $(
     '<div class="kix-columnoptionsdialog-control goog-inline-block kix-columnoptionsdialog-line-between">' +
-      '<div class="jfk-checkbox goog-inline-block" role="checkbox" dir="ltr" tabindex="0" aria-labelledby="kix-columnoptionsdialog-line-between-label" style="user-select: none;">' +
-        '<div class="jfk-checkbox-checkmark" role="presentation"></div>' +
-      '</div>' +
+    '<div class="jfk-checkbox goog-inline-block" role="checkbox" dir="ltr" tabindex="0" aria-labelledby="kix-columnoptionsdialog-line-between-label" style="user-select: none;">' +
+    '<div class="jfk-checkbox-checkmark" role="presentation"></div>' +
+    '</div>' +
     '</div>'
   );
 
@@ -304,7 +304,7 @@ function generateCheckboxControl(checked) {
     $checkBoxInner.addClass(uncheckedClass);
   }
 
-  $checkBox.click(function() {
+  $checkBox.click(function () {
     if ($checkBoxInner.hasClass(checkedClass)) {
       $checkBoxInner.removeClass(checkedClass);
       $checkBoxInner.addClass(uncheckedClass);
@@ -320,7 +320,7 @@ function generateCheckboxControl(checked) {
 function generateTextInput(value) {
   const $input = $(
     '<div class="kix-columnoptionsdialog-control goog-inline-block">' +
-      '<input type="text" class="kix-columnoptionsdialog-column-spacing jfk-textinput" id="kix-columnoptionsdialog-column-spacing">' + 
+    '<input type="text" class="kix-columnoptionsdialog-column-spacing jfk-textinput" id="kix-columnoptionsdialog-column-spacing">' +
     '</div>'
   );
 
@@ -332,10 +332,10 @@ function generateTextInput(value) {
 function addOptionToDialog($dialog, optionLabel, $optionControl) {
   const $option = $(
     '<div class="kix-columnoptionsdialog-section">' +
-      '<div class="kix-columnoptionsdialog-title goog-inline-block">' +
-        '<label for="kix-columnoptionsdialog-number-of-columns">' + optionLabel + '</label>' +
-      '</div>' +
-      // $optionControl will be added here
+    '<div class="kix-columnoptionsdialog-title goog-inline-block">' +
+    '<label for="kix-columnoptionsdialog-number-of-columns">' + optionLabel + '</label>' +
+    '</div>' +
+    // $optionControl will be added here
     '</div>'
   );
 
@@ -362,21 +362,21 @@ function generateLineNumberingVerticalMenu(results) {
   const $noNumbersMenuItem = generateCheckboxMenuItem("None", !enabled);
   const $entireDocNumbersMenuItem = generateCheckboxMenuItem("Number entire document", enabled);
 
-  $noNumbersMenuItem.uncheck(function() {
-    chrome.storage.local.set({"enabled": false});
+  $noNumbersMenuItem.uncheck(function () {
+    chrome.storage.local.set({ "enabled": false });
     // TODO: $entireDocNumbersMenuItem visually check
   });
-  $noNumbersMenuItem.check(function() {
-    chrome.storage.local.set({"enabled": true});
+  $noNumbersMenuItem.check(function () {
+    chrome.storage.local.set({ "enabled": true });
     // TODO: $entireDocNumbersMenuItem visually uncheck
   });
 
-  $entireDocNumbersMenuItem.uncheck(function() {
-    chrome.storage.local.set({"enabled": true});
+  $entireDocNumbersMenuItem.uncheck(function () {
+    chrome.storage.local.set({ "enabled": true });
     // TODO: $noNumbersMenuItem visually uncheck
   });
-  $entireDocNumbersMenuItem.check(function() {
-    chrome.storage.local.set({"enabled": false});
+  $entireDocNumbersMenuItem.check(function () {
+    chrome.storage.local.set({ "enabled": false });
     // TODO: $noNumbersMenuItem visually check
   });
 
@@ -398,7 +398,7 @@ function generateLineNumberingVerticalMenu(results) {
   $verticalMenu.append(generateMenuSeparator());
 
   const $moreOptionsMenuItem = generateMenuItem("More options...");
-  $moreOptionsMenuItem.click(function() {
+  $moreOptionsMenuItem.click(function () {
     $('body').append(generateLineNumberingOptionsDialog());
   });
   $verticalMenu.append($moreOptionsMenuItem);
@@ -413,7 +413,7 @@ function generateLineNumberingSubMenu($verticalMenu, $mainMenuContainer) {
 
 function generateLineNumberingOptionsDialog() {
   const $dialog = generateDialog(
-    "Line numbering options", 
+    "Line numbering options",
     lineNumberingOptionsApplyCallback()
   );
 
