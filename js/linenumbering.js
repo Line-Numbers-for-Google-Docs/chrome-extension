@@ -37,10 +37,10 @@ chrome.runtime.sendMessage({
 //
 // CHECKS IF EXTENSION IS ENABLED TO RUN ALL NECESSARY COMMAND //
 //
-chrome.storage.local.get(["enabled"], function(result) {
+chrome.storage.local.get(["enabled"], function (result) {
   if (result["enabled"] == true) {
     // Update times used number
-    chrome.storage.local.get(["timesUsed"], function(result) {
+    chrome.storage.local.get(["timesUsed"], function (result) {
       var timesUsed;
       if (
         parseInt(result["timesUsed"]) != result["timesUsed"] ||
@@ -54,7 +54,7 @@ chrome.storage.local.get(["enabled"], function(result) {
         {
           timesUsed: timesUsed
         },
-        function() {
+        function () {
           console.log("timesUsed value updated to " + timesUsed);
           refresh();
         }
@@ -75,10 +75,8 @@ chrome.storage.local.get(["enabled"], function(result) {
   }
 });
 
-// alert( "RUNNING" );
-
 function updateEveryXLine() {
-  chrome.storage.local.get(["everyXLine"], function(result) {
+  chrome.storage.local.get(["everyXLine"], function (result) {
     //update everyXLine value if change
     if (result["everyXLine"] > 0 && result["everyXLine"] <= 100) {
       everyXLine = result["everyXLine"];
@@ -90,7 +88,7 @@ function updateEveryXLine() {
 }
 
 function updateNumberBlankLines() {
-  chrome.storage.local.get(["numberBlankLines"], function(result) {
+  chrome.storage.local.get(["numberBlankLines"], function (result) {
     //update everyXLine value if change
     if (result["numberBlankLines"]) {
       numberBlankLines = result["numberBlankLines"];
@@ -102,7 +100,7 @@ function updateNumberBlankLines() {
 }
 
 function updateNumberHeaderFooter() {
-  chrome.storage.local.get(["numberHeaderFooter"], function(result) {
+  chrome.storage.local.get(["numberHeaderFooter"], function (result) {
     //update everyXLine value if change
     if (result["numberHeaderFooter"]) {
       numberHeaderFooter = result["numberHeaderFooter"];
@@ -114,7 +112,7 @@ function updateNumberHeaderFooter() {
 }
 
 function updateNumberParagraphsOnly() {
-  chrome.storage.local.get(["numberParagraphsOnly"], function(result) {
+  chrome.storage.local.get(["numberParagraphsOnly"], function (result) {
     //update everyXLine value if change
     if (result["numberParagraphsOnly"]) {
       numberParagraphsOnly = result["numberParagraphsOnly"];
@@ -126,7 +124,7 @@ function updateNumberParagraphsOnly() {
 }
 
 function updateNewPageCountReset() {
-  chrome.storage.local.get(["newPageCountReset"], function(result) {
+  chrome.storage.local.get(["newPageCountReset"], function (result) {
     // update newPageCountReset value if change
     if (result["newPageCountReset"]) {
       newPageCountReset = result["newPageCountReset"];
@@ -138,7 +136,7 @@ function updateNewPageCountReset() {
 }
 
 function updateLineBorder() {
-  chrome.storage.local.get(["lineBorder"], function(result) {
+  chrome.storage.local.get(["lineBorder"], function (result) {
     // update lineBorder value if change
     if (result["lineBorder"]) {
       lineBorder = result["lineBorder"];
@@ -156,7 +154,7 @@ function updateLineBorder() {
 }
 
 function updateRightNumbering() {
-  chrome.storage.local.get(["rightNumbering"], function(result) {
+  chrome.storage.local.get(["rightNumbering"], function (result) {
     // update rightNumbering value if change
     if (result["rightNumbering"]) {
       rightNumbering = result["rightNumbering"];
@@ -179,17 +177,20 @@ function updateRightNumbering() {
   });
 }
 
-// var lineCount = $(".kix-lineview").length;
 var ln = 0;
 
 function numberLine($lineview) {
-  console.log("Parents");
   if (
     !numberHeaderFooter &&
     ($lineview.closest(".kix-page-header").length > 0 ||
       $lineview.closest(".kix-page-bottom").length > 0)
   ) {
     // Header/Footer?
+    return false;
+  } else if (
+    $lineview.closest(".kix-paginated-footnoteview").length > 0
+  ) {
+    // Footnote
     return false;
   } else if (
     !numberBlankLines &&
@@ -223,7 +224,7 @@ function numberLines() {
   if (newPageCountReset) {
     $("body")
       .find(".kix-page")
-      .each(function() {
+      .each(function () {
         var lines = $(this).find(".kix-lineview");
         numberSelectedLines(lines);
       });
@@ -238,7 +239,7 @@ function numberSelectedLines(lines) {
   // lines should be an array of found elements to number
   ln = 0;
   // TODO: This should allow easy implementation of selection of were to start and stop line numbering
-  lines.each(function() {
+  lines.each(function () {
     var numberThisLine = numberLine($(this));
     if (numberThisLine) ln++;
     if (ln % everyXLine === 0 && numberThisLine) {
@@ -261,7 +262,7 @@ function refresh() {
   $(".numbered-right")
     .removeClass("numbered")
     .removeClass("numbered-right");
-  chrome.storage.local.get(["enabled"], function(result) {
+  chrome.storage.local.get(["enabled"], function (result) {
     if (result["enabled"] == true) {
       //If extension still enabled
       updateEveryXLine();
@@ -281,19 +282,19 @@ function refresh() {
 refresh();
 
 function autorefresh() {
-  chrome.storage.local.get(["enabled"], function(result) {
+  chrome.storage.local.get(["enabled"], function (result) {
     if (result["enabled"] == true) {
       numberLines();
     }
   });
 }
 
-setInterval(function() {
+setInterval(function () {
   autorefresh();
 }, 1000);
 
 // Listen for messages from the popup
-chrome.runtime.onMessage.addListener(function(msg, sender, response) {
+chrome.runtime.onMessage.addListener(function (msg, sender, response) {
   // Validate the message's structure
   if (msg.from === "popup" && msg.subject === "refresh") {
     //Run when popup notifies of a refresh
