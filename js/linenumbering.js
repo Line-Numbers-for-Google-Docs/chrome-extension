@@ -1,4 +1,12 @@
-var numberlineClass = "numbered";
+// Inject line numbering css
+// NOTE: This fixes problem of CSS not being injected into document if using secondary google account.
+var style = document.createElement('link');
+style.rel = 'stylesheet';
+style.type = 'text/css';
+style.href = chrome.extension.getURL('css/linenumbering.css');
+(document.head || document.documentElement).appendChild(style);
+
+const numberlineClass = "numbered";
 
 // Check document code is compatible with way line numbering works
 if ($("body").find(".kix-lineview").length == 0) {
@@ -230,7 +238,6 @@ function numberLines() {
       });
   } else {
     var lines = $("body").find(".kix-lineview"); //.filter(':parents(.kix-tablerenderer)');
-    console.log("Lines", lines);
     numberSelectedLines(lines);
   }
 }
