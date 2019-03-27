@@ -6,7 +6,8 @@ style.type = 'text/css';
 style.href = chrome.extension.getURL('css/linenumbering.css');
 (document.head || document.documentElement).appendChild(style);
 
-const numberlineClass = "numbered";
+// Variable used to switch between regular numbering and right-sided numbering
+var numberlineClass = "numbered";
 
 // Check document code is compatible with way line numbering works
 if ($("body").find(".kix-lineview").length == 0) {
