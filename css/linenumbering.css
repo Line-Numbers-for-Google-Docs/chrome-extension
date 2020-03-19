@@ -2,7 +2,7 @@
   counter-reset: ln;
 }
 
-.kix-lineview {
+.kix-lineview-text-block {
   counter-increment: ln;
 }*/
 
@@ -20,27 +20,36 @@
   border: none;
 }
 
+.kix-lineview-text-block {
+  --ln-offset: -2.7em;
+  --ln-width: 2em;
+}
+
 /* Line numbering */
-.kix-lineview.numbered::before {
+.kix-lineview-text-block.numbered::before {
   content: attr(ln-number);
   position: absolute;
-  left: -4em;
+  left: var(--ln-offset);
   width: 2em;
   text-align: right;
   float: left;
   color: #626871;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-.kix-lineview.numbered-right::before {
+.kix-lineview-text-block.numbered.right::before {
   content: attr(ln-number);
   position: relative;
-  right: -4em;
-  width: 2em;
+  right: var(--ln-offset);
+  width: var(--ln-width);
   text-align: left;
   float: right;
   color: #626871;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-.linenumberhover .kix-lineview.numbered:hover::before {
+.linenumberhover .kix-lineview-text-block.numbered:hover::before {
   color: black;
 }

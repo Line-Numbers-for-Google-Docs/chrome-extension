@@ -9,23 +9,6 @@ style.href = chrome.extension.getURL('css/linenumbering.css');
 // Variable used to switch between regular numbering and right-sided numbering
 var numberlineClass = "numbered";
 
-// Check document code is compatible with way line numbering works
-if ($("body").find(".kix-lineview").length == 0) {
-  // pop-up that let's use know that extension won't work with this document and let user know of possible reasons
-  // ask user if he wishes to send data to the developer to see if he can build in a fix for his document
-
-  // Temporary alert till popup is designed
-  alert(
-    "The Line Numbers for Google Docs extension will not work with this document"
-  );
-
-  var popupHTML =
-    '<a href="mailto:pablogamito@gmail.com?subject=&body=' + $("body") + "</a>";
-
-  // TODO: Make this work
-  // $( 'body' )
-}
-
 //**********//
 //INITIALIZE//
 //**********//
@@ -173,15 +156,13 @@ function updateRightNumbering() {
     console.log("Updated rightNumbering to " + rightNumbering);
 
     if (rightNumbering) {
-      numberlineClass = "numbered-right";
+      numberlineClass = "numbered right";
       $(".numbered")
-        .removeClass("numbered")
-        .addClass("numbered-right");
+        .addClass("right");
     } else {
       numberlineClass = "numbered";
-      $(".numbered-right")
-        .removeClass("numbered-right")
-        .addClass("numbered");
+      $(".numbered")
+        .removeClass("right");
     }
   });
 }
@@ -206,7 +187,7 @@ function numberLine($lineview) {
     $lineview
       .find("span.kix-wordhtmlgenerator-word-node")
       .text()
-      .replace(/\s/g, "") === ""
+      .replace(/\u200C|\s/g, "") === "" // \u200C is the encoding for &zwnj;
   ) {
     // Blank line?
     return false;
@@ -234,14 +215,17 @@ function numberLines() {
     $("body")
       .find(".kix-page")
       .each(function () {
-        var lines = $(this).find(".kix-lineview");
+        var lines = $(this).find(".kix-lineview-text-block");
         numberSelectedLines(lines);
       });
   } else {
-    var lines = $("body").find(".kix-lineview"); //.filter(':parents(.kix-tablerenderer)');
+    var lines = $("body").find(".kix-lineview-text-block"); //.filter(':parents(.kix-tablerenderer)');
     numberSelectedLines(lines);
   }
 }
+
+// Tweak this to add extra padding between numbers and text
+var lnWidth = 36;
 
 function numberSelectedLines(lines) {
   // lines should be an array of found elements to number
@@ -251,12 +235,19 @@ function numberSelectedLines(lines) {
     var numberThisLine = numberLine($(this));
     if (numberThisLine) ln++;
     if (ln % everyXLine === 0 && numberThisLine) {
+      var parent = $(this).parents('.kix-lineview').first()[0];
+      var offset = parent.getBoundingClientRect().x - $(this)[0].getBoundingClientRect().x - lnWidth;
+
       $(this)
         .addClass(numberlineClass)
         .attr("ln-number", ln);
+
+      $(this)[0].style.setProperty("--ln-offset", `${offset}px`);
+      $(this)[0].style.setProperty("--ln-width", `${lnWidth}px`)
+
+      console.log($(this));
     } else {
-      $(this).removeClass("numbered");
-      $(this).removeClass("numbered-right");
+      $(this).removeClass("numbered right");
     }
   });
 }
@@ -267,9 +258,9 @@ function numberSelectedLines(lines) {
 
 function refresh() {
   $(".numbered").removeClass("numbered");
-  $(".numbered-right")
+  $(".numbered.right")
     .removeClass("numbered")
-    .removeClass("numbered-right");
+    .removeClass("right");
   chrome.storage.local.get(["enabled"], function (result) {
     if (result["enabled"] == true) {
       //If extension still enabled
@@ -289,17 +280,17 @@ function refresh() {
 //Refresh on load to show pages
 refresh();
 
-function autorefresh() {
-  chrome.storage.local.get(["enabled"], function (result) {
-    if (result["enabled"] == true) {
-      numberLines();
-    }
-  });
-}
+// function autorefresh() {
+//   chrome.storage.local.get(["enabled"], function (result) {
+//     if (result["enabled"] == true) {
+//       numberLines();
+//     }
+//   });
+// }
 
-setInterval(function () {
-  autorefresh();
-}, 1000);
+// setInterval(function () {
+//   autorefresh();
+// }, 1000);
 
 // Listen for messages from the popup
 chrome.runtime.onMessage.addListener(function (msg, sender, response) {

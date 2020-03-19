@@ -28,9 +28,7 @@
         "https://docs.google.com/document/d/*",
         "http://docs.google.com/document/d/*"
       ],
-      "css": [
-        "css/linenumbering.css"
-      ],
+      "css": [],
       "js": [
         "libs/jquery.min.js",
         "libs/jquery.waituntilexists.js",
