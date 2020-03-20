@@ -26,12 +26,12 @@ class Settings {
     constructor(rawSettings) {
         // Update this to change the default settings.
         this.defaults = {
-            step: 1
-            // this.numberHeaderFooter = false;
-            // this.numberBlankLines = false;
-            // this.numberParagraphsOnly = true;
-            // this.resetCountOnNewPage = false;
-            // this.lineBorder = false;
+            step: 1,
+            numberBlankLines = false,
+            resetCountOnNewPage = false,
+            // numberHeaderFooter: false,
+            // numberParagraphsOnly = true,
+            // lineBorder = false,
         };
 
         this.settings = {};
