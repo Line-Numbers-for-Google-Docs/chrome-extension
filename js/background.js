@@ -1,4 +1,4 @@
-// On Exention Open Ask to Reload Line Numbers on all Lines
+// On Extension Open Ask to Reload Line Numbers on all Lines
 function refreshGDocs() {
 	chrome.tabs.query({
 		url: "*://docs.google.com/document/d/*"

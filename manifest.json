@@ -4,7 +4,7 @@
   "short_name": "Line Numbers",
   "description": "The simplest way to add line numbers to any Google Docs document",
   "author": "Pablo Gamito",
-  "version": "1.3.8",
+  "version": "2.0.0",
   "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
   "icons": {
     "48": "icons/icon48.png",
@@ -17,9 +17,7 @@
   "background": {
     "scripts": [
       "libs/jquery.min.js",
-      "libs/dexie.min.js",
-      "js/background.js",
-      "js/storage.js"
+      "js/background.js"
     ]
   },
   "content_scripts": [
@@ -28,13 +26,10 @@
         "https://docs.google.com/document/d/*",
         "http://docs.google.com/document/d/*"
       ],
-      "css": [],
       "js": [
-        "libs/jquery.min.js",
-        "libs/jquery.waituntilexists.js",
-        "js/linenumbering.js"
+        "js/content.js"
       ],
-      "all_frames": true
+      "all_frames": false
     }
   ],
   "permissions": [
@@ -44,6 +39,9 @@
     "storage"
   ],
   "web_accessible_resources": [
-    "css/linenumbering.css"
+    "css/linenumbering.css",
+    "js/linenumbering.js",
+    "js/storage.js",
+    "js/utils.js"
   ]
 }

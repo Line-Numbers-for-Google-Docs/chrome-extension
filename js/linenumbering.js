@@ -1,309 +1,104 @@
-// Inject line numbering css
-// NOTE: This fixes problem of CSS not being injected into document if using secondary google account.
-var style = document.createElement('link');
-style.rel = 'stylesheet';
-style.type = 'text/css';
-style.href = chrome.extension.getURL('css/linenumbering.css');
-(document.head || document.documentElement).appendChild(style);
+import { SettingsManager } from "./storage.js";
+import { findFirstParentWithClass } from "./utils.js";
 
-// Variable used to switch between regular numbering and right-sided numbering
-var numberlineClass = "numbered";
+class LineNumberer {
+    constructor() {
+        // Style values
+        this.lnWidth = 36;
 
-//**********//
-//INITIALIZE//
-//**********//
+        // Initialize a SettingsProvider to be able to fetch document settings
+        const documentId = window.location.href.match(/(?<=\/d\/)[\d\w]+/g)[0];
+        this.settingsManager = new SettingsManager(documentId);
+    }
 
-// Default Values
-var everyXLine = 5;
-var numberHeaderFooter = false;
-var numberBlankLines = false;
-var numberParagraphsOnly = true;
-var newPageCountReset = false;
-var lineBorder = false;
+    // TODO: Use this to page section numbering
+    get lineBlocks() {
+        /**
+         * Gets the blocks of objects to number.
+         * A block is a list of line objects to number in sequence.
+         * Different blocks of lines are numbered independently.
+         * 
+         * @return list of list of line objects
+         */
 
-chrome.runtime.sendMessage({
-  for: "storage",
-  action: "getSettings"
-});
+        if (this.resetCountOnNewPage) {
+            const lineBlocks = []
+            
+            const pages = document.body.querySelectorAll(".kix-page");
+            for (const page in pages) {
+                lineBlocks.push(Array.from(page.querySelectorAll(".kix-lineview-text-block")));
+            }
 
-//
-// CHECKS IF EXTENSION IS ENABLED TO RUN ALL NECESSARY COMMAND //
-//
-chrome.storage.local.get(["enabled"], function (result) {
-  if (result["enabled"] == true) {
-    // Update times used number
-    chrome.storage.local.get(["timesUsed"], function (result) {
-      var timesUsed;
-      if (
-        parseInt(result["timesUsed"]) != result["timesUsed"] ||
-        result["timesUsed"] == null
-      ) {
-        timesUsed = 1;
-      } else {
-        timesUsed = parseInt(result["timesUsed"]) + 1;
-      }
-      chrome.storage.local.set(
-        {
-          timesUsed: timesUsed
-        },
-        function () {
-          console.log("timesUsed value updated to " + timesUsed);
-          refresh();
+            return lineBlocks;
         }
-      );
-      if (timesUsed == 88) {
-        // TODO: Run popup asking to rate the extension
-      }
-    });
 
-    updateEveryXLine();
-    updateNumberBlankLines();
-    updateNumberHeaderFooter();
-    updateNumberParagraphsOnly();
-    updateLineBorder();
-    updateRightNumbering();
-    // Number lines
-    numberLines();
-  }
-});
-
-function updateEveryXLine() {
-  chrome.storage.local.get(["everyXLine"], function (result) {
-    //update everyXLine value if change
-    if (result["everyXLine"] > 0 && result["everyXLine"] <= 100) {
-      everyXLine = result["everyXLine"];
-    } else {
-      everyXLine = 5;
+        return [Array.from(document.body.querySelectorAll(".kix-lineview-text-block"))];
     }
-    console.log("Updated everyXLine to " + everyXLine);
-  });
+
+    number() {
+        /**
+         * Number the entire documents according to the document settings.
+         * 
+         * Splits the lines into "blocks" of lines to each be numbered independently.
+         */
+
+        for (const lines of this.lineBlocks) {
+            const consideredLines = lines.filter(line => this.shouldCountLine(line));
+            this.numberLinesSequentially(consideredLines, 1, this.settingsManager.settings.step);
+        }
+    }
+
+    numberLinesSequentially(lines, start=1, step=1) {
+        /**
+         * Display the line numbering according to the documents settings for the lines passed in as an argument.
+         * 
+         * Doesn't take into account any restarting of line numbering. If line numbering is required to be restarted
+         * after a certain point, then this function should be called multiple times with different batches of lines.
+         * 
+         * @param {Array}   lines An array of the DOM objects of the lines that should be considered for numbering 
+         *                        sequentially.
+         * @param {Integer} start The number of the first line.
+         * @param {Integer} step  The step to take when displaying the line numbers.
+         *                        A step of 1 means we number every line that should be numbered.
+         *                        A step of 5 will mean we only show the line number every 5 lines.
+         */
+
+        for (let i = 0, ln = start; i < lines.length; i++, ln++) {
+            if (ln % step != 0) {
+                continue;
+            }
+
+            const line = lines[i];
+            
+            // Get the offset with the parent lineview, to get the proper alignment to the edge of the document.
+            // Numbers are attached to the lineview-text-block rather than the lineview for proper vertical alignment
+            // with the text. But that messes with horizontal alignment with the edge of the document if lines are
+            // tabbed in for example, so this offset adjusts for it.
+            const parent = findFirstParentWithClass(line, "kix-lineview");
+            const offset = parent.getBoundingClientRect().x - line.getBoundingClientRect().x - this.lnWidth;
+
+            line.classList.add("numbered");
+            line.setAttribute("ln-number", ln);
+            line.style.setProperty("--ln-offset", `${offset}px`);
+            line.style.setProperty("--ln-width", `${this.lnWidth}px`);
+        }
+    }
+
+    shouldCountLine(line) {
+        /**
+         * Checks whether or not a line should count towards the line count.
+         * 
+         * @param line The DOM node of the line we want to check whether or not it should count towards the numbering.
+         * 
+         * @return {bool} True iff the line should count towards the numbering.
+         */
+
+        return true;
+    }
+    
 }
 
-function updateNumberBlankLines() {
-  chrome.storage.local.get(["numberBlankLines"], function (result) {
-    //update everyXLine value if change
-    if (result["numberBlankLines"]) {
-      numberBlankLines = result["numberBlankLines"];
-    } else {
-      numberBlankLines = false;
-    }
-    console.log("Updated numberHeaderFooter to " + numberHeaderFooter);
-  });
+export function main() {
+    const lineNumberer = new LineNumberer();
+    lineNumberer.number();
 }
-
-function updateNumberHeaderFooter() {
-  chrome.storage.local.get(["numberHeaderFooter"], function (result) {
-    //update everyXLine value if change
-    if (result["numberHeaderFooter"]) {
-      numberHeaderFooter = result["numberHeaderFooter"];
-    } else {
-      numberHeaderFooter = false;
-    }
-    console.log("Updated numberHeaderFooter to " + numberHeaderFooter);
-  });
-}
-
-function updateNumberParagraphsOnly() {
-  chrome.storage.local.get(["numberParagraphsOnly"], function (result) {
-    //update everyXLine value if change
-    if (result["numberParagraphsOnly"]) {
-      numberParagraphsOnly = result["numberParagraphsOnly"];
-    } else {
-      numberParagraphsOnly = false;
-    }
-    console.log("Updated numberParagraphsOnly to " + numberParagraphsOnly);
-  });
-}
-
-function updateNewPageCountReset() {
-  chrome.storage.local.get(["newPageCountReset"], function (result) {
-    // update newPageCountReset value if change
-    if (result["newPageCountReset"]) {
-      newPageCountReset = result["newPageCountReset"];
-    } else {
-      newPageCountReset = false;
-    }
-    console.log("Updated updateNewPageCountReset to " + numberParagraphsOnly);
-  });
-}
-
-function updateLineBorder() {
-  chrome.storage.local.get(["lineBorder"], function (result) {
-    // update lineBorder value if change
-    if (result["lineBorder"]) {
-      lineBorder = result["lineBorder"];
-    } else {
-      lineBorder = false;
-    }
-    console.log("Updated lineBorder to " + lineBorder);
-    // Add or remove line border
-    if (lineBorder) {
-      $("body").addClass("text-border");
-    } else {
-      $("body").removeClass("text-border");
-    }
-  });
-}
-
-function updateRightNumbering() {
-  chrome.storage.local.get(["rightNumbering"], function (result) {
-    // update rightNumbering value if change
-    if (result["rightNumbering"]) {
-      rightNumbering = result["rightNumbering"];
-    } else {
-      rightNumbering = false;
-    }
-    console.log("Updated rightNumbering to " + rightNumbering);
-
-    if (rightNumbering) {
-      numberlineClass = "numbered right";
-      $(".numbered")
-        .addClass("right");
-    } else {
-      numberlineClass = "numbered";
-      $(".numbered")
-        .removeClass("right");
-    }
-  });
-}
-
-var ln = 0;
-
-function numberLine($lineview) {
-  if (
-    !numberHeaderFooter &&
-    ($lineview.closest(".kix-page-header").length > 0 ||
-      $lineview.closest(".kix-page-bottom").length > 0)
-  ) {
-    // Header/Footer?
-    return false;
-  } else if (
-    $lineview.closest(".kix-paginated-footnoteview").length > 0
-  ) {
-    // Footnote
-    return false;
-  } else if (
-    !numberBlankLines &&
-    $lineview
-      .find("span.kix-wordhtmlgenerator-word-node")
-      .text()
-      .replace(/\u200C|\s/g, "") === "" // \u200C is the encoding for &zwnj;
-  ) {
-    // Blank line?
-    return false;
-  } else if (numberParagraphsOnly && $lineview.parent().attr("id")) {
-    if (
-      $lineview
-        .parent()
-        .attr("id")
-        .replace(/\.[^]*/, "") === "h"
-    ) {
-      // Not pragraph?
-      return false;
-    }
-  } else if ($lineview.parents(".kix-tablerenderer").length) {
-    // Part of table
-    return false;
-  }
-
-  return true;
-}
-
-function numberLines() {
-  console.log("Numbering lines every " + everyXLine + " line(s).");
-  if (newPageCountReset) {
-    $("body")
-      .find(".kix-page")
-      .each(function () {
-        var lines = $(this).find(".kix-lineview-text-block");
-        numberSelectedLines(lines);
-      });
-  } else {
-    var lines = $("body").find(".kix-lineview-text-block"); //.filter(':parents(.kix-tablerenderer)');
-    numberSelectedLines(lines);
-  }
-}
-
-// Tweak this to add extra padding between numbers and text
-var lnWidth = 36;
-
-function numberSelectedLines(lines) {
-  // lines should be an array of found elements to number
-  ln = 0;
-  // TODO: This should allow easy implementation of selection of were to start and stop line numbering
-  lines.each(function () {
-    var numberThisLine = numberLine($(this));
-    if (numberThisLine) ln++;
-    if (ln % everyXLine === 0 && numberThisLine) {
-      var parent = $(this).parents('.kix-lineview').first()[0];
-      var offset = parent.getBoundingClientRect().x - $(this)[0].getBoundingClientRect().x - lnWidth;
-
-      $(this)
-        .addClass(numberlineClass)
-        .attr("ln-number", ln);
-
-      $(this)[0].style.setProperty("--ln-offset", `${offset}px`);
-      $(this)[0].style.setProperty("--ln-width", `${lnWidth}px`)
-
-      console.log($(this));
-    } else {
-      $(this).removeClass("numbered right");
-    }
-  });
-}
-
-//*****************//
-//REFRESH or UPDATE//
-//*****************//
-
-function refresh() {
-  $(".numbered").removeClass("numbered");
-  $(".numbered.right")
-    .removeClass("numbered")
-    .removeClass("right");
-  chrome.storage.local.get(["enabled"], function (result) {
-    if (result["enabled"] == true) {
-      //If extension still enabled
-      updateEveryXLine();
-      updateNumberHeaderFooter();
-      updateNumberBlankLines();
-      updateNumberParagraphsOnly();
-      updateNewPageCountReset();
-      updateLineBorder();
-      updateRightNumbering();
-
-      numberLines();
-    }
-  });
-}
-
-//Refresh on load to show pages
-refresh();
-
-// function autorefresh() {
-//   chrome.storage.local.get(["enabled"], function (result) {
-//     if (result["enabled"] == true) {
-//       numberLines();
-//     }
-//   });
-// }
-
-// setInterval(function () {
-//   autorefresh();
-// }, 1000);
-
-// Listen for messages from the popup
-chrome.runtime.onMessage.addListener(function (msg, sender, response) {
-  // Validate the message's structure
-  if (msg.from === "popup" && msg.subject === "refresh") {
-    //Run when popup notifies of a refresh
-    console.log("Force refresh requested");
-    refresh();
-  }
-});
-
-//************************//
-//SELECTION LINE NUMBERING//
-//************************//
-
-//TODO: Allow numbering lines from selection
