@@ -15,10 +15,7 @@ export class SettingsManager {
     }
 
     store() {
-        chrome.storage.sync.set({[this.documentId]: this.settings.raw}, function() {
-            // Notify that we saved.
-            message('Settings saved');
-        });
+        chrome.storage.sync.set({[this.documentId]: this.settings.raw}, function() {});
     }
 }
 
