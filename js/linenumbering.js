@@ -1,14 +1,26 @@
 import { SettingsManager } from "./storage.js";
+import { injectMenu } from "./menu.js";
 import { findFirstParentWithClass } from "./utils.js";
 
 class LineNumberer {
     constructor() {
         // Style values
         this.lnWidth = 36;
+    }
+
+    async start() {
+        // TODO: Listen for changes to documents
+        console.log(document.getElementsByClassName('kix-appview-editor-container')[0]);
 
         // Initialize a SettingsProvider to be able to fetch document settings
-        const documentId = window.location.href.match(/(?<=\/d\/)[\d\w]+/g)[0];
-        this.settingsManager = new SettingsManager(documentId);
+        this.settingsManager = await SettingsManager.getInstance();
+        this.settings = this.settingsManager.settings;
+
+        // Setup callbacks when settings change
+        this.settings.onUpdate((settings) => this.render(settings));
+
+        // Render line numbers
+        this.render(this.settings);
     }
 
     // TODO: Use this to page section numbering
@@ -33,6 +45,21 @@ class LineNumberer {
         }
 
         return [Array.from(document.body.querySelectorAll(".kix-lineview-text-block"))];
+    }
+
+    render(settings) {
+        this.clearLineNumbers();
+
+        if (settings.enabled) {
+            this.number();
+        }
+    }
+
+    clearLineNumbers() {
+        const numberedLines = Array.from(document.getElementsByClassName('numbered'))
+        for (const node of numberedLines) {
+            node.classList.remove('numbered');
+        }
     }
 
     number() {
@@ -99,6 +126,9 @@ class LineNumberer {
 }
 
 export function main() {
-    const lineNumberer = new LineNumberer();
-    lineNumberer.number();
+    // Inject the menu into the page
+    injectMenu();
+
+    // Start numbering lines
+    new LineNumberer().start();
 }

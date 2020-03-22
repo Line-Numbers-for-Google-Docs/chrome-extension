@@ -42,6 +42,7 @@
     "css/linenumbering.css",
     "js/linenumbering.js",
     "js/storage.js",
+    "js/menu.js",
     "js/utils.js"
   ]
 }
