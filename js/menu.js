@@ -23,6 +23,8 @@ export async function injectMenu() {
     console.log(settingsManager);
     const settings = settingsManager.settings;
 
+    const validInput = [true, true];
+
     const dialog = document.createElement('div');
     dialog.id = "line-numbering-dialog"
     const dialogTitle = "Line Numbering";
@@ -108,8 +110,53 @@ export async function injectMenu() {
         <div class="kix-pagenumberdialog-label goog-inline-block"></div>
     </div>
     `;
-    numberingSection.querySelector('#ln-start-at-input').value = 1;
-    numberingSection.querySelector('#ln-count-by-input').value = 1;
+
+    const startAtInput = numberingSection.querySelector('#ln-start-at-input');
+    startAtInput.value = settings.start;
+
+    const errorMessage = document.createElement('div');
+    errorMessage.classList.add('ln-input-error');
+
+    const countByInput = numberingSection.querySelector('#ln-count-by-input');
+    countByInput.value = settings.step;
+    countByInput.addEventListener('change', (event) => {
+        event.target.classList.remove('input-error');
+        errorMessage.remove();
+
+        if (isNaN(event.target.value)) {
+            event.target.classList.add('input-error');
+            errorMessage.innerText = "Must be numeric.";
+            event.target.parentNode.parentNode.parentNode.insertBefore(
+                errorMessage, event.target.parentNode.parentNode.nextSibling);
+
+            validInput[1] = false;
+            return;
+        }
+
+        const countBy = Number(event.target.value);
+        if (!Number.isInteger(countBy)) {
+            event.target.classList.add('input-error');
+            errorMessage.innerText = "Must be a whole number.";
+            event.target.parentNode.parentNode.parentNode.insertBefore(
+                errorMessage, event.target.parentNode.parentNode.nextSibling);
+            
+            validInput[1] = false;
+            return;
+        }
+
+        if (countBy < 1) {
+            event.target.classList.add('input-error');
+            errorMessage.innerText = "Must be strictly positive.";
+            event.target.parentNode.parentNode.parentNode.insertBefore(
+                errorMessage, event.target.parentNode.parentNode.nextSibling);
+
+            validInput[1] = false;
+            return;
+        }
+
+        validInput[1] = true;
+        settings.step = countBy;
+    });
 
     const dialogContent = dialog.getElementsByClassName('modal-dialog-content')[0];
     dialogContent.prepend(numberingSection);
@@ -122,7 +169,7 @@ export async function injectMenu() {
     cancelButton.onclick = function() {cancel()};
 
     const applyButton = dialog.getElementsByClassName('ln-modal-dialog-apply')[0];
-    applyButton.onclick = function() {accept()};
+    applyButton.onclick = function() {apply()};
 
     function showPopup() {
         settings.save();
@@ -134,7 +181,11 @@ export async function injectMenu() {
         settings.restoreLastSave();
     }
 
-    function accept() {
+    function apply() {
+        if (!validInput.every((valid) => valid)) {
+            return;
+        }
+
         hidePopup();
         settings.popLastSave();
         settingsManager.store();
@@ -143,6 +194,4 @@ export async function injectMenu() {
     function hidePopup() {
         document.body.removeChild(dialog);
     }
-
-    showPopup();
 }

@@ -1,8 +1,8 @@
-/*body {
+body {
   counter-reset: ln;
 }
 
-.kix-lineview-text-block {
+/* .kix-lineview-text-block {
   counter-increment: ln;
 }*/
 
@@ -26,8 +26,13 @@
 }
 
 /* Line numbering */
-.kix-lineview-text-block.numbered::before {
-  content: attr(ln-number);
+
+.kix-lineview-text-block.numbered {
+  counter-increment: ln;
+}
+
+.kix-lineview-text-block.numbered.visible::before {
+  content: counter(ln);
   position: absolute;
   left: var(--ln-offset);
   width: 2em;
@@ -38,8 +43,8 @@
   transform: translateY(-50%);
 }
 
-.kix-lineview-text-block.numbered.right::before {
-  content: attr(ln-number);
+.kix-lineview-text-block.numbered.visible.right::before {
+  content: counter(ln);
   position: relative;
   right: var(--ln-offset);
   width: var(--ln-width);
@@ -99,4 +104,15 @@
   cursor: pointer;
   padding-left: 6px;
   padding-top: 2px;
+}
+
+#line-numbering-dialog .dialog-input-field .jfk-textinput.input-error {
+  border-color: #dd4b39;
+}
+
+#line-numbering-dialog .ln-input-error {
+  color: #dd4b39;
+  font-family: Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+  font-size: 11px;
+  outline: none;
 }

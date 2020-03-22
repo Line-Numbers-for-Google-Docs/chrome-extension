@@ -111,11 +111,21 @@ class Settings {
         this.executeUpdateCallbacks();
     }
 
+    get start() {
+        return this.settings.start;
+    }
+
+    set start(start) {
+        this.settings.start = start;
+        this.executeUpdateCallbacks();
+    }
+
     get step() {
         return this.settings.step;
     }
 
     set step(step) {
         this.settings.step = step;
+        this.executeUpdateCallbacks();
     }
 }

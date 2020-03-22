@@ -6,11 +6,84 @@ class LineNumberer {
     constructor() {
         // Style values
         this.lnWidth = 36;
+
+        this.lastRender = 0;
+        this.renderBacklog = [];
     }
 
     async start() {
-        // TODO: Listen for changes to documents
-        console.log(document.getElementsByClassName('kix-appview-editor-container')[0]);
+        // Listen for changes to documents and number line numbering respectively
+        const app = document.getElementsByClassName('kix-appview-editor-container')[0];
+        const config = { attributes: false, childList: true, subtree: true };
+        this.observer = new MutationObserver((mutationList, observer) => {
+            const mutationArray = Array.from(mutationList);
+
+            // Check for added or remove lines from a paragraph or added paragraph
+            let addedCount = 0;
+            let removedCount = 0;
+            for (const mutation of mutationArray) {
+                if (mutation.target.classList.contains('kix-paragraphrenderer')) {
+                    addedCount += mutation.addedNodes.length;
+                    removedCount += mutation.removedNodes.length;
+                }
+            }
+            if (removedCount != addedCount) {
+                this.render(this.settings);
+                return;
+            }
+
+            for (const mutation of mutationArray) {
+                const addedNodes = Array.from(mutation.addedNodes);
+                const removedNodes = Array.from(mutation.removedNodes);
+
+                // Check for removed paragraph
+                for (const removedNode of removedNodes) {
+                    if (removedNode.nodeType == 3) {
+                        // Text node
+                        continue;
+                    }
+                    if (removedNode.classList.contains('kix-paragraphrenderer')) {
+                        this.render(this.settings);
+
+                        return;
+                    }
+                }              
+
+                // Check for line content updates which remove line number for updated lines
+                if (addedNodes.length == removedNodes.length) {
+                    for (let i = 0; i < addedNodes.length; i++) {
+                        const addedNode = addedNodes[i];
+                        if (addedNode.nodeType == 3) {
+                            // Text node
+                            continue;
+                        }
+
+                        const match = addedNode.querySelectorAll('.kix-lineview-text-block');
+                        if (match.length > 0) {
+                            const removedNode = removedNodes[i];
+                            const old = removedNode.querySelectorAll('.kix-lineview-text-block.numbered');
+
+                            if (old.length > 0) {
+                                // Renumber line
+                                match[0].classList.add('numbered');
+                                match[0].setAttribute('ln-number', old[0].getAttribute('ln-number'));
+                                const offset = old[0].getAttribute('ln-offset');
+                                const width = old[0].getAttribute('ln-width');
+                                match[0].setAttribute("ln-offset", offset);
+                                match[0].setAttribute("ln-width", width);
+                                match[0].style.setProperty("--ln-offset", offset);
+                                match[0].style.setProperty("--ln-width", width);
+
+                                if (old[0].classList.contains('visible')) {
+                                    match[0].classList.add('visible');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        this.observer.observe(app, config);
 
         // Initialize a SettingsProvider to be able to fetch document settings
         this.settingsManager = await SettingsManager.getInstance();
@@ -21,6 +94,10 @@ class LineNumberer {
 
         // Render line numbers
         this.render(this.settings);
+    }
+
+    async stop() {
+        this.observer.disconnect();
     }
 
     // TODO: Use this to page section numbering
@@ -47,18 +124,38 @@ class LineNumberer {
         return [Array.from(document.body.querySelectorAll(".kix-lineview-text-block"))];
     }
 
-    render(settings) {
+    async render(settings) {
+        // Clear backlog
+        let timeout;
+        while (timeout = this.renderBacklog.pop()) {
+            clearTimeout(timeout);
+        }
+
+        const time = new Date().getTime();
+
+        if (this.lastRender + 100 > time) {
+            // Too many renders, last one was less than 0.1 second ago.
+            const timeout = setTimeout(() => { this.render(this.settings) }, 100);
+            this.renderBacklog.push(timeout);
+
+            return;
+        }
+
         this.clearLineNumbers();
 
         if (settings.enabled) {
             this.number();
         }
+
+        this.lastRender = time;
     }
 
     clearLineNumbers() {
         const numberedLines = Array.from(document.getElementsByClassName('numbered'))
         for (const node of numberedLines) {
             node.classList.remove('numbered');
+            node.classList.remove('visible');
+            node.classList.remove('right');
         }
     }
 
@@ -91,10 +188,6 @@ class LineNumberer {
          */
 
         for (let i = 0, ln = start; i < lines.length; i++, ln++) {
-            if (ln % step != 0) {
-                continue;
-            }
-
             const line = lines[i];
             
             // Get the offset with the parent lineview, to get the proper alignment to the edge of the document.
@@ -106,8 +199,14 @@ class LineNumberer {
 
             line.classList.add("numbered");
             line.setAttribute("ln-number", ln);
+            line.setAttribute("ln-offset", `${offset}px`);
+            line.setAttribute("ln-width", `${this.lnWidth}px`);
             line.style.setProperty("--ln-offset", `${offset}px`);
             line.style.setProperty("--ln-width", `${this.lnWidth}px`);
+
+            if (ln % step == 0) {
+                line.classList.add("visible");
+            }
         }
     }
 
