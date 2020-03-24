@@ -4,9 +4,6 @@ import { findFirstParentWithClass } from "./utils.js";
 
 class LineNumberer {
     constructor() {
-        // Style values
-        this.lnWidth = 36;
-
         this.lastRender = 0;
         this.renderBacklog = [];
     }
@@ -58,21 +55,15 @@ class LineNumberer {
                             continue;
                         }
 
-                        const match = addedNode.querySelectorAll('.kix-lineview-text-block');
+                        const match = addedNode.querySelectorAll('.kix-lineview');
                         if (match.length > 0) {
                             const removedNode = removedNodes[i];
-                            const old = removedNode.querySelectorAll('.kix-lineview-text-block.numbered');
+                            const old = removedNode.querySelectorAll('.kix-lineview.numbered');
 
                             if (old.length > 0) {
                                 // Renumber line
                                 match[0].classList.add('numbered');
                                 match[0].setAttribute('ln-number', old[0].getAttribute('ln-number'));
-                                const offset = old[0].getAttribute('ln-offset');
-                                const width = old[0].getAttribute('ln-width');
-                                match[0].setAttribute("ln-offset", offset);
-                                match[0].setAttribute("ln-width", width);
-                                match[0].style.setProperty("--ln-offset", offset);
-                                match[0].style.setProperty("--ln-width", width);
 
                                 if (old[0].classList.contains('visible')) {
                                     match[0].classList.add('visible');
@@ -115,13 +106,13 @@ class LineNumberer {
             
             const pages = document.body.querySelectorAll(".kix-page");
             for (const page in pages) {
-                lineBlocks.push(Array.from(page.querySelectorAll(".kix-lineview-text-block")));
+                lineBlocks.push(Array.from(page.querySelectorAll(".kix-lineview")));
             }
 
             return lineBlocks;
         }
 
-        return [Array.from(document.body.querySelectorAll(".kix-lineview-text-block"))];
+        return [Array.from(document.body.querySelectorAll(".kix-lineview"))];
     }
 
     async render(settings) {
@@ -194,15 +185,25 @@ class LineNumberer {
             // Numbers are attached to the lineview-text-block rather than the lineview for proper vertical alignment
             // with the text. But that messes with horizontal alignment with the edge of the document if lines are
             // tabbed in for example, so this offset adjusts for it.
-            const parent = findFirstParentWithClass(line, "kix-lineview");
-            const offset = parent.getBoundingClientRect().x - line.getBoundingClientRect().x - this.lnWidth;
+            const textBlocks = Array.from(line.querySelectorAll(".kix-lineview-text-block"));
+            let minY1 = textBlocks[0].getBoundingClientRect().y;
+            let maxY2 = textBlocks[0].getBoundingClientRect().y + textBlocks[0].getBoundingClientRect().height;
+            // for (const textBlock of textBlocks) {
+            //     const y1 = textBlock.getBoundingClientRect().y;
+            //     const y2 = y1 + textBlock.getBoundingClientRect().height;
+            //     if (y1 < minY1) {
+            //         minY1 = y1;
+            //     }
+            //     if (y2 > maxY2) {
+            //         maxY2 = y2;
+            //     }
+            // }
+            
+            const top = minY1 + (maxY2 - minY1)/2 - line.getBoundingClientRect().y;
 
             line.classList.add("numbered");
             line.setAttribute("ln-number", ln);
-            line.setAttribute("ln-offset", `${offset}px`);
-            line.setAttribute("ln-width", `${this.lnWidth}px`);
-            line.style.setProperty("--ln-offset", `${offset}px`);
-            line.style.setProperty("--ln-width", `${this.lnWidth}px`);
+            line.style.setProperty("--ln-top", `${top}px`);
 
             if (ln % step == 0) {
                 line.classList.add("visible");
