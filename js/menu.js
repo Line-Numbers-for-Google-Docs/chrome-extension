@@ -1,6 +1,58 @@
 import { SettingsManager } from "./storage.js";
 
 export async function injectMenu() {
+    const settingsManager = await SettingsManager.getInstance();
+    const settings = settingsManager.settings;
+
+    const dialogMenu = new DialogMenu("Line Numbering", 
+        () => {
+            settings.restoreLastSave();
+        },
+        () => {
+            settings.popLastSave();
+            settingsManager.store();
+        });
+    
+    // Enable section
+    const enableCheckbox = DialogMenu.checkBox("Show line numbering", 
+        () => {return settings.enabled}, (enabled) => {settings.enabled = enabled});
+    dialogMenu.addSection(null, [enableCheckbox]);
+
+    // Numbering section
+    const positiveIntegerParseAndValidate = (value) => {
+        if (isNaN(value)) {
+            return {error: true, errorMessage: "Must be numeric."}
+        }
+
+        const countBy = Number(value);
+        if (!Number.isInteger(countBy)) {
+            return {error: true, errorMessage: "Must be a whole number."}
+        }
+
+        if (countBy < 1) {
+            return {error: true, errorMessage: "Must be strictly positive."}
+        }
+
+        return {error: false, value: countBy}
+    };
+
+    const startAtInput = DialogMenu.input("start-at", "Start at", null, 
+        () => {return settings.start;},
+        positiveIntegerParseAndValidate,
+        (start) => {settings.start = start;});
+    const countByInput = DialogMenu.input("count-by", "Count by", "(number every X line)", 
+        () => {return settings.step;},
+        positiveIntegerParseAndValidate,
+        (countBy) => {settings.step = countBy;});
+    dialogMenu.addSection("Numbering", [startAtInput, countByInput]);
+
+    injectMenuOpenButton(() => {
+        settings.save();
+        dialogMenu.show();
+    });
+}
+
+function injectMenuOpenButton(showPopup) {
     const commentButton = document.getElementById('docs-docos-commentsbutton');
 
     const lineNumberingMenu = document.createElement('div');
@@ -15,183 +67,183 @@ export async function injectMenu() {
             </div>
         </div>`;
 
-    lineNumberingMenu.onclick = function() {showPopup();};
+    lineNumberingMenu.onclick = showPopup;
 
     commentButton.parentNode.parentNode.insertBefore(lineNumberingMenu, commentButton.parentNode);
+}
 
-    const settingsManager = await SettingsManager.getInstance();
-    console.log(settingsManager);
-    const settings = settingsManager.settings;
+class DialogMenu {
+    constructor(title, cancel, apply) {
+        this.title = title;
+        this.cancel = cancel;
+        this.apply = apply;
+        this.sectionGenerators = []; // functions to generate sections
+    }
 
-    const validInput = [true, true];
+    build() {
+        const dialog = document.createElement('div');
+        dialog.id = "line-numbering-dialog"
 
-    const dialog = document.createElement('div');
-    dialog.id = "line-numbering-dialog"
-    const dialogTitle = "Line Numbering";
+        dialog.innerHTML = `
+        <div class="modal-dialog-bg" style="opacity: 0.75; width: 100vw; height: 100vh;" aria-hidden="true"></div>
 
-    dialog.innerHTML = `
-    <div class="modal-dialog-bg" style="opacity: 0.75; width: 100vw; height: 100vh;" aria-hidden="true"></div>
-
-    <div class="modal-dialog docs-dialog" tabindex="0" role="dialog" aria-labelledby="evb5a0:70g" style="left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 1;">
-        <div class="modal-dialog-title modal-dialog-title-draggable">
-            <span class="modal-dialog-title-text" id="evb5a0:70g" role="heading">${dialogTitle}</span>
-            <span class="modal-dialog-title-close" role="button" tabindex="0" aria-label="Close" data-tooltip="Close"></span>
-        </div>
-        <div class="modal-dialog-content">
-            <div class="modal-dialog-buttons">
-                <button class="ln-modal-dialog-cancel" name="cancel">Cancel</button>
-                <button name="apply" class="ln-modal-dialog-apply goog-buttonset-default goog-buttonset-action">Apply</button>
+        <div class="modal-dialog docs-dialog" tabindex="0" role="dialog" aria-labelledby="evb5a0:70g" style="left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 1;">
+            <div class="modal-dialog-title modal-dialog-title-draggable">
+                <span class="modal-dialog-title-text" id="evb5a0:70g" role="heading">${this.title}</span>
+                <span class="modal-dialog-title-close" role="button" tabindex="0" aria-label="Close" data-tooltip="Close"></span>
             </div>
-        </div> 
-    </div>`;
+            <div class="modal-dialog-content">
+                <div class="settings-content">
+                </div>
+                <div class="modal-dialog-buttons">
+                    <button class="ln-modal-dialog-cancel" name="cancel">Cancel</button>
+                    <button name="apply" class="ln-modal-dialog-apply goog-buttonset-default goog-buttonset-action">Apply</button>
+                </div>
+            </div> 
+        </div>`;
 
-    const enableCheckboxSection = document.createElement('div');
-    enableCheckboxSection.classList.add('dialog-section');
-    enableCheckboxSection.innerHTML = `
-    <div class="dialog-input-field">
-        <div class="jfk-checkbox docs-material-gm-checkbox"></div>
-        <div class="label">Show line numbering</div>
-    </div>`
-    const enableCheckbox = enableCheckboxSection.getElementsByClassName('jfk-checkbox')[0];
-    if (settings.enabled) {
-        enableCheckbox.classList.add('docs-material-gm-checkbox-checked');
-    } else {
-        enableCheckbox.classList.add('docs-material-gm-checkbox-unchecked');
-    }
+        const content = dialog.querySelector('.settings-content');
 
-    enableCheckbox.onclick = toggleLineNumbering;
-    enableCheckboxSection.getElementsByClassName('label')[0].onclick = toggleLineNumbering;
-
-    function toggleLineNumbering() {
-        if (settings.enabled) {
-            enableCheckbox.classList.remove('docs-material-gm-checkbox-checked');
-            enableCheckbox.classList.add('docs-material-gm-checkbox-unchecked');
-        } else {
-            enableCheckbox.classList.remove('docs-material-gm-checkbox-unchecked');
-            enableCheckbox.classList.add('docs-material-gm-checkbox-checked');
+        for (const generator of this.sectionGenerators) {
+            content.appendChild(generator());
         }
 
-        settings.enabled = !settings.enabled;
+        const closeCross = dialog.querySelector('.modal-dialog-title-close');
+        const cancelButton = dialog.querySelector('.ln-modal-dialog-cancel');
+        const applyButton = dialog.querySelector('.ln-modal-dialog-apply');
+
+        const closeAndCancel = () => {this.close(); this.cancel();};
+        const closeAndApply = () => {this.close(); this.apply();};
+        closeCross.onclick = closeAndCancel;
+        cancelButton.onclick = closeAndCancel;
+        applyButton.onclick = closeAndApply;
+
+        return dialog;
     }
 
-    const numberingSection = document.createElement('div');
-    numberingSection.innerHTML = `
-    <div class="dialog-title">Numbering</div>
-
-    <div class="dialog-input-field">
-        <div>
-            <label>Start at</label>
-        </div>
-        <div style="margin-left: auto;">
-            <input type="text" id="ln-start-at-input" class="kix-headerfooterdialog-input jfk-textinput">
-        </div>
-    </div>
-
-    <div class="dialog-input-field">
-        <div>
-            <label>Count by</label>
-            <br><span style="font-size: 10px">(number every X line)</span>
-        </div>
-        <div style="margin-left: auto;">
-            <input type="text" id="ln-count-by-input" class="kix-headerfooterdialog-input jfk-textinput">
-        </div>
-    </div>
-
-    <div class="kix-pagenumberdialog-header-radio-button goog-inline-block">
-        <div class="kix-pagenumberdialog-control goog-inline-block">
-            <div class="jfk-radiobutton jfk-radiobutton-checked" data-value="continue" role="radio" aria-checked="true" data-name="" style="user-select: none;" tabindex="0"><span class="jfk-radiobutton-radio"></span><span class="jfk-radiobutton-label"><label for="kix-pagenumberdialog-header">Continuous</label></span></div>
-        </div>
-        <div class="kix-pagenumberdialog-label goog-inline-block"></div>
-    </div>
-    <div class="kix-pagenumberdialog-header-radio-button goog-inline-block">
-        <div class="kix-pagenumberdialog-control goog-inline-block">
-            <div class="jfk-radiobutton jfk-radiobutton-checked" data-value="continue" role="radio" aria-checked="true" data-name="" style="user-select: none;" tabindex="0"><span class="jfk-radiobutton-radio"></span><span class="jfk-radiobutton-label"><label for="kix-pagenumberdialog-header">Restart each page</label></span></div>
-        </div>
-        <div class="kix-pagenumberdialog-label goog-inline-block"></div>
-    </div>
-    `;
-
-    const startAtInput = numberingSection.querySelector('#ln-start-at-input');
-    startAtInput.value = settings.start;
-
-    const errorMessage = document.createElement('div');
-    errorMessage.classList.add('ln-input-error');
-
-    const countByInput = numberingSection.querySelector('#ln-count-by-input');
-    countByInput.value = settings.step;
-    countByInput.addEventListener('change', (event) => {
-        event.target.classList.remove('input-error');
-        errorMessage.remove();
-
-        if (isNaN(event.target.value)) {
-            event.target.classList.add('input-error');
-            errorMessage.innerText = "Must be numeric.";
-            event.target.parentNode.parentNode.parentNode.insertBefore(
-                errorMessage, event.target.parentNode.parentNode.nextSibling);
-
-            validInput[1] = false;
-            return;
-        }
-
-        const countBy = Number(event.target.value);
-        if (!Number.isInteger(countBy)) {
-            event.target.classList.add('input-error');
-            errorMessage.innerText = "Must be a whole number.";
-            event.target.parentNode.parentNode.parentNode.insertBefore(
-                errorMessage, event.target.parentNode.parentNode.nextSibling);
-            
-            validInput[1] = false;
-            return;
-        }
-
-        if (countBy < 1) {
-            event.target.classList.add('input-error');
-            errorMessage.innerText = "Must be strictly positive.";
-            event.target.parentNode.parentNode.parentNode.insertBefore(
-                errorMessage, event.target.parentNode.parentNode.nextSibling);
-
-            validInput[1] = false;
-            return;
-        }
-
-        validInput[1] = true;
-        settings.step = countBy;
-    });
-
-    const dialogContent = dialog.getElementsByClassName('modal-dialog-content')[0];
-    dialogContent.prepend(numberingSection);
-    dialogContent.prepend(enableCheckboxSection);
-
-    const close = dialog.getElementsByClassName('modal-dialog-title-close')[0];
-    close.onclick = function() {cancel()};
-
-    const cancelButton = dialog.getElementsByClassName('ln-modal-dialog-cancel')[0];
-    cancelButton.onclick = function() {cancel()};
-
-    const applyButton = dialog.getElementsByClassName('ln-modal-dialog-apply')[0];
-    applyButton.onclick = function() {apply()};
-
-    function showPopup() {
-        settings.save();
-        document.body.appendChild(dialog);
+    show() {
+        this.dialog = this.build();
+        document.body.appendChild(this.dialog);
     }
 
-    function cancel() {
-        hidePopup();
-        settings.restoreLastSave();
+    close() {
+        document.body.removeChild(this.dialog);
     }
 
-    function apply() {
-        if (!validInput.every((valid) => valid)) {
-            return;
+    addSection(title, elementGenerators) {
+        const sectionGenerator = () => {
+            const section = document.createElement('div');
+            section.classList.add('dialog-section');
+            if (title != null) {
+                section.innerHTML = '<div class="dialog-title">Numbering</div>'
+            }
+
+            for (const generator of elementGenerators) {
+                section.appendChild(generator());
+            }
+
+            return section;
         }
 
-        hidePopup();
-        settings.popLastSave();
-        settingsManager.store();
+        this.sectionGenerators.push(sectionGenerator);
     }
 
-    function hidePopup() {
-        document.body.removeChild(dialog);
+    static checkBox(labelText, isChecked, onUpdate) {
+        return () => {
+            const checkboxInput = document.createElement('div');
+            checkboxInput.classList.add('dialog-input-field');
+            checkboxInput.innerHTML = `
+                <div class="jfk-checkbox docs-material-gm-checkbox"></div>
+                <div class="label">${labelText}</div>`
+
+            const checkbox = checkboxInput.querySelector('.jfk-checkbox');
+            if (isChecked()) {
+                checkbox.classList.add('docs-material-gm-checkbox-checked');
+            } else {
+                checkbox.classList.add('docs-material-gm-checkbox-unchecked');
+            }
+
+            const onclick = () => {
+                const enabled = checkbox.classList.contains('docs-material-gm-checkbox-checked');
+                if (enabled) {
+                    // Disable
+                    checkbox.classList.remove('docs-material-gm-checkbox-checked');
+                    checkbox.classList.add('docs-material-gm-checkbox-unchecked');
+
+                    onUpdate(false);
+                } else {
+                    // Enable
+                    checkbox.classList.remove('docs-material-gm-checkbox-unchecked');
+                    checkbox.classList.add('docs-material-gm-checkbox-checked');
+
+                    onUpdate(true);
+                }
+            }
+
+            const label = checkboxInput.querySelector('.label');
+            checkbox.onclick = onclick;
+            label.onclick = onclick;
+
+            return checkboxInput;
+        }
+    }
+
+    static input(id, label, description, getValue, parseAndValidate, onUpdate) {
+        return () => {
+            const input = document.createElement('div');
+            input.classList.add('dialog-input-field');
+            input.innerHTML = `
+                <div>
+                    <label>${label}</label>
+                </div>
+                <div style="margin-left: auto;">
+                    <input type="text" class="kix-headerfooterdialog-input jfk-textinput">
+                </div>`
+
+            if (description != null) {
+                const div = input.querySelector('div');
+                const span = document.createElement('span');
+                span.style['font-size'] = '10px';
+                span.innerText = description;
+                
+                div.appendChild(document.createElement('br'));
+                div.appendChild(span);
+            }
+
+            const inputBox = input.querySelector('.jfk-textinput');
+            inputBox.value = getValue();
+
+            inputBox.addEventListener('change', (event) => {
+                const errorMessageId = `error-message-${id}`;
+
+                event.target.classList.remove('input-error');
+                const errorMessage = event.target.parentNode.parentNode.parentNode.querySelector(`#${errorMessageId}`);
+                if (errorMessage != null) {
+                    errorMessage.remove();
+                }
+
+                const value = event.target.value;
+
+                const res = parseAndValidate(value);
+
+                if (res.error) {
+                    event.target.classList.add('input-error');
+
+                    const errorMessage = document.createElement('div');
+                    errorMessage.classList.add('ln-input-error');
+                    errorMessage.id = errorMessageId;
+                    errorMessage.innerText = res.errorMessage;
+                    event.target.parentNode.parentNode.parentNode.insertBefore(
+                        errorMessage, event.target.parentNode.parentNode.nextSibling);
+                    
+                    // TODO: Do something to disable applying changes.
+                    // validInput[1] = false;
+                } else {
+                    onUpdate(res.value);
+                }
+            });
+
+            return input;
+        }
     }
 }

@@ -35,7 +35,7 @@ body {
   content: counter(ln);
   position: absolute;
   left: var(--ln-offset);
-  width: 2em;
+  width: var(--ln-width);
   text-align: right;
   float: left;
   color: #626871;

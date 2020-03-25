@@ -15,64 +15,37 @@ class LineNumberer {
         this.observer = new MutationObserver((mutationList, observer) => {
             const mutationArray = Array.from(mutationList);
 
-            // Check for added or remove lines from a paragraph or added paragraph
-            let addedCount = 0;
-            let removedCount = 0;
-            for (const mutation of mutationArray) {
-                if (mutation.target.classList.contains('kix-paragraphrenderer')) {
-                    addedCount += mutation.addedNodes.length;
-                    removedCount += mutation.removedNodes.length;
-                }
-            }
-            if (removedCount != addedCount) {
-                this.render(this.settings);
-                return;
-            }
-
             for (const mutation of mutationArray) {
                 const addedNodes = Array.from(mutation.addedNodes);
-                const removedNodes = Array.from(mutation.removedNodes);
 
-                // Check for removed paragraph
-                for (const removedNode of removedNodes) {
-                    if (removedNode.nodeType == 3) {
+                for (const addedNode of addedNodes) {
+                    if (addedNode.nodeType == 3) {
                         // Text node
                         continue;
                     }
-                    if (removedNode.classList.contains('kix-paragraphrenderer')) {
-                        this.render(this.settings);
-
-                        return;
+                    if (addedNode.classList.contains('kix-lineview') && this.shouldCountLine(addedNode)) {
+                        this.numberLine(addedNode);
                     }
-                }              
-
-                // Check for line content updates which remove line number for updated lines
-                if (addedNodes.length == removedNodes.length) {
-                    for (let i = 0; i < addedNodes.length; i++) {
-                        const addedNode = addedNodes[i];
-                        if (addedNode.nodeType == 3) {
-                            // Text node
-                            continue;
-                        }
-
-                        const match = addedNode.querySelectorAll('.kix-lineview');
-                        if (match.length > 0) {
-                            const removedNode = removedNodes[i];
-                            const old = removedNode.querySelectorAll('.kix-lineview.numbered');
-
-                            if (old.length > 0) {
-                                // Renumber line
-                                match[0].classList.add('numbered');
-                                match[0].setAttribute('ln-number', old[0].getAttribute('ln-number'));
-
-                                if (old[0].classList.contains('visible')) {
-                                    match[0].classList.add('visible');
-                                }
-                            }
+                    const lines = Array.from(addedNode.querySelectorAll('.kix-lineview'));
+                    for (const line of lines) {
+                        if (this.shouldCountLine(line)) {
+                            this.numberLine(line);
                         }
                     }
                 }
             }
+
+            const lines = Array.from(document.getElementsByClassName('numbered'));
+            for (let i = 0, ln = this.settings.start; i < lines.length; i++, ln++) {
+                const line = lines[i];
+                if (ln % this.settings.step == 0) {
+                    line.classList.add('visible');
+                } else {
+                    line.classList.remove('visible');
+                }
+            }
+
+            return;
         });
         this.observer.observe(app, config);
 
@@ -116,6 +89,8 @@ class LineNumberer {
     }
 
     async render(settings) {
+        document.body.style['counter-reset'] = `ln ${settings.start - 1}`;
+
         // Clear backlog
         let timeout;
         while (timeout = this.renderBacklog.pop()) {
@@ -180,35 +155,33 @@ class LineNumberer {
 
         for (let i = 0, ln = start; i < lines.length; i++, ln++) {
             const line = lines[i];
-            
-            // Get the offset with the parent lineview, to get the proper alignment to the edge of the document.
-            // Numbers are attached to the lineview-text-block rather than the lineview for proper vertical alignment
-            // with the text. But that messes with horizontal alignment with the edge of the document if lines are
-            // tabbed in for example, so this offset adjusts for it.
-            const textBlocks = Array.from(line.querySelectorAll(".kix-lineview-text-block"));
-            let minY1 = textBlocks[0].getBoundingClientRect().y;
-            let maxY2 = textBlocks[0].getBoundingClientRect().y + textBlocks[0].getBoundingClientRect().height;
-            // for (const textBlock of textBlocks) {
-            //     const y1 = textBlock.getBoundingClientRect().y;
-            //     const y2 = y1 + textBlock.getBoundingClientRect().height;
-            //     if (y1 < minY1) {
-            //         minY1 = y1;
-            //     }
-            //     if (y2 > maxY2) {
-            //         maxY2 = y2;
-            //     }
-            // }
-            
-            const top = minY1 + (maxY2 - minY1)/2 - line.getBoundingClientRect().y;
-
-            line.classList.add("numbered");
-            line.setAttribute("ln-number", ln);
-            line.style.setProperty("--ln-top", `${top}px`);
+            this.numberLine(line);
 
             if (ln % step == 0) {
                 line.classList.add("visible");
             }
         }
+    }
+
+    numberLine(line) {
+        line.classList.add("numbered");
+
+        // Figure out the vertical alignment to have the number aligned with the actual text rather than the lineview.
+        const textBlocks = Array.from(line.querySelectorAll(".kix-lineview-text-block"));
+        let minY1 = textBlocks[0].getBoundingClientRect().y;
+        let maxY2 = textBlocks[0].getBoundingClientRect().y + textBlocks[0].getBoundingClientRect().height;
+        // for (const textBlock of textBlocks) {
+        //     const y1 = textBlock.getBoundingClientRect().y;
+        //     const y2 = y1 + textBlock.getBoundingClientRect().height;
+        //     if (y1 < minY1) {
+        //         minY1 = y1;
+        //     }
+        //     if (y2 > maxY2) {
+        //         maxY2 = y2;
+        //     }
+        // }
+        const top = minY1 + (maxY2 - minY1)/2 - line.getBoundingClientRect().y;
+        line.style.setProperty("--ln-top", `${top}px`);
     }
 
     shouldCountLine(line) {
