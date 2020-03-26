@@ -16,6 +16,7 @@ class LineNumberer {
             const mutationArray = Array.from(mutationList);
 
             for (const mutation of mutationArray) {
+                // Special case for headers and footers
                 if (mutation.target.classList.contains('kix-lineview-content')) {
                     const line = findFirstParentWithClass(mutation.target, 'kix-lineview');
                     if (this.shouldCountLine(line)) {
@@ -117,19 +118,14 @@ class LineNumberer {
         this.resetEachPageStyle = this.generateStyles(`.kix-page.docs-page {counter-reset: ln ${this.settings.start - 1}}`);
 
         document.body.appendChild(this.resetEachPageStyle);
-
-        console.log("Injecting style", this.resetEachPageStyle);
     }
 
     async render(settings) {
-        console.log("Re-rendering", this.settings);
-
         document.body.style['counter-reset'] = `ln ${settings.start - 1}`;
 
+        this.clearResetCountEachPage();
         if (this.settings.type == numbering.EACH_PAGE) {
             this.resetCountEachPage();
-        } else {
-            this.clearResetCountEachPage();
         }
 
         this.clearLineNumbers();
@@ -221,6 +217,18 @@ class LineNumberer {
             // &nbsp; => \u00A0
             // &zwnj; => \u200C
             if (line.innerText.match(/^(\u00A0|\u200C|\s)+$/g)) {
+                return false;
+            }
+        }
+
+        if (!this.settings.numberHeaders) {
+            if (line.parentNode.parentNode.parentNode.classList.contains('kix-page-header')) {
+                return false;
+            }
+        }
+
+        if (!this.settings.numberFooters) {
+            if (line.parentNode.parentNode.parentNode.classList.contains('kix-page-bottom')) {
                 return false;
             }
         }

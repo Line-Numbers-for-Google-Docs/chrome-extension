@@ -49,9 +49,8 @@ class Settings {
             step: 1,
             type: numbering.CONTINUOUS,
             numberBlankLines: true,
-            // numberHeaderFooter: false,
-            // numberParagraphsOnly: true,
-            // lineBorder: false,
+            numberHeaders: false,
+            numberFooters: false,
         };
 
         this.updateCallbacks = [];
@@ -150,6 +149,24 @@ class Settings {
 
     set numberBlankLines(numberBlankLines) {
         this.settings.numberBlankLines = numberBlankLines;
+        this.executeUpdateCallbacks();
+    }
+
+    get numberHeaders() {
+        return this.settings.numberHeaders;
+    }
+
+    set numberHeaders(numberHeaders) {
+        this.settings.numberHeaders = numberHeaders;
+        this.executeUpdateCallbacks();
+    }
+
+    get numberFooters() {
+        return this.settings.numberFooters;
+    }
+
+    set numberFooters(numberFooters) {
+        this.settings.numberFooters = numberFooters;
         this.executeUpdateCallbacks();
     }
 }

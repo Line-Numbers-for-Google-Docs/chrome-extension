@@ -69,7 +69,15 @@ export async function injectMenu() {
         "Blank lines", 
         () => {return settings.numberBlankLines}, 
         (numberBlankLines) => {settings.numberBlankLines = numberBlankLines});
-    dialogMenu.addSection("Numbering", [numberingStyleRadioGroup, startAtInput, countByInput, blankLinesCheckbox]);
+    const headersCheckbox = DialogMenu.checkBox(
+        "Headers", 
+        () => {return settings.numberHeaders}, 
+        (numberHeaders) => {settings.numberHeaders = numberHeaders});
+    const footersCheckbox = DialogMenu.checkBox(
+        "Footers", 
+        () => {return settings.numberFooters}, 
+        (numberFooters) => {settings.numberFooters = numberFooters});
+    dialogMenu.addSection("Numbering", [numberingStyleRadioGroup, startAtInput, countByInput, blankLinesCheckbox, headersCheckbox, footersCheckbox]);
 
     injectMenuOpenButton(() => {
         settings.save();
