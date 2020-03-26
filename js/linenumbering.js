@@ -20,6 +20,8 @@ class LineNumberer {
                     const line = findFirstParentWithClass(mutation.target, 'kix-lineview');
                     if (this.shouldCountLine(line)) {
                         this.numberLine(line);
+                    } else {
+                        this.stopCountingLine(line);
                     }
 
                     continue;
@@ -224,6 +226,13 @@ class LineNumberer {
         }
 
         return true;
+    }
+
+    stopCountingLine(line) {
+        try {
+            line.classList.remove('numbered');
+            line.classList.remove('visible');
+        } finally {};
     }
     
 }
