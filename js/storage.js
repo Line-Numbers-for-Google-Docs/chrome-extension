@@ -35,6 +35,11 @@ export class SettingsManager {
     }
 }
 
+export const numbering = {
+    CONTINUOUS: 0,
+    EACH_PAGE: 1,
+}
+
 class Settings {
     constructor() {
         // Update this to change the default settings.
@@ -42,8 +47,8 @@ class Settings {
             enabled: false,
             start: 1,
             step: 1,
-            numberBlankLines: false,
-            resetCountOnNewPage: false,
+            type: numbering.CONTINUOUS,
+            numberBlankLines: true,
             // numberHeaderFooter: false,
             // numberParagraphsOnly: true,
             // lineBorder: false,
@@ -90,7 +95,8 @@ class Settings {
     }
 
     save() {
-        this.saveStack.push(JSON.parse(JSON.stringify(this.settings)));
+        const settingsCopy = JSON.parse(JSON.stringify(this.settings));
+        this.saveStack.push(settingsCopy);
     }
 
     restoreLastSave() {
@@ -126,6 +132,24 @@ class Settings {
 
     set step(step) {
         this.settings.step = step;
+        this.executeUpdateCallbacks();
+    }
+
+    get type() {
+        return this.settings.type;
+    }
+
+    set type(type) {
+        this.settings.type = type;
+        this.executeUpdateCallbacks();
+    }
+
+    get numberBlankLines() {
+        return this.settings.numberBlankLines;
+    }
+
+    set numberBlankLines(numberBlankLines) {
+        this.settings.numberBlankLines = numberBlankLines;
         this.executeUpdateCallbacks();
     }
 }

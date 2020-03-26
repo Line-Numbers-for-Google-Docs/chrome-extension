@@ -1,4 +1,4 @@
-import { SettingsManager } from "./storage.js";
+import { SettingsManager, numbering } from "./storage.js";
 import { injectMenu } from "./menu.js";
 import { findFirstParentWithClass } from "./utils.js";
 
@@ -16,6 +16,15 @@ class LineNumberer {
             const mutationArray = Array.from(mutationList);
 
             for (const mutation of mutationArray) {
+                if (mutation.target.classList.contains('kix-lineview-content')) {
+                    const line = findFirstParentWithClass(mutation.target, 'kix-lineview');
+                    if (this.shouldCountLine(line)) {
+                        this.numberLine(line);
+                    }
+
+                    continue;
+                }
+
                 const addedNodes = Array.from(mutation.addedNodes);
 
                 for (const addedNode of addedNodes) {
@@ -88,23 +97,37 @@ class LineNumberer {
         return [Array.from(document.body.querySelectorAll(".kix-lineview"))];
     }
 
+    generateStyles(rule) {
+        const style = document.createElement('style');
+        style.innerHTML = rule;
+
+        return style;
+    }
+
+    clearResetCountEachPage() {
+        if (this.resetEachPageStyle != null) {
+            this.resetEachPageStyle.remove();
+            this.resetEachPageStyle = null;
+        }
+    }
+
+    resetCountEachPage() {
+        this.resetEachPageStyle = this.generateStyles(`.kix-page.docs-page {counter-reset: ln ${this.settings.start - 1}}`);
+
+        document.body.appendChild(this.resetEachPageStyle);
+
+        console.log("Injecting style", this.resetEachPageStyle);
+    }
+
     async render(settings) {
+        console.log("Re-rendering", this.settings);
+
         document.body.style['counter-reset'] = `ln ${settings.start - 1}`;
 
-        // Clear backlog
-        let timeout;
-        while (timeout = this.renderBacklog.pop()) {
-            clearTimeout(timeout);
-        }
-
-        const time = new Date().getTime();
-
-        if (this.lastRender + 100 > time) {
-            // Too many renders, last one was less than 0.1 second ago.
-            const timeout = setTimeout(() => { this.render(this.settings) }, 100);
-            this.renderBacklog.push(timeout);
-
-            return;
+        if (this.settings.type == numbering.EACH_PAGE) {
+            this.resetCountEachPage();
+        } else {
+            this.clearResetCountEachPage();
         }
 
         this.clearLineNumbers();
@@ -112,8 +135,6 @@ class LineNumberer {
         if (settings.enabled) {
             this.number();
         }
-
-        this.lastRender = time;
     }
 
     clearLineNumbers() {
@@ -192,6 +213,15 @@ class LineNumberer {
          * 
          * @return {bool} True iff the line should count towards the numbering.
          */
+
+        if (!this.settings.numberBlankLines) {
+            // NOTE: Use `.charCodeAt(0).toString(16)` to get HEX unicode of character in string.
+            // &nbsp; => \u00A0
+            // &zwnj; => \u200C
+            if (line.innerText.match(/^(\u00A0|\u200C|\s)+$/g)) {
+                return false;
+            }
+        }
 
         return true;
     }

@@ -118,3 +118,24 @@ body {
   font-size: 11px;
   outline: none;
 }
+
+.ln-control .jfk-radiobutton .jfk-radiobutton-radio {
+  height: 16px;
+  left: 2px;
+  width: 16px;
+  border: 2px solid #5f6368;
+}
+
+.ln-control .jfk-radiobutton.jfk-radiobutton-checked .jfk-radiobutton-radio {
+  border: 2px solid #4285f4;
+}
+
+.ln-control .jfk-radiobutton.jfk-radiobutton-checked .jfk-radiobutton-radio::after {
+  background: #4285f4;
+  border: 4px solid #4285f4;
+  box-sizing: border-box;
+  height: 8px;
+  left: 2px;
+  top: 2px;
+  width: 8px;
+}

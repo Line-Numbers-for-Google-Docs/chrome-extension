@@ -1,4 +1,4 @@
-import { SettingsManager } from "./storage.js";
+import { SettingsManager, numbering } from "./storage.js";
 
 export async function injectMenu() {
     const settingsManager = await SettingsManager.getInstance();
@@ -44,7 +44,32 @@ export async function injectMenu() {
         () => {return settings.step;},
         positiveIntegerParseAndValidate,
         (countBy) => {settings.step = countBy;});
-    dialogMenu.addSection("Numbering", [startAtInput, countByInput]);
+    const numberingStyleRadioGroup = DialogMenu.radioGroup(["Continuous", "Restart Each Page"], 
+        () => {
+            switch (settings.type) {
+                case numbering.CONTINUOUS:
+                    return 0;
+                case numbering.EACH_PAGE:
+                    return 1;
+                default:
+                    return 0;
+            }
+        },
+        (selected) => {
+            switch (selected) {
+                case 0:
+                    settings.type = numbering.CONTINUOUS;
+                    break;
+                case 1:
+                    settings.type = numbering.EACH_PAGE;
+                    break;
+            }
+        });
+    const blankLinesCheckbox = DialogMenu.checkBox(
+        "Blank lines", 
+        () => {return settings.numberBlankLines}, 
+        (numberBlankLines) => {settings.numberBlankLines = numberBlankLines});
+    dialogMenu.addSection("Numbering", [numberingStyleRadioGroup, startAtInput, countByInput, blankLinesCheckbox]);
 
     injectMenuOpenButton(() => {
         settings.save();
@@ -244,6 +269,63 @@ class DialogMenu {
             });
 
             return input;
+        }
+    }
+
+    static radioGroup(labels, selected, onSelect) {
+        return () => {
+            const radioGroup = document.createElement('div');
+            radioGroup.classList.add('ln-radio-button-group-controls');
+
+            const selectedIndex = selected();
+
+            let radioButton;
+            const radios = [];
+            for (let i = 0; i < labels.length; i++) {
+                const label = labels[i];
+
+                radioButton = this.radioButton(label, () => {return (i == selectedIndex);})();
+                radioButton.style['padding-right'] = '24px';
+                
+                const radio = radioButton.querySelector('.jfk-radiobutton');
+                radio.attributes.index = i;
+                radio.onclick = () => {
+                    for (const r of radios) {
+                        r.classList.remove('jfk-radiobutton-checked');
+                    }
+                    radio.classList.add('jfk-radiobutton-checked');
+
+                    onSelect(radio.attributes.index);
+                };
+
+                radios.push(radio);
+                radioGroup.appendChild(radioButton);
+            }
+            radioButton.style.removeProperty('padding-right');
+
+            return radioGroup;
+        }
+    }
+
+    static radioButton(label, selected) {
+        return () => {
+            const radioButton = document.createElement('div');
+            radioButton.classList.add('goog-inline-block');
+            radioButton.innerHTML = `
+                <div class="ln-control goog-inline-block">
+                    <div class="jfk-radiobutton">
+                        <span class="jfk-radiobutton-radio"></span>
+                        <span class="jfk-radiobutton-label">
+                            <label for="kix-pagenumberdialog-footer">${label}</label>
+                        </span>
+                    </div>
+                </div>`
+
+            if (selected()) {
+                radioButton.querySelector('.jfk-radiobutton').classList.add('jfk-radiobutton-checked');
+            }
+
+            return radioButton;
         }
     }
 }
