@@ -1,0 +1,3 @@
+dataLayer.push({
+    'event': 'backgroundScriptLoaded',
+});

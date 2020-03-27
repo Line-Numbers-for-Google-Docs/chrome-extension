@@ -5,7 +5,7 @@
   "description": "The simplest way to add line numbers to any Google Docs document",
   "author": "Pablo Gamito",
   "version": "2.0.0",
-  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
+  "content_security_policy": "script-src 'self' https://www.googletagmanager.com https://ssl.google-analytics.com https://www.google-analytics.com; object-src 'self'",
   "icons": {
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
@@ -15,10 +15,7 @@
     "default_popup": "popup.html"
   },
   "background": {
-    "scripts": [
-      "libs/jquery.min.js",
-      "js/background.js"
-    ]
+    "page": "background.html"
   },
   "content_scripts": [
     {
