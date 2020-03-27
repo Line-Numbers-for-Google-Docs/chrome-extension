@@ -17,9 +17,10 @@ export class SettingsManager {
             chrome.storage.sync.get([this.documentId], (result) => {
                 if (result[this.documentId] != null) {
                     this._settings.set(result[this.documentId]);
+                } else {
+                    this._settings.set({});
                 }
 
-                console.log("Got settings", this._settings.settings);
                 resolve(true);
             });
         });        

@@ -119,6 +119,10 @@ body {
   outline: none;
 }
 
+#line-numbering-dialog .ln-inline-group {
+  display: flex;
+}
+
 .ln-control .jfk-radiobutton .jfk-radiobutton-radio {
   height: 16px;
   left: 2px;

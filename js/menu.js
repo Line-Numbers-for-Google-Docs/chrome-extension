@@ -77,7 +77,8 @@ export async function injectMenu() {
         "Footers", 
         () => {return settings.numberFooters}, 
         (numberFooters) => {settings.numberFooters = numberFooters});
-    dialogMenu.addSection("Numbering", [numberingStyleRadioGroup, startAtInput, countByInput, blankLinesCheckbox, headersCheckbox, footersCheckbox]);
+    const checkBoxGroup = DialogMenu.inLineGroup([blankLinesCheckbox, headersCheckbox, footersCheckbox]);
+    dialogMenu.addSection("Numbering", [numberingStyleRadioGroup, startAtInput, countByInput, checkBoxGroup]);
 
     injectMenuOpenButton(() => {
         settings.save();
@@ -312,6 +313,25 @@ class DialogMenu {
             radioButton.style.removeProperty('padding-right');
 
             return radioGroup;
+        }
+    }
+
+    static inLineGroup(itemsGenerators) {
+        return() => {
+            const group = document.createElement('div');
+            group.classList.add('ln-inline-group');
+
+            let itemWrapper;
+            for (const generator of itemsGenerators) {
+                itemWrapper = document.createElement('div');
+                itemWrapper.style.paddingRight = '15px';
+                const item = generator();
+                itemWrapper.appendChild(item);
+                group.appendChild(itemWrapper);
+            }
+            itemWrapper.style.paddingRight = 0;
+
+            return group;
         }
     }
 
