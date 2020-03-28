@@ -52,13 +52,12 @@ a,a:visited,a:hover,a:active{
 	position:relative;
   transition:0.5s color ease;
 	text-decoration:none;
-	color:#81b3d2;
-	font-size: 1.5em;
+	color:#009bff;
 }
 a:hover{
-	color:#d73444;
+	color:#2A5DB0;
 }
-a:after{
+/* a:after{
   content: "";
   transition:0.5s all ease;
   -webkit-backface-visibility:hidden;
@@ -69,13 +68,13 @@ a:after{
   bottom:-0.25em;
 }
 a:after{
-  height:0.1rem;
+  height:0.05rem;
   width:0;
-  background:#d73444;
+  background:#2A5DB0;
   left:50%;
   -webkit-transform:translateX(-50%);
           transform:translateX(-50%);
 }
 a:hover:after{
   width:100%;
-}
+} */
