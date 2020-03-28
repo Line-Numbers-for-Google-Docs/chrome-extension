@@ -38,6 +38,7 @@
   "web_accessible_resources": [
     "css/linenumbering.css",
     "js/linenumbering.js",
+    "js/metrics.js",
     "js/storage.js",
     "js/menu.js",
     "js/utils.js"

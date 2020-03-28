@@ -1,4 +1,5 @@
 import { SettingsManager, numbering } from "./storage.js";
+import { Metrics } from "./metrics.js";
 
 export async function injectMenu() {
     const settingsManager = await SettingsManager.getInstance();
@@ -15,7 +16,16 @@ export async function injectMenu() {
     
     // Enable section
     const enableCheckbox = DialogMenu.checkBox("Show line numbering", 
-        () => {return settings.enabled}, (enabled) => {settings.enabled = enabled});
+        () => {return settings.enabled}, 
+        (enabled) => {
+            settings.enabled = enabled;
+
+            if (enabled) {
+                Metrics.numberingEnabled();
+            } else {
+                Metrics.NumberingDisabled();
+            }
+        });
     dialogMenu.addSection(null, [enableCheckbox]);
 
     // Numbering section

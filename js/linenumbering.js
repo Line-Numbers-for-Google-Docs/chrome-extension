@@ -1,4 +1,5 @@
 import { SettingsManager, numbering } from "./storage.js";
+import { Metrics } from "./metrics.js";
 import { injectMenu } from "./menu.js";
 import { findFirstParentWithClass } from "./utils.js";
 
@@ -285,10 +286,14 @@ class LineNumberer {
     
 }
 
-export function main() {
+export async function main() {
     // Inject the menu into the page
     injectMenu();
 
     // Start numbering lines
-    new LineNumberer().start();
+    const ln = new LineNumberer();
+    await ln.start();
+
+    // Record document loaded
+    Metrics.documentLoaded(ln.settings.enabled);
 }
