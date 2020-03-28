@@ -45,6 +45,13 @@ body {
   transform: translateY(-50%); */
 }
 
+.kix-lineview.numbered.visible.right::before {
+  left: 0;
+  right: var(--ln-offset);
+  text-align: left;
+  float: right;
+}
+
 /* .kix-lineview.numbered.visible.right::before {
   content: counter(ln);
   position: relative;

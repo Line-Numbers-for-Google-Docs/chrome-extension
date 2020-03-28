@@ -4,14 +4,8 @@ import { findFirstParentWithClass } from "./utils.js";
 
 class LineNumberer {
     constructor() {
-        this.lastRender = 0;
-        this.renderBacklog = [];
-    }
-
-    async start() {
-        // Listen for changes to documents and number line numbering respectively
-        const app = document.getElementsByClassName('kix-appview-editor-container')[0];
-        const config = { attributes: false, childList: true, subtree: true };
+        // Used to listen for changes to documents and number line numbering respectively
+        this.observerConnected = false;
         this.observer = new MutationObserver((mutationList, observer) => {
             const mutationArray = Array.from(mutationList);
 
@@ -59,8 +53,9 @@ class LineNumberer {
 
             return;
         });
-        this.observer.observe(app, config);
+    }
 
+    async start() {
         // Initialize a SettingsProvider to be able to fetch document settings
         this.settingsManager = await SettingsManager.getInstance();
         this.settings = this.settingsManager.settings;
@@ -70,6 +65,22 @@ class LineNumberer {
 
         // Render line numbers
         this.render(this.settings);
+    }
+
+    connectMutationObserver() {
+        if (!this.observerConnected) {
+            const app = document.getElementsByClassName('kix-appview-editor-container')[0];
+            const config = { attributes: false, childList: true, subtree: true };
+            this.observer.observe(app, config);
+            this.observerConnected = true;
+        }
+    }
+
+    disconnectMutationObserver() {
+        if (this.observerConnected) {
+            this.observer.disconnect();
+            this.observerConnected = false;
+        }
     }
 
     async stop() {
@@ -131,7 +142,10 @@ class LineNumberer {
         this.clearLineNumbers();
 
         if (settings.enabled) {
+            this.connectMutationObserver();
             this.number();
+        } else {
+            this.disconnectMutationObserver();
         }
     }
 
@@ -201,6 +215,12 @@ class LineNumberer {
         // }
         const top = minY1 + (maxY2 - minY1)/2 - line.getBoundingClientRect().y;
         line.style.setProperty("--ln-top", `${top}px`);
+        
+        if (line.style.direction) {
+            if (line.style.direction == 'rtl') {
+                line.classList.add('right');
+            }
+        }
     }
 
     shouldCountLine(line) {
