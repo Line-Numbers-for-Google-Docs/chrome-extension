@@ -31,7 +31,6 @@ export class SettingsManager {
     }
 
     store() {
-        console.log("Storing settings", this.settings.settings);
         chrome.storage.sync.set({[this.documentId]: this.settings.raw}, function() {});
     }
 }

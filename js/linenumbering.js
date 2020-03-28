@@ -274,6 +274,10 @@ class LineNumberer {
             }
         }
 
+        if (line.parentNode.parentNode.classList.contains('kix-cellrenderer')) {
+            return false;
+        }
+
         return true;
     }
 
