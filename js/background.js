@@ -1,22 +1,7 @@
-// On Extension Open Ask to Reload Line Numbers on all Lines
-function refreshGDocs() {
-	chrome.tabs.query({
-		url: "*://docs.google.com/document/d/*"
-	}, function (tabs) {
-		for (var i = 0; i < tabs.length; i++) {
-			chrome.tabs.sendMessage(
-				tabs[i].id, {
-					from: 'popup',
-					subject: 'refresh'
-				},
-				function (response) {
-					console.log('GDocs Line Numbering Refreshed');
-				});
-		}
-	});
-}
-
 function reloadGDocs() {
+	/**
+	 * Reload all open Google Docs tabs. Makes sure extension scripts are injected into already open documents.
+	 */
 	chrome.tabs.query({
 		url: "*://docs.google.com/document/d/*"
 	}, function (tabs) {
@@ -26,35 +11,58 @@ function reloadGDocs() {
 	});
 }
 
-function onInstall() {
-	console.log("Extension Installed");
-	chrome.storage.local.set({
-		"enabled": true
-	}, function () {
-		console.log('enabled value set to default value');
-		reloadGDocs();
-	});
-}
+// Handle install and update events
+chrome.runtime.onInstalled.addListener((details) => {
+	const currentVersion = chrome.runtime.getManifest().version
+	const previousVersion = details.previousVersion
+	const reason = details.reason
+ 
+	console.log(`Previous Version: ${previousVersion }`)
+	console.log(`Current Version: ${currentVersion }`)
+	
+	switch (reason) {
+		case 'install':
+			console.log('Extension installed!');
 
-function onUpdate() {
-	console.log("Extension Updated");
-	reloadGDocs();
-}
+			reloadGDocs();
 
-function getVersion() {
-	var details = chrome.app.getDetails();
-	return details.version;
-}
+			const welcomePage = `https://line-numbers-for-google-docs.github.io/#/welcome`;
 
-// Check if the version has changed.
-var currVersion = getVersion();
-var prevVersion = localStorage['version']
-if (currVersion != prevVersion) {
-	// Check if we just installed this extension.
-	if (typeof prevVersion == 'undefined') {
-		onInstall();
-	} else {
-		onUpdate();
+			chrome.tabs.create({url: welcomePage}, function (tab) {
+				console.log(`New tab launched with ${welcomePage}`);
+			});
+
+			dataLayer.push({
+				event: 'installed',
+				version: currentVersion,
+				virtualPath: '/background',
+				virtualTitle: 'Background Script'
+			});
+
+			break;
+		case 'update':
+			console.log('Extension updated!');
+
+			reloadGDocs();
+
+			const versionWelcomePage = `https://line-numbers-for-google-docs.github.io/#/version/${currentVersion}/welcome`;
+
+			chrome.tabs.create({url: versionWelcomePage}, function (tab) {
+				console.log(`New tab launched with ${versionWelcomePage}`);
+			});
+
+			dataLayer.push({
+				event: 'updated',
+				version: currentVersion,
+				virtualPath: '/background',
+				virtualTitle: 'Background Script'
+			});
+
+			break;
+		case 'chrome_update':
+		case 'shared_module_update':
+		default:
+			console.warn('Unknown install events within the browser')
+			break;
 	}
-	localStorage['version'] = currVersion;
-}
+});

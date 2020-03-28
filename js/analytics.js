@@ -1,3 +1,5 @@
 dataLayer.push({
-    'event': 'backgroundScriptLoaded',
+    event: 'backgroundScriptLoaded',
+    virtualPath: '/background',
+    virtualTitle: 'Background Script'
 });
