@@ -1,7 +1,3 @@
-body {
-  counter-reset: ln;
-}
-
 /* .kix-lineview {
   counter-increment: ln;
 }*/
@@ -20,11 +16,6 @@ body {
   border: none;
 }
 
-.kix-lineview {
-  --ln-offset: -2.7em;
-  --ln-width: 2em;
-}
-
 /* Line numbering */
 
 .kix-lineview.numbered {
@@ -34,15 +25,13 @@ body {
 .kix-lineview.numbered.visible::before {
   content: counter(ln);
   position: absolute;
-  left: var(--ln-offset);
-  width: var(--ln-width);
+  left: -2.7em;
+  width: 2em;
   text-align: right;
   float: left;
   color: #626871;
   top: var(--ln-top);
   transform: translateY(-50%);
-  /* top: 50%;
-  transform: translateY(-50%); */
 }
 
 .kix-lineview.numbered.visible.right::before {
@@ -51,18 +40,6 @@ body {
   text-align: left;
   float: right;
 }
-
-/* .kix-lineview.numbered.visible.right::before {
-  content: counter(ln);
-  position: relative;
-  right: var(--ln-offset);
-  width: var(--ln-width);
-  text-align: left;
-  float: right;
-  color: #626871;
-  top: 50%;
-  transform: translateY(-50%);
-} */
 
 .linenumberhover .kix-lineview.numbered:hover::before {
   color: black;

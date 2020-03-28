@@ -126,12 +126,30 @@ class LineNumberer {
     }
 
     resetCountEachPage() {
-        this.resetEachPageStyle = this.generateStyles(`.kix-page.docs-page {counter-reset: ln ${this.settings.start - 1}}`);
-
-        document.body.appendChild(this.resetEachPageStyle);
+        if (this.resetEachPageStyle == null) {
+            this.resetEachPageStyle = this.generateStyles(`.kix-page.docs-page {counter-reset: ln ${this.settings.start - 1}}`);
+            document.body.appendChild(this.resetEachPageStyle);
+        }
     }
 
+    hideNumbers() {
+        if (this.hideNumbersStyle == null) {
+            this.hideNumbersStyle = this.generateStyles('.kix-lineview.numbered::before {display: none}');
+            document.body.appendChild(this.hideNumbersStyle);
+        }
+    }
+
+    showNumbers() {
+        if (this.hideNumbersStyle != null) {
+            this.hideNumbersStyle.remove();
+            this.hideNumbersStyle = null;
+        } 
+    }
+
+    // Try to avoid calling this as much as possible, trigger of full re-render of the line numbers.
     async render(settings) {
+        this.hideNumbers();
+
         document.body.style['counter-reset'] = `ln ${settings.start - 1}`;
 
         this.clearResetCountEachPage();
@@ -147,6 +165,8 @@ class LineNumberer {
         } else {
             this.disconnectMutationObserver();
         }
+
+        this.showNumbers();
     }
 
     clearLineNumbers() {
