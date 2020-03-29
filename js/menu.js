@@ -93,7 +93,11 @@ export async function injectMenu() {
         "Columns", 
         () => {return settings.numberColumns}, 
         (numberColumns) => {settings.numberColumns = numberColumns});
-    const checkBoxGroup2 = DialogMenu.inLineGroup([columnsCheckbox]);
+    const pageBordersCheckbox = DialogMenu.checkBox(
+        "Page Borders", 
+        () => {return settings.pageBorders}, 
+        (pageBorders) => {settings.pageBorders = pageBorders});
+    const checkBoxGroup2 = DialogMenu.inLineGroup([columnsCheckbox, pageBordersCheckbox]);
 
     dialogMenu.addSection("Numbering", [numberingStyleRadioGroup, startAtInput, countByInput, checkBoxGroup1, checkBoxGroup2]);
 

@@ -30,6 +30,8 @@ class LineNumberer {
                         // Text node
                         continue;
                     }
+
+                    // Line numbering
                     if (addedNode.classList.contains('kix-lineview') && this.shouldCountLine(addedNode)) {
                         this.numberLine(addedNode);
                     }
@@ -37,6 +39,29 @@ class LineNumberer {
                     for (const line of lines) {
                         if (this.shouldCountLine(line)) {
                             this.numberLine(line);
+                        }
+                    }
+
+                    // Borders
+                    if (this.settings.pageBorders) {
+                        if (addedNode.classList.contains('kix-paragraphrenderer')) {
+                            if (addedNode.parentNode.parentNode.classList.contains('kix-page-header')) {
+                                addedNode.classList.add('ln-document-border');
+                            } else if (addedNode.parentNode.parentNode.classList.contains('kix-page-bottom')) {
+                                addedNode.classList.add('ln-document-border');
+                            } else if (addedNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.kix-paragraphrenderer') === addedNode) {
+                                addedNode.classList.add('ln-document-border');
+                            }
+                        }
+                        const paragraphs = Array.from(addedNode.querySelectorAll('.kix-paragraphrenderer'));
+                        for (const paragraph of paragraphs) {
+                            if (paragraph.parentNode.parentNode.classList.contains('kix-page-header')) {
+                                paragraph.classList.add('ln-document-border');
+                            } else if (paragraph.parentNode.parentNode.classList.contains('kix-page-bottom')) {
+                                paragraph.classList.add('ln-document-border');
+                            } else if (paragraph.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.kix-paragraphrenderer') === paragraph) {
+                                paragraph.classList.add('ln-document-border');
+                            }
                         }
                     }
                 }
@@ -147,9 +172,46 @@ class LineNumberer {
         } 
     }
 
+    // TODO: HANDLE CASE TO ADD DOCUMENT BORDERS ON NEW PAGES IN MUTATION OBSERVER.
+    addDocumentBorders() {
+        const pages = document.body.querySelectorAll('.kix-page.docs-page');
+
+        for (let i = 0; i < pages.length; i++) {
+            const page = pages[i];
+
+            const headerFirstParagraph = page.querySelector('.kix-page-header .kix-paragraphrenderer');
+            if (headerFirstParagraph != null) {
+                headerFirstParagraph.classList.add('ln-document-border');
+            }
+
+            const contentFirstParagraph = page.querySelector('.kix-page-content-wrapper .kix-paragraphrenderer');
+            if (contentFirstParagraph != null) {
+                contentFirstParagraph.classList.add('ln-document-border');
+            }
+
+            const footerFirstParagraph = page.querySelector('.kix-page-bottom .kix-paragraphrenderer');
+            if (footerFirstParagraph != null) {
+                footerFirstParagraph.classList.add('ln-document-border');
+            }
+        }
+    }
+
+    removeDocumentBorders() {
+        const elems = document.body.getElementsByClassName('ln-document-border');
+        
+        for (let i = 0; i < elems.length; i++) {
+            const elem = elems[i];
+            elem.classList.remove('ln-document-border');
+        }
+    }
+
     // Try to avoid calling this as much as possible, trigger of full re-render of the line numbers.
     async render(settings) {
         this.hideNumbers();
+
+        if (!this.settings.pageBorders) {
+            this.removeDocumentBorders();
+        }
 
         document.body.style['counter-reset'] = `ln ${settings.start - 1}`;
 
@@ -167,6 +229,9 @@ class LineNumberer {
             this.disconnectMutationObserver();
         }
 
+        if (this.settings.pageBorders) {
+            this.addDocumentBorders();
+        }
         this.showNumbers();
     }
 

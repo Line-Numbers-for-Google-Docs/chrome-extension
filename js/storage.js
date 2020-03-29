@@ -52,6 +52,7 @@ class Settings {
             numberHeaders: false,
             numberFooters: false,
             numberColumns: true,
+            pageBorders: false,
         };
 
         this.updateCallbacks = [];
@@ -177,6 +178,15 @@ class Settings {
 
     set numberColumns(numberColumns) {
         this.settings.numberColumns = numberColumns;
+        this.executeUpdateCallbacks();
+    }
+
+    get pageBorders() {
+        return this.settings.pageBorders;
+    }
+
+    set pageBorders(pageBorders) {
+        this.settings.pageBorders = pageBorders;
         this.executeUpdateCallbacks();
     }
 }
