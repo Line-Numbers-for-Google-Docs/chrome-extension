@@ -87,8 +87,15 @@ export async function injectMenu() {
         "Footers", 
         () => {return settings.numberFooters}, 
         (numberFooters) => {settings.numberFooters = numberFooters});
-    const checkBoxGroup = DialogMenu.inLineGroup([blankLinesCheckbox, headersCheckbox, footersCheckbox]);
-    dialogMenu.addSection("Numbering", [numberingStyleRadioGroup, startAtInput, countByInput, checkBoxGroup]);
+    const checkBoxGroup1 = DialogMenu.inLineGroup([blankLinesCheckbox, headersCheckbox, footersCheckbox]);
+
+    const columnsCheckbox = DialogMenu.checkBox(
+        "Columns", 
+        () => {return settings.numberColumns}, 
+        (numberColumns) => {settings.numberColumns = numberColumns});
+    const checkBoxGroup2 = DialogMenu.inLineGroup([columnsCheckbox]);
+
+    dialogMenu.addSection("Numbering", [numberingStyleRadioGroup, startAtInput, countByInput, checkBoxGroup1, checkBoxGroup2]);
 
     injectMenuOpenButton(() => {
         settings.save();

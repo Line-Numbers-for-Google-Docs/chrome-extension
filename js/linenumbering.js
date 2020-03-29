@@ -274,6 +274,13 @@ class LineNumberer {
             }
         }
 
+        if (!this.settings.numberColumns) {
+            const column = line.parentNode.parentNode.parentNode.parentNode.parentNode.previousSibling;
+            if (column != null && column.classList.contains('kix-page-column')) {
+                return false;
+            }
+        }
+
         if (line.parentNode.parentNode.classList.contains('kix-cellrenderer')) {
             return false;
         }

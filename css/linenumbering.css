@@ -1,22 +1,6 @@
-/* .kix-lineview {
-  counter-increment: ln;
-}*/
-
-/*Adding border line*/
-.text-border .kix-page-content-wrapper .kix-paragraphrenderer::before {
-  content: '';
-  position: absolute;
-  height: 100%;
-  width: 1px;
-  left: -1em;
-  float: left;
-  border-left: 3px double black;
-}
-.kix-page-content-wrapper .kix-page-bottom .kix-paragraphrenderer::before {
-  border: none;
-}
-
+/* ************** */
 /* Line numbering */
+/* ************** */
 
 .kix-lineview.numbered {
   counter-increment: ln;
@@ -44,6 +28,28 @@
 .linenumberhover .kix-lineview.numbered:hover::before {
   color: black;
 }
+
+/* **************** */
+/* Document Borders */
+/* **************** */
+
+.ln-document-border .kix-paragraphrenderer::before {
+  content: '';
+  position: absolute;
+  height: 100vh;
+  width: 1px;
+  left: -0.5em;
+  float: left;
+  border-left: 3px double black;
+}
+
+/* .kix-page-content-wrapper .kix-page-bottom .kix-paragraphrenderer::before {
+  border: none;
+} */
+
+/* *********** */
+/* Dialog Menu */
+/* *********** */
 
 #lnMenu .goog-inline-block {
   display: flex;

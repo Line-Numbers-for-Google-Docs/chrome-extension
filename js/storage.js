@@ -51,6 +51,7 @@ class Settings {
             numberBlankLines: true,
             numberHeaders: false,
             numberFooters: false,
+            numberColumns: true,
         };
 
         this.updateCallbacks = [];
@@ -167,6 +168,15 @@ class Settings {
 
     set numberFooters(numberFooters) {
         this.settings.numberFooters = numberFooters;
+        this.executeUpdateCallbacks();
+    }
+
+    get numberColumns() {
+        return this.settings.numberColumns;
+    }
+
+    set numberColumns(numberColumns) {
+        this.settings.numberColumns = numberColumns;
         this.executeUpdateCallbacks();
     }
 }
