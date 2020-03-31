@@ -26,7 +26,7 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 			reloadGDocs();
 
-			const welcomePage = `https://line-numbers-for-google-docs.github.io/#/welcome`;
+			const welcomePage = `https://linenumbers.app/#/welcome`;
 
 			chrome.tabs.create({url: welcomePage}, function (tab) {
 				console.log(`New tab launched with ${welcomePage}`);
@@ -45,7 +45,7 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 			reloadGDocs();
 
-			const versionWelcomePage = `https://line-numbers-for-google-docs.github.io/#/version/${currentVersion}/welcome`;
+			const versionWelcomePage = `https://linenumbers.app/#/version/${currentVersion}/welcome`;
 
 			chrome.tabs.create({url: versionWelcomePage}, function (tab) {
 				console.log(`New tab launched with ${versionWelcomePage}`);

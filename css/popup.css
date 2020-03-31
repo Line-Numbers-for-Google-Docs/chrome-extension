@@ -5,41 +5,35 @@ body {
   font-family: 'Lato', sans-serif;
   font-size: 14px;
   font-weight: 300;
+  display: flex;
+  flex-direction: column;
 }
-h1 {
+
+.header {
+  display: flex;
+  align-items: center;
+}
+
+.header .title {
   font-size: 20px;
   color: rgb(76,76,76);
   font-family: 'Lato', sans-serif;
   font-weight: 700;
   margin: 0;
 }
-h1::after {
-  content: "";
-  display: block;
-  height: 1px;
-  width: 200%;
-  margin-top: -20px;
-  margin-left: -10px;
-  background: rgb(240,240,240);
-}
-h1 img {
+
+.header .logo img {
   height: 48px;
   width: 48px;
 }
-h1 .title {
-  position: relative;
-  bottom: 25px;
-  left: 5px;
-}
-h1 .subtitle {
-  position: relative;
-  bottom: 33px;
-  left: 53px;
+
+.header .subtitle {
   font-size: 12px;
   font-weight: 400;
+  margin-bottom: 5px;
 }
 
-.content {
+.footer {
   padding: 5px
 }
 
@@ -57,24 +51,48 @@ a,a:visited,a:hover,a:active{
 a:hover{
 	color:#2A5DB0;
 }
-/* a:after{
-  content: "";
-  transition:0.5s all ease;
-  -webkit-backface-visibility:hidden;
-          backface-visibility:hidden;
-  position:absolute;
+
+/* Sign in with Google */
+.google-button {
+  height: 40px;
+  border-width: 0;
+  background: white;
+  color: #737373;
+  border-radius: 5px;
+  white-space: nowrap;
+  box-shadow: 1px 1px 0px 1px rgba(0, 0, 0, 0.05);
+  -webkit-transition-property: background-color, box-shadow;
+  transition-property: background-color, box-shadow;
+  -webkit-transition-duration: 150ms;
+          transition-duration: 150ms;
+  -webkit-transition-timing-function: ease-in-out;
+          transition-timing-function: ease-in-out;
+  padding: 0;
 }
-a:after{
-  bottom:-0.25em;
+.google-button:focus, .google-button:hover {
+  box-shadow: 1px 4px 5px 1px rgba(0, 0, 0, 0.1);
 }
-a:after{
-  height:0.05rem;
-  width:0;
-  background:#2A5DB0;
-  left:50%;
-  -webkit-transform:translateX(-50%);
-          transform:translateX(-50%);
+.google-button:active {
+  background-color: #e5e5e5;
+  box-shadow: none;
+  -webkit-transition-duration: 10ms;
+          transition-duration: 10ms;
 }
-a:hover:after{
-  width:100%;
-} */
+
+.google-button__icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 8px 0 8px 8px;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+}
+
+.google-button__text {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: 'Roboto',arial,sans-serif;
+}
