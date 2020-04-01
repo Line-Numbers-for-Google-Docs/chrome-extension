@@ -6,50 +6,39 @@ dataLayer.push({
     virtualTitle: 'Extension Popup'
 });
 
-function signedIn() {
-    document.getElementById('g-signin').style.display = 'none';
-    document.getElementById('logged-in-content').style.display = 'block';
-}
+const goBackButton = document.getElementById('go-back');
+const landingSection = document.getElementById('landing');
+const checkoutSection = document.getElementById('checkout');
+const signInButton = document.getElementById('g-signin');
+const goPremiumButton = document.getElementById('go-premium');
 
-function signedOut() {
-    document.getElementById('g-signin').style.display = 'block';
-    document.getElementById('logged-in-content').style.display = 'none';
-}
-
-document.getElementById('g-signin').onclick = function () {
+signInButton.onclick = function () {
     Auth.login().then((token) => {
         console.log(token);
         signedIn();
-
-        // const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
-
-        // var xhr = new XMLHttpRequest();
-        // xhr.open('GET', url);
-        // xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        // xhr.onload = function() {
-        //     console.log('Response', xhr.responseText);
-        // };
-        // xhr.send();
     });
 };
 
-signedOut();
+document.getElementById('close-popup').onclick = function() {
+    window.close();
+}
 
-// Auth.getAuthToken().then((token) => {
-//     console.log('Singed in!', token);
-//     signedIn();
+goPremiumButton.onclick = function() {
+    landingSection.style.display = 'none';
+    checkoutSection.style.display = "";
+    goBackButton.style.display = "";
 
-//     const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
+    goBackButton.onclick = function() {
+        landingSection.style.display = "";
+        checkoutSection.style.display = "none";
+        goBackButton.style.display = "none";
+    }
+}
 
-//     var xhr = new XMLHttpRequest();
-//     xhr.open('GET', url);
-//     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-//     xhr.onload = function() {
-//         console.log('Response', xhr.responseText);
-//     };
-//     xhr.send();
+// TODO: Add ability to sign out.
 
-// }).catch(() => {
-//     console.log('Not signed in!');
-//     signedOut();
-// });
+Auth.getAuthToken().then((token) => {
+    goPremiumButton.style.display = 'block';
+}).catch(() => {
+    signInButton.style.display = 'block';
+});
