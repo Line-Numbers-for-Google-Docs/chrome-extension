@@ -269,7 +269,8 @@ input[type="radio"]:not(:checked) + label {
 }
 input[type="radio"]:not(:checked) + label:hover {
     background: rgba(17, 17, 17, 0.2);
-    color: whitesmoke;
+    background: linear-gradient(to right, rgba(78, 139, 241, 0.3), rgba(91, 134, 229, 0.3));
+    color: rgba(17, 17, 17, 0.5);
 }
 
 input[type="radio"]:checked + label {

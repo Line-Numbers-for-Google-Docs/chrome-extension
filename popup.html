@@ -54,16 +54,22 @@
   <!-- CHECKOUT - MAIN CONTENT 2 -->
   <div id="checkout" style="display: none;">
     <div id="selector">
-      <input checked type="radio" name="selection" id="radio-1">
-      <label class="left-radius" for="radio-1">
+      <input checked type="radio" name="subscription-selection" id="monthly-subscription">
+      <label class="left-radius" for="monthly-subscription">
         <span class="radio__interval">Monthly</span>
-        <span class="radio__price">$0.49<span class="light">/ Month</small></span>
+        <span class="radio__price">
+          <span id="monthly-price">$0.49</span>
+          <span>/ Month</small>
+        </span>
       </label>
 
-      <input type="radio" name="selection" id="radio-2">
-      <label class="right-radius best-value" for="radio-2">
+      <input type="radio" name="subscription-selection" id="yearly-subscription">
+      <label class="right-radius best-value" for="yearly-subscription">
         <span class="radio__interval">Yearly</span>
-        <span class="radio__price">$2.99<span class="light">/ Year</small></span>
+        <span class="radio__price">
+          <span id="yearly-price">$2.99</span>
+          <span>/ Year</small>
+        </span>
       </label>
     </div>
 
@@ -73,10 +79,13 @@
   </div>
 
   <!-- FOOTER -->
-  <div class="footer">        
+  <div class="footer">
+    <!-- TODO: Add links -->
     <a target="_blank" href="https://linenumbers.app/#/welcome">Quick Start Guide</a> | 
-    <a target="_blank" href="https://linenumbers.app/#/faq">Frequently Asked Questions</a> | <br />
+    <a target="_blank" href="https://linenumbers.app/#/faq">Frequently Asked Questions</a>
+    <br />
     <a target="_blank" href="https://linenumbers.app/#/contact">Report a Problem</a> |
+    <a target="_blank" href="https://linenumbers.app/#/privacy">Privacy Policy</a> |
     <a target="_blank" href="https://linenumbers.app/#/contact">Contact the Developer</a>
   </div>
 
