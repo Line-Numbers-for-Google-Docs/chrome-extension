@@ -5,7 +5,6 @@
   <meta charset='utf-8'>
   <!-- <link href="https://fonts.googleapis.com/css2?family=Baloo+Thambi+2" rel="stylesheet"> -->
   <link rel="stylesheet" type="text/css" href="css/popup.css">
-  <script type="text/javascript" src="js/gtm.js"></script>
 </head>
 
 <body>
@@ -90,6 +89,10 @@
   </div>
 
   <script type="module" src="js/popup.js"></script>
+
+  <!-- Load analytics after popup.js for performance reasons -->
+  <script type="text/javascript" src="js/gtm.js"></script>
+  <script type="module" src="js/popup-metrics.js"></script>
 </body>
 
 </html>

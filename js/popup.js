@@ -1,10 +1,10 @@
 import { Auth } from "./auth.js"
 
-dataLayer.push({
-    event: 'virtualPageView',
-    virtualPath: '/popup',
-    virtualTitle: 'Extension Popup'
-});
+// TODO: Rewrite all the then and catch with async await and resolve to null for failure.
+
+/**
+ * Setup
+ */
 
 const goBackButton = document.getElementById('go-back');
 const landingSection = document.getElementById('landing');
@@ -13,21 +13,38 @@ const signInButton = document.getElementById('g-signin');
 const goPremiumButton = document.getElementById('go-premium');
 const checkoutButton = document.getElementById('checkout-btn');
 
-// TODO: Add ability to sign out.
-const TOKEN_STORE = {}
-
-function login(onFailure) {
-    
-}
-
+// Figure out what to display based on user state
 (function() {
     Auth.getAuthToken().then((token) => {
+        // User signed in
         TOKEN_STORE.token = token;
-        goPremiumButton.style.display = 'block';
+
+        Auth.getSubscriptionStatus().then(subscriptionStatus => {
+            // TODO: Sync time with server
+            if (subscriptionStatus.premium && subscriptionStatus.premium_end > new Date().getTime()/1000) {
+                // TODO: Figure out what to do if user already has a subscription
+                console.log(`Subscription active until ${subscriptionStatus.premium_end}`)
+            } else {
+                goPremiumButton.style.display = 'block';
+            }
+        }).catch(() => {
+            // TODO: Handle case...
+            goPremiumButton.style.display = 'block';
+        });
     }).catch(() => {
+        // User not signed in
         signInButton.style.display = 'block';
     });
 })();
+
+/**
+ * Authentication
+ */
+
+// TODO: Add ability to sign out.
+
+// Keeps track of token to avoid having to query local storage to retrieve it
+const TOKEN_STORE = {};
 
 signInButton.onclick = function () {
     Auth.login().then((token) => {
@@ -42,6 +59,12 @@ signInButton.onclick = function () {
 document.getElementById('close-popup').onclick = function() {
     window.close();
 }
+
+/**
+ * Subscriptions
+ */
+
+// TODO: Add ability to update subscriptions.
 
 goPremiumButton.onclick = function() {
     landingSection.style.display = 'none';
@@ -108,8 +131,9 @@ checkoutButton.onclick = function() {
     checkoutUrlRequest.send();
 
     checkoutUrlRequest.onreadystatechange = (e) => {
+        // TODO: Figure out how to handle failure properly
         if (checkoutUrlRequest.readyState == 4 && checkoutUrlRequest.status == 200) {
-            if (checkoutUrlRequest.responseText){
+            if (checkoutUrlRequest.responseText) {
                 const checkOutURL = checkoutUrlRequest.responseText;
                 chrome.tabs.create({ url: checkOutURL });
             }
