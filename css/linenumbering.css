@@ -13,9 +13,10 @@
   width: 2em;
   text-align: right;
   float: left;
-  color: #626871;
   top: var(--ln-top);
   transform: translateY(-50%);
+  font-size: var(--ln-size);
+  color: var(--ln-color);
 }
 
 .kix-lineview.numbered.visible.right::before {
@@ -68,8 +69,21 @@
   width: 24px;
 }
 
+#line-numbering-dialog .modal-dialog.docs-dialog {
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+}
+
 #line-numbering-dialog .dialog-section {
   margin-bottom: 16px;
+  overflow: scroll;
+  margin-right: -24px;
+  padding-right: 24px;
+}
+
+#line-numbering-dialog .modal-dialog-buttons {
+  margin-top: 0;
 }
 
 #line-numbering-dialog .dialog-title {
@@ -78,7 +92,24 @@
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
-  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #dadce0;
+}
+
+#line-numbering-dialog .dialog-title .section-title {
+  margin: 0 8px;
+  padding-bottom: 2px;
+}
+#line-numbering-dialog .dialog-title .section-title:first-of-type  {
+  margin-left: 0;
+}
+#line-numbering-dialog .dialog-title .section-title:last-of-type  {
+  margin-right: 0;
+}
+
+#line-numbering-dialog .dialog-title .section-title.active {
+  border-spacing: 10px;
+  border-bottom: 2px solid rgb(20, 111, 228);
 }
 
 #line-numbering-dialog .dialog-checkbox-field {

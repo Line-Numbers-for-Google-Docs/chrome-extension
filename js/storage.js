@@ -53,6 +53,8 @@ class Settings {
             numberFooters: false,
             numberColumns: true,
             pageBorders: false,
+            numberSize: 10,
+            numberColor: "#626871",
         };
 
         this.updateCallbacks = [];
@@ -187,6 +189,24 @@ class Settings {
 
     set pageBorders(pageBorders) {
         this.settings.pageBorders = pageBorders;
+        this.executeUpdateCallbacks();
+    }
+
+    get numberSize() {
+        return this.settings.numberSize;
+    }
+
+    set numberSize(numberSize) {
+        this.settings.numberSize = numberSize;
+        this.executeUpdateCallbacks();
+    }
+
+    get numberColor() {
+        return this.settings.numberColor;
+    }
+
+    set numberColor(numberColor) {
+        this.settings.numberColor = numberColor;
         this.executeUpdateCallbacks();
     }
 }

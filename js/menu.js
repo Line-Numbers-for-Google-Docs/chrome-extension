@@ -13,8 +13,11 @@ export async function injectMenu() {
             settings.popLastSave();
             settingsManager.store();
         });
-    
-    // Enable section
+
+    /**
+     * Numbering section
+     */
+
     const enableCheckbox = DialogMenu.checkBox("Show line numbering", 
         () => {return settings.enabled}, 
         (enabled) => {
@@ -26,24 +29,35 @@ export async function injectMenu() {
                 Metrics.NumberingDisabled();
             }
         });
-    dialogMenu.addSection(null, [enableCheckbox]);
 
-    // Numbering section
-    const positiveIntegerParseAndValidate = (value) => {
+    const positiveNumberParseAndValidate = (value) => {
         if (isNaN(value)) {
             return {error: true, errorMessage: "Must be numeric."}
         }
 
-        const countBy = Number(value);
-        if (!Number.isInteger(countBy)) {
-            return {error: true, errorMessage: "Must be a whole number."}
-        }
+        const number = Number(value);
 
-        if (countBy < 1) {
+        if (number <= 0) {
             return {error: true, errorMessage: "Must be strictly positive."}
         }
 
-        return {error: false, value: countBy}
+        return { error: false, value: number };
+    }
+
+    const positiveIntegerParseAndValidate = (value) => {
+        const res = positiveNumberParseAndValidate(value);
+
+        if (res.error) {
+            return res;
+        }
+
+        const number = res.value;
+
+        if (!Number.isInteger(number)) {
+            return {error: true, errorMessage: "Must be a whole number."}
+        }
+
+        return {error: false, value: number}
     };
 
     const startAtInput = DialogMenu.input("start-at", "Start at", null, 
@@ -93,13 +107,44 @@ export async function injectMenu() {
         "Columns", 
         () => {return settings.numberColumns}, 
         (numberColumns) => {settings.numberColumns = numberColumns});
-    const pageBordersCheckbox = DialogMenu.checkBox(
+    const checkBoxGroup2 = DialogMenu.inLineGroup([columnsCheckbox]);
+
+    dialogMenu.addSection("Numbering", [enableCheckbox, numberingStyleRadioGroup, startAtInput, countByInput, checkBoxGroup1, checkBoxGroup2]);
+
+    /**
+     * Style Section
+     */
+
+    const hexParseAndValidate = (value) => {
+        if ((/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/g).test(value)) {
+            return {error: false, value: value}
+        } else {
+            return {error: true, errorMessage: "Invalid HEX color code."}
+        }
+    }
+
+    const numberSize = DialogMenu.input("number-size", "Size", null, 
+        () => {return settings.numberSize;},
+        positiveNumberParseAndValidate,
+        (numberSize) => {settings.numberSize = numberSize;});
+    
+    const numberColor = DialogMenu.input("number-color", "Color", null, 
+        () => {return settings.numberColor;},
+        hexParseAndValidate,
+        (numberColor) => {settings.numberColor = numberColor;});
+
+    dialogMenu.addSection("Style", [numberSize, numberColor]);
+    
+    /**
+     * Border Section
+     */
+
+    const pageBorderCheckbox = DialogMenu.checkBox(
         "Page Borders", 
         () => {return settings.pageBorders}, 
         (pageBorders) => {settings.pageBorders = pageBorders});
-    const checkBoxGroup2 = DialogMenu.inLineGroup([columnsCheckbox, pageBordersCheckbox]);
 
-    dialogMenu.addSection("Numbering", [numberingStyleRadioGroup, startAtInput, countByInput, checkBoxGroup1, checkBoxGroup2]);
+    dialogMenu.addSection("Borders", [pageBorderCheckbox]);
 
     injectMenuOpenButton(() => {
         settings.save();
@@ -139,6 +184,7 @@ class DialogMenu {
         const dialog = document.createElement('div');
         dialog.id = "line-numbering-dialog"
 
+        // TODO: Add reset button, but in Format > Paragraph Style > Borders and shading
         dialog.innerHTML = `
         <div class="modal-dialog-bg" style="opacity: 0.75; width: 100vw; height: 100vh;" aria-hidden="true"></div>
 
@@ -150,18 +196,51 @@ class DialogMenu {
             <div class="modal-dialog-content">
                 <div class="settings-content">
                 </div>
-                <div class="modal-dialog-buttons">
-                    <button class="ln-modal-dialog-cancel" name="cancel">Cancel</button>
-                    <button name="apply" class="ln-modal-dialog-apply goog-buttonset-default goog-buttonset-action">Apply</button>
-                </div>
             </div> 
+            <div class="modal-dialog-buttons">
+                <button class="ln-modal-dialog-cancel" name="cancel">Cancel</button>
+                <button name="apply" class="ln-modal-dialog-apply goog-buttonset-default goog-buttonset-action">Apply</button>
+            </div>
         </div>`;
 
         const content = dialog.querySelector('.settings-content');
 
+        const dialogSectionSelector = document.createElement('div');
+        dialogSectionSelector.classList.add('dialog-title');
+        content.appendChild(dialogSectionSelector);
+
+        const sectionsDiv = document.createElement('div');
+        content.appendChild(sectionsDiv);
+
+        const sectionTitles = [];
+        const sections = [];
         for (const generator of this.sectionGenerators) {
-            content.appendChild(generator());
+            const sectionTitle = document.createElement('span');
+            sectionTitle.classList.add('section-title');
+            sectionTitle.innerText = generator[0]; // [0] Title
+            dialogSectionSelector.appendChild(sectionTitle);
+            sectionTitles.push(sectionTitle);
+
+            const section = generator[1](); // [1] Generator function
+            section.style.display = 'none';
+            sectionsDiv.appendChild(section); 
+            sections.push(section);
+
+            console.log('Width', section.offsetWidth);
+            console.log('Height', section.offsetHeight);
+
+            sectionTitle.onclick = function () {
+                for (let i = 0; i < sections.length; i++) {
+                    sections[i].style.display = 'none';
+                    sectionTitles[i].classList.remove('active');
+                }
+
+                section.style.display = null;
+                sectionTitle.classList.add('active');
+            };
         }
+        sections[0].style.display = null;
+        sectionTitles[0].classList.add('active');
 
         const closeCross = dialog.querySelector('.modal-dialog-title-close');
         const cancelButton = dialog.querySelector('.ln-modal-dialog-cancel');
@@ -189,9 +268,6 @@ class DialogMenu {
         const sectionGenerator = () => {
             const section = document.createElement('div');
             section.classList.add('dialog-section');
-            if (title != null) {
-                section.innerHTML = '<div class="dialog-title">Numbering</div>'
-            }
 
             for (const generator of elementGenerators) {
                 section.appendChild(generator());
@@ -200,7 +276,7 @@ class DialogMenu {
             return section;
         }
 
-        this.sectionGenerators.push(sectionGenerator);
+        this.sectionGenerators.push([title, sectionGenerator]);
     }
 
     static checkBox(labelText, isChecked, onUpdate) {

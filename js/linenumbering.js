@@ -214,6 +214,8 @@ class LineNumberer {
         }
 
         document.body.style['counter-reset'] = `ln ${settings.start - 1}`;
+        document.body.style.setProperty('--ln-size', `${settings.numberSize}pt`);
+        document.body.style.setProperty('--ln-color', settings.numberColor);
 
         this.clearResetCountEachPage();
         if (this.settings.type == numbering.EACH_PAGE) {
