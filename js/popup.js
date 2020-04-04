@@ -19,30 +19,29 @@ const nonPremiumContent = document.getElementById('signed-in-non-premium-content
 const premiumContent = document.getElementById('premium-content');
 
 // Figure out what to display based on user state
-(function() {
-    Auth.getAuthToken().then((token) => {
-        // User signed in
-        TOKEN_STORE.token = token;
+const synchronizePageWithUserState = async function() {
+    signedOutContent.style.display = 'none';
+    premiumContent.style.display = 'none';
+    nonPremiumContent.style.display = 'none';
 
-        Auth.isPremium().then(isPremium => {
-            if (isPremium) {
-                // User signed in and premium
-                premiumContent.style.display = null;
-            } else {
-                // User signed in but not premium
-                nonPremiumContent.style.display = null;
-            }
-        }).catch((err) => {
-            // TODO: Handle case...
-            console.error(err);
-            goPremiumButton.style.display = null;
-        });
-    }).catch((err) => {
+    const authToken = await Auth.getAuthToken();
+
+    if (authToken == null) {
         // User not signed in
-        console.error(err);
         signedOutContent.style.display = null;
-    });
-})();
+    } else {
+        // User signed in
+        const isPremium = await Auth.isPremium();
+        if (isPremium) {
+            // User signed in and premium
+            premiumContent.style.display = null;
+        } else {
+            // User signed in but not premium
+            nonPremiumContent.style.display = null;
+        }
+    }
+}
+synchronizePageWithUserState();
 
 /**
  * Authentication
@@ -50,18 +49,15 @@ const premiumContent = document.getElementById('premium-content');
 
 // TODO: Add ability to sign out.
 
-// Keeps track of token to avoid having to query local storage to retrieve it
-const TOKEN_STORE = {};
+signInButton.onclick = async function () {
+    const auth_token = await Auth.login();
 
-signInButton.onclick = function () {
-    Auth.login().then((token) => {
-        TOKEN_STORE.token = token;
-        signInButton.style.display = 'hidden';
-        goPremiumButton.style.display = 'block';
-    }).catch(() => {
-        console.error("Failed to login...");
-        // TODO: Handle failure.
-    })
+    if (auth_token == null) {
+        // Failed to login...
+        // TODO: Handle this in some way -- show message to user.
+    } else {
+        synchronizePageWithUserState();
+    }
 };
 
 document.getElementById('close-popup').onclick = function() {
@@ -121,7 +117,7 @@ subscriptionsRequest.onreadystatechange = (e) => {
     }
 }
 
-checkoutButton.onclick = function() {
+checkoutButton.onclick = async function() {
     let subscriptionType;
     if (document.getElementById('monthly-subscription').checked) {
         subscriptionType = 'monthly';
@@ -133,8 +129,10 @@ checkoutButton.onclick = function() {
         return;
     }
 
+    const auth_token = await Auth.getAuthToken();
+
     const checkoutUrlRequest = new XMLHttpRequest();
-    const checkoutUrlRequestUrl = `https://linenumbers.app/api/v1/checkoutURL?authToken=${TOKEN_STORE.token}&subscriptionType=${subscriptionType}`;
+    const checkoutUrlRequestUrl = `https://linenumbers.app/api/v1/checkoutURL?authToken=${auth_token}&subscriptionType=${subscriptionType}`;
     checkoutUrlRequest.open("GET", checkoutUrlRequestUrl);
     checkoutUrlRequest.send();
 

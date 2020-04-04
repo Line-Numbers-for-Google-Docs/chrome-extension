@@ -1,6 +1,6 @@
 import { Auth } from './auth.js';
 
-Auth.syncSubscriptionStatus();
+Auth.queryAndCacheSubscriptionStatus();
 
 function reloadGDocs() {
 	/**

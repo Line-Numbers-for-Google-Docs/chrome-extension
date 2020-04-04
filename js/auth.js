@@ -9,13 +9,9 @@ export class Auth {
     }
 
     static queryLocalStorageForToken() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _) => {
             chrome.storage.local.get([Auth.AUTH_TOKEN_KEY], function(result) {
-                if (result[Auth.AUTH_TOKEN_KEY] == null) {
-                    reject();
-                } else {
-                    resolve(result[Auth.AUTH_TOKEN_KEY]);
-                }
+                resolve(result[Auth.AUTH_TOKEN_KEY]);
             });
         });
     }
@@ -24,23 +20,24 @@ export class Auth {
         chrome.storage.local.set({[Auth.AUTH_TOKEN_KEY]: token}, function() {});
     }
 
-    static getAuthToken(interactive = false) {
-        return new Promise((resolve, reject) => {
-            Auth.queryLocalStorageForToken().then((token) => {
-                resolve(token);
-            }).catch(() => {
-                // No authToken found in local storage, start authFlow to retrieve token
-                Auth.retrieveAuthToken(interactive).then(token => {
-                    resolve(token);
-                }).catch(() => {
-                    reject();
-                });
-            });
-        });
+    static async getAuthToken(interactive = false) {
+        let authToken = await Auth.queryLocalStorageForToken();
+
+        if (authToken == null) {
+            // No authToken found in local storage, start authFlow to retrieve token
+            authToken = await Auth.retrieveAndCacheAuthToken(interactive);
+        }
+
+        return authToken;
     }
 
-    static retrieveAuthToken(interactive = false) {
-        return new Promise((resolve, reject) => {
+    static retrieveAndCacheAuthToken(interactive = false) {
+        return new Promise((resolve, _) => {
+            if (chrome.identity == null) {
+                // In content script, can't authenticate...
+                resolve(null);
+            }
+
             const redirect_uri = chrome.identity.getRedirectURL("linenumbers");
 
             chrome.identity.launchWebAuthFlow(
@@ -49,7 +46,7 @@ export class Auth {
                     /* Extract token from redirect_url */ 
                     if (redirect_url == null) {
                         // Failed to Authenticate...
-                        reject();
+                        resolve(null);
                     } else {
                         const authToken = redirect_url.split('authToken=')[1];
                         Auth.storeTokenInLocalStorage(authToken);
@@ -60,8 +57,11 @@ export class Auth {
         });
     }
 
-    static login() {
-        return this.getAuthToken(true);
+    static async login() {
+        const authToken = await this.getAuthToken(true);
+        queryAndCacheSubscriptionStatus();
+
+        return authToken;
     }
 
     static invalidateAuthToken() {
@@ -69,13 +69,6 @@ export class Auth {
             chrome.storage.local.remove([Auth.AUTH_TOKEN_KEY], function () {
                 resolve();
             });
-        });
-    }
-
-    static syncAuthToken() {
-        this.querySubscriptionStatus().then(subscriptionStatus => {
-            storeSubscriptionStatusInLocalStorage(subscriptionStatus);
-            resolve(subscriptionStatus);
         });
     }
 
@@ -90,11 +83,7 @@ export class Auth {
     static queryLocalStorageForSubscriptionStatus() {
         return new Promise((resolve, reject) => {
             chrome.storage.local.get([Auth.SUBSCRIPTION_STATUS_KEY], function(result) {
-                if (result[Auth.SUBSCRIPTION_STATUS_KEY] == null) {
-                    reject();
-                } else {
-                    resolve(result[Auth.SUBSCRIPTION_STATUS_KEY]);
-                }
+                resolve(result[Auth.SUBSCRIPTION_STATUS_KEY]);
             });
         });
     }
@@ -103,68 +92,62 @@ export class Auth {
         chrome.storage.local.set({[Auth.SUBSCRIPTION_STATUS_KEY]: subscriptionStatus}, function() {});
     }
 
-    static getSubscriptionStatus() {
-        return new Promise((resolve, reject) => {
-            Auth.queryLocalStorageForSubscriptionStatus().then(subscriptionStatus => {
-                resolve(subscriptionStatus);
-            }).catch(() => {
-                Auth.querySubscriptionStatus().then(subscriptionStatus => {
-                    Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
-                    resolve(subscriptionStatus);
-                }).catch(() => {
-                    // Failed to query subscription status
-                    // TODO: Make sure anything that calls this handles this case properly
-                    reject("Failed to query subscription status...");
-                });
-            });
-        });
+    static async getSubscriptionStatus() {
+        let subscriptionStatus = await Auth.queryLocalStorageForSubscriptionStatus();
+
+        if (subscriptionStatus == null) {
+            // Subscription status not found in local storage, query API get retrieve it.
+            console.log("Subscription status not found locally, retrieving from API...");
+            subscriptionStatus = await Auth.queryAndCacheSubscriptionStatus();
+        }
+
+        return subscriptionStatus;
     }
 
-    static querySubscriptionStatus() {
-        return new Promise((resolve, reject) => {
-            this.getAuthToken().then((token) => {
-                const subscriptionStatusRequest = new XMLHttpRequest();
-                const subscriptionStatusRequestUrl = `https://linenumbers.app/api/v1/subscriptionStatus?authToken=${token}`;
-                subscriptionStatusRequest.open("GET", subscriptionStatusRequestUrl);
-                subscriptionStatusRequest.send();
+    static queryAndCacheSubscriptionStatus() {
+        return new Promise(async (resolve, reject) => {
+            const authToken = await Auth.getAuthToken();
 
-                subscriptionStatusRequest.onreadystatechange = (e) => {
-                    if (subscriptionStatusRequest.readyState == 4) {
-                        if (subscriptionStatusRequest.status == 200) {
-                            const subscriptionStatus = JSON.parse(subscriptionStatusRequest.responseText);
-                            resolve(subscriptionStatus);
-                        } else {
-                            // Failed to query subscription status
-                            // TODO: Make sure anything that calls this handles this case properly
-                            reject("Failed to query subscription status...");
-                            console.log("Failed!", subscriptionStatusRequest);
-                        }
-                    }
-                }
-            }).catch(() => {
-                resolve({
+            if (authToken == null) {
+                // User not logged in.
+                const subscriptionStatus = {
                     premium: false,
                     premium_end: null,
-                });
-            });
+                };
+
+                resolve(subscriptionStatus);
+                Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
+
+                return;
+            }
+
+            const subscriptionStatusRequest = new XMLHttpRequest();
+            const subscriptionStatusRequestUrl = `https://linenumbers.app/api/v1/subscriptionStatus?authToken=${token}`;
+            subscriptionStatusRequest.open("GET", subscriptionStatusRequestUrl);
+            subscriptionStatusRequest.send();
+
+            subscriptionStatusRequest.onreadystatechange = (e) => {
+                if (subscriptionStatusRequest.readyState == 4) {
+                    if (subscriptionStatusRequest.status == 200) {
+                        const subscriptionStatus = JSON.parse(subscriptionStatusRequest.responseText);
+                        resolve(subscriptionStatus);
+                        Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
+                    } else {
+                        // Failed to query subscription status
+                        // TODO: Figure out how to handles this case properly
+                        reject("Failed to query subscription status...");
+                        console.log("Failed!", subscriptionStatusRequest);
+                    }
+                }
+            }
         });
     }
 
-    // NOTE: This should be run on start up
-    static async syncSubscriptionStatus() {
-        this.querySubscriptionStatus().then(subscriptionStatus => {
-            Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
-        });
-    }
-
-    static isPremium() {
-        return new Promise((resolve, _) => {
-            this.getSubscriptionStatus().then((subscriptionStatus) => {
-                // TODO: Sync time with server
-                resolve(subscriptionStatus.premium && subscriptionStatus.premium_end > new Date().getTime() / 1000);
-            }).catch(() => {
-                resolve(false);
-            });
-        });
+    static async isPremium() {
+        const subscriptionStatus = await Auth.getSubscriptionStatus();
+        
+        return subscriptionStatus != null && 
+            subscriptionStatus.premium && 
+            subscriptionStatus.premium_end > new Date().getTime() / 1000;
     }
 }
