@@ -2,6 +2,8 @@ import { Auth } from './auth.js';
 
 Auth.queryAndCacheSubscriptionStatus();
 
+chrome.runtime.setUninstallURL("https://linenumbers.app/#/uninstall");
+
 function reloadGDocs() {
 	/**
 	 * Reload all open Google Docs tabs. Makes sure extension scripts are injected into already open documents.
