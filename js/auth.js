@@ -122,7 +122,7 @@ export class Auth {
             }
 
             const subscriptionStatusRequest = new XMLHttpRequest();
-            const subscriptionStatusRequestUrl = `https://linenumbers.app/api/v1/subscriptionStatus?authToken=${token}`;
+            const subscriptionStatusRequestUrl = `https://linenumbers.app/api/v1/subscriptionStatus?authToken=${authToken}`;
             subscriptionStatusRequest.open("GET", subscriptionStatusRequestUrl);
             subscriptionStatusRequest.send();
 
