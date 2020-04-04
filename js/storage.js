@@ -1,3 +1,5 @@
+import { Auth } from "./auth.js";
+
 export class SettingsManager {
     static async getInstance() {
         if (this.instance == null) {
@@ -14,11 +16,11 @@ export class SettingsManager {
         this.documentId = documentId;
         this._settings = new Settings();
         this.available = new Promise((resolve, reject) => {
-            chrome.storage.sync.get([this.documentId], (result) => {
+            chrome.storage.sync.get([this.documentId], async (result) => {
                 if (result[this.documentId] != null) {
-                    this._settings.set(result[this.documentId]);
+                    await this._settings.set(result[this.documentId]);
                 } else {
-                    this._settings.set({});
+                    await this._settings.set({});
                 }
 
                 resolve(true);
@@ -44,17 +46,21 @@ class Settings {
     constructor() {
         // Update this to change the default settings.
         this.defaults = {
-            enabled: false,
-            start: 1,
-            step: 1,
-            type: numbering.CONTINUOUS,
-            numberBlankLines: true,
-            numberHeaders: false,
-            numberFooters: false,
-            numberColumns: true,
-            pageBorders: false,
-            numberSize: 10,
-            numberColor: "#626871",
+            free: {
+                enabled: false,
+                start: 1,
+                step: 1,
+                type: numbering.CONTINUOUS,
+                numberBlankLines: true,
+                numberHeaders: false,
+                numberFooters: false,
+            },
+            premium: {
+                numberColumns: false,
+                pageBorders: false,
+                numberSize: 10,
+                numberColor: "#626871",
+            },    
         };
 
         this.updateCallbacks = [];
@@ -63,13 +69,26 @@ class Settings {
         this.settings = {};
     }
 
-    set(rawSettings) {
-        // Override defaults with provided settings values
-        for (const key in this.defaults) {
+    _initializeSettings(rawSettings, defaults) {
+        for (const key in defaults) {
             if (rawSettings.hasOwnProperty(key)) {
                 this.settings[key] = rawSettings[key];
             } else {
-                this.settings[key] = this.defaults[key];
+                this.settings[key] = defaults[key];
+            }
+        }
+    }
+
+    async set(rawSettings) {
+        // Override defaults with provided settings values
+        this._initializeSettings(rawSettings, this.defaults.free);
+
+        const isPremium = await Auth.isPremium();
+        if (isPremium) {
+            this._initializeSettings(rawSettings, this.defaults.premium);
+        } else {
+            for (const key in this.defaults.premium) {
+                this.settings[key] = this.defaults.premium[key];
             }
         }
     }
@@ -78,7 +97,7 @@ class Settings {
         this.updateCallbacks.push(callback);
     }
 
-    executeUpdateCallbacks() {
+    async executeUpdateCallbacks() {
         for (const callback of this.updateCallbacks) {
             callback(this);
         }
@@ -110,6 +129,8 @@ class Settings {
     popLastSave() {
         return this.saveStack.pop();
     }
+
+    // Free settings
 
     get enabled() {
         return this.settings.enabled;
@@ -174,13 +195,18 @@ class Settings {
         this.executeUpdateCallbacks();
     }
 
+    // Premium settings
+
     get numberColumns() {
         return this.settings.numberColumns;
     }
 
     set numberColumns(numberColumns) {
-        this.settings.numberColumns = numberColumns;
-        this.executeUpdateCallbacks();
+        Auth.isPremium().then(isPremium => {
+            if (!isPremium) return;
+            this.settings.numberColumns = numberColumns;
+            this.executeUpdateCallbacks();
+        });
     }
 
     get pageBorders() {
@@ -188,8 +214,11 @@ class Settings {
     }
 
     set pageBorders(pageBorders) {
-        this.settings.pageBorders = pageBorders;
-        this.executeUpdateCallbacks();
+        Auth.isPremium().then(isPremium => {
+            if (!isPremium) return;
+            this.settings.pageBorders = pageBorders;
+            this.executeUpdateCallbacks();
+        });
     }
 
     get numberSize() {
@@ -197,8 +226,11 @@ class Settings {
     }
 
     set numberSize(numberSize) {
-        this.settings.numberSize = numberSize;
-        this.executeUpdateCallbacks();
+        Auth.isPremium().then(isPremium => {
+            if (!isPremium) return;
+            this.settings.numberSize = numberSize;
+            this.executeUpdateCallbacks();
+        });
     }
 
     get numberColor() {
@@ -206,7 +238,10 @@ class Settings {
     }
 
     set numberColor(numberColor) {
-        this.settings.numberColor = numberColor;
-        this.executeUpdateCallbacks();
+        Auth.isPremium().then(isPremium => {
+            if (!isPremium) return;
+            this.settings.numberColor = numberColor;
+            this.executeUpdateCallbacks();
+        });
     }
 }

@@ -77,6 +77,12 @@ body {
     flex-direction: column;
 }
 
+.content section {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
 /* Premium Description */
 
 .premium-description {
@@ -127,9 +133,19 @@ body {
     background-color: #5a5b5f;
 }
 
+/* Ask to login text */
+.ask-to-login-message {
+    padding: 0 20px;
+    font-size: 15px;
+    color: #5a5b5f;
+    line-height: 20px;
+    text-align: center;
+}
+
 /* Sign in with Google button */
 
 .google-button {
+    cursor: pointer;
     height: 40px;
     border-width: 0;
     background: white;
@@ -144,34 +160,34 @@ body {
     -webkit-transition-timing-function: ease-in-out;
             transition-timing-function: ease-in-out;
     padding: 0;
-  }
-  .google-button:focus, .google-button:hover {
+}
+.google-button:focus, .google-button:hover {
     box-shadow: 1px 4px 5px 1px rgba(0, 0, 0, 0.1);
-  }
-  .google-button:active {
+}
+.google-button:active {
     background-color: #e5e5e5;
     box-shadow: none;
     -webkit-transition-duration: 10ms;
             transition-duration: 10ms;
-  }
-  
-  .google-button__icon {
+}
+
+.google-button__icon {
     display: inline-block;
     vertical-align: middle;
     margin: 8px 0 8px 8px;
     width: 18px;
     height: 18px;
     box-sizing: border-box;
-  }
-  
-  .google-button__text {
+}
+
+.google-button__text {
     display: inline-block;
     vertical-align: middle;
     padding: 0 24px;
     font-size: 14px;
     font-weight: bold;
     font-family: 'Roboto',arial,sans-serif;
-  }
+}
 
 /* Go Premium Button */
 
@@ -199,6 +215,36 @@ body {
     background: -webkit-linear-gradient(left, #fdc830, #f37335);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+/* Thank you for your support Message */
+
+.thank-you-message {
+    padding: 0 20px;
+    font-size: 15px;
+    color: #5a5b5f;
+    line-height: 20px;
+    text-align: center;
+}
+
+/* Manage Subscription Button */
+
+.manage-subscription-btn {
+    margin-top: 10px;
+    cursor: pointer;
+    background: transparent;
+    padding: .75rem 1rem;
+    border: none;
+    background-image: -webkit-linear-gradient(left, #4e8bf1, #5B86E5);
+    border-radius: 5px;
+}
+.manage-subscription-btn:focus {
+    outline: 0;
+    box-shadow: none!important;
+}
+.manage-subscription-btn-text {
+    color: #fff;
+    font-size: 12px;
 }
 
 /* Footer */

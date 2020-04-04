@@ -150,11 +150,21 @@ export class Auth {
         });
     }
 
-    // TODO: This should be run on start up
-    static syncSubscriptionStatus() {
+    // NOTE: This should be run on start up
+    static async syncSubscriptionStatus() {
         this.querySubscriptionStatus().then(subscriptionStatus => {
-            storeSubscriptionStatusInLocalStorage(subscriptionStatus);
-            resolve(subscriptionStatus);
+            Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
+        });
+    }
+
+    static isPremium() {
+        return new Promise((resolve, _) => {
+            this.getSubscriptionStatus().then((subscriptionStatus) => {
+                // TODO: Sync time with server
+                resolve(subscriptionStatus.premium && subscriptionStatus.premium_end > new Date().getTime() / 1000);
+            }).catch(() => {
+                resolve(false);
+            });
         });
     }
 }

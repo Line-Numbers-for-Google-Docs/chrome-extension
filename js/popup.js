@@ -13,27 +13,34 @@ const signInButton = document.getElementById('g-signin');
 const goPremiumButton = document.getElementById('go-premium');
 const checkoutButton = document.getElementById('checkout-btn');
 
+// Sections
+const signedOutContent = document.getElementById('signed-out-content');
+const nonPremiumContent = document.getElementById('signed-in-non-premium-content');
+const premiumContent = document.getElementById('premium-content');
+
 // Figure out what to display based on user state
 (function() {
     Auth.getAuthToken().then((token) => {
         // User signed in
         TOKEN_STORE.token = token;
 
-        Auth.getSubscriptionStatus().then(subscriptionStatus => {
-            // TODO: Sync time with server
-            if (subscriptionStatus.premium && subscriptionStatus.premium_end > new Date().getTime()/1000) {
-                // TODO: Figure out what to do if user already has a subscription
-                console.log(`Subscription active until ${subscriptionStatus.premium_end}`)
+        Auth.isPremium().then(isPremium => {
+            if (isPremium) {
+                // User signed in and premium
+                premiumContent.style.display = null;
             } else {
-                goPremiumButton.style.display = 'block';
+                // User signed in but not premium
+                nonPremiumContent.style.display = null;
             }
-        }).catch(() => {
+        }).catch((err) => {
             // TODO: Handle case...
-            goPremiumButton.style.display = 'block';
+            console.error(err);
+            goPremiumButton.style.display = null;
         });
-    }).catch(() => {
+    }).catch((err) => {
         // User not signed in
-        signInButton.style.display = 'block';
+        console.error(err);
+        signedOutContent.style.display = null;
     });
 })();
 
@@ -52,6 +59,7 @@ signInButton.onclick = function () {
         signInButton.style.display = 'hidden';
         goPremiumButton.style.display = 'block';
     }).catch(() => {
+        console.error("Failed to login...");
         // TODO: Handle failure.
     })
 };
@@ -131,11 +139,12 @@ checkoutButton.onclick = function() {
     checkoutUrlRequest.send();
 
     checkoutUrlRequest.onreadystatechange = (e) => {
-        // TODO: Figure out how to handle failure properly
-        if (checkoutUrlRequest.readyState == 4 && checkoutUrlRequest.status == 200) {
-            if (checkoutUrlRequest.responseText) {
+        if (checkoutUrlRequest.readyState == 4) {
+            if (checkoutUrlRequest.status == 200 && checkoutUrlRequest.responseText) {
                 const checkOutURL = checkoutUrlRequest.responseText;
                 chrome.tabs.create({ url: checkOutURL });
+            } else {
+                // TODO: Let user know checkout failed and what to do
             }
         }
     }

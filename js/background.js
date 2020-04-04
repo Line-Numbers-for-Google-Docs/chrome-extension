@@ -1,3 +1,7 @@
+import { Auth } from './auth.js';
+
+Auth.syncSubscriptionStatus();
+
 function reloadGDocs() {
 	/**
 	 * Reload all open Google Docs tabs. Makes sure extension scripts are injected into already open documents.

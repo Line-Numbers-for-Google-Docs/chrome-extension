@@ -47,6 +47,7 @@
     "js/metrics.js",
     "js/storage.js",
     "js/menu.js",
-    "js/utils.js"
+    "js/utils.js",
+    "js/auth.js"
   ]
 }

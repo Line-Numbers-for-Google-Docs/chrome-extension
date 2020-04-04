@@ -1,34 +1,12 @@
 import { SettingsManager, numbering } from "./storage.js";
 import { Metrics } from "./metrics.js";
+import { Auth } from "./auth.js";
 
 export async function injectMenu() {
     const settingsManager = await SettingsManager.getInstance();
     const settings = settingsManager.settings;
 
-    const dialogMenu = new DialogMenu("Line Numbering", 
-        () => {
-            settings.restoreLastSave();
-        },
-        () => {
-            settings.popLastSave();
-            settingsManager.store();
-        });
-
-    /**
-     * Numbering section
-     */
-
-    const enableCheckbox = DialogMenu.checkBox("Show line numbering", 
-        () => {return settings.enabled}, 
-        (enabled) => {
-            settings.enabled = enabled;
-
-            if (enabled) {
-                Metrics.numberingEnabled();
-            } else {
-                Metrics.NumberingDisabled();
-            }
-        });
+    const enabledIfPremium = async () => { return await Auth.isPremium(); };
 
     const positiveNumberParseAndValidate = (value) => {
         if (isNaN(value)) {
@@ -59,6 +37,31 @@ export async function injectMenu() {
 
         return {error: false, value: number}
     };
+
+    const dialogMenu = new DialogMenu("Line Numbering", 
+        () => {
+            settings.restoreLastSave();
+        },
+        () => {
+            settings.popLastSave();
+            settingsManager.store();
+        });
+
+    /**
+     * Numbering section
+     */
+
+    const enableCheckbox = DialogMenu.checkBox("Show line numbering", 
+        () => {return settings.enabled}, 
+        (enabled) => {
+            settings.enabled = enabled;
+
+            if (enabled) {
+                Metrics.numberingEnabled();
+            } else {
+                Metrics.NumberingDisabled();
+            }
+        });
 
     const startAtInput = DialogMenu.input("start-at", "Start at", null, 
         () => {return settings.start;},
@@ -106,7 +109,8 @@ export async function injectMenu() {
     const columnsCheckbox = DialogMenu.checkBox(
         "Columns", 
         () => {return settings.numberColumns}, 
-        (numberColumns) => {settings.numberColumns = numberColumns});
+        (numberColumns) => {settings.numberColumns = numberColumns},
+        enabledIfPremium);
     const checkBoxGroup2 = DialogMenu.inLineGroup([columnsCheckbox]);
 
     dialogMenu.addSection("Numbering", [enableCheckbox, numberingStyleRadioGroup, startAtInput, countByInput, checkBoxGroup1, checkBoxGroup2]);
@@ -126,12 +130,14 @@ export async function injectMenu() {
     const numberSize = DialogMenu.input("number-size", "Size", null, 
         () => {return settings.numberSize;},
         positiveNumberParseAndValidate,
-        (numberSize) => {settings.numberSize = numberSize;});
+        (numberSize) => {settings.numberSize = numberSize;},
+        enabledIfPremium);
     
     const numberColor = DialogMenu.input("number-color", "Color", null, 
         () => {return settings.numberColor;},
         hexParseAndValidate,
-        (numberColor) => {settings.numberColor = numberColor;});
+        (numberColor) => {settings.numberColor = numberColor;},
+        enabledIfPremium);
 
     dialogMenu.addSection("Style", [numberSize, numberColor]);
     
@@ -142,7 +148,8 @@ export async function injectMenu() {
     const pageBorderCheckbox = DialogMenu.checkBox(
         "Page Borders", 
         () => {return settings.pageBorders}, 
-        (pageBorders) => {settings.pageBorders = pageBorders});
+        (pageBorders) => {settings.pageBorders = pageBorders},
+        enabledIfPremium);
 
     dialogMenu.addSection("Borders", [pageBorderCheckbox]);
 
@@ -226,9 +233,6 @@ class DialogMenu {
             sectionsDiv.appendChild(section); 
             sections.push(section);
 
-            console.log('Width', section.offsetWidth);
-            console.log('Height', section.offsetHeight);
-
             sectionTitle.onclick = function () {
                 for (let i = 0; i < sections.length; i++) {
                     sections[i].style.display = 'none';
@@ -241,6 +245,15 @@ class DialogMenu {
         }
         sections[0].style.display = null;
         sectionTitles[0].classList.add('active');
+
+        Auth.isPremium().then(isPremium => {
+            if (!isPremium) {
+                const goPremium = document.createElement('div');
+                goPremium.classList.add('go-premium');
+                goPremium.innerHTML = "<p><a target='_blank' href='https://linenumbers.app/#/premium'>Go Premium</a> to enable all settings.</p>"
+                dialog.querySelector('.modal-dialog').appendChild(goPremium);
+            }
+        });
 
         const closeCross = dialog.querySelector('.modal-dialog-title-close');
         const cancelButton = dialog.querySelector('.ln-modal-dialog-cancel');
@@ -279,7 +292,7 @@ class DialogMenu {
         this.sectionGenerators.push([title, sectionGenerator]);
     }
 
-    static checkBox(labelText, isChecked, onUpdate) {
+    static checkBox(labelText, isChecked, onUpdate, isEnabled) {
         return () => {
             const checkboxInput = document.createElement('div');
             checkboxInput.classList.add('dialog-input-field');
@@ -294,38 +307,57 @@ class DialogMenu {
                 checkbox.classList.add('docs-material-gm-checkbox-unchecked');
             }
 
-            const onclick = () => {
-                const enabled = checkbox.classList.contains('docs-material-gm-checkbox-checked');
-                if (enabled) {
-                    // Disable
-                    checkbox.classList.remove('docs-material-gm-checkbox-checked');
-                    checkbox.classList.add('docs-material-gm-checkbox-unchecked');
-
-                    onUpdate(false);
-                } else {
-                    // Enable
-                    checkbox.classList.remove('docs-material-gm-checkbox-unchecked');
-                    checkbox.classList.add('docs-material-gm-checkbox-checked');
-
-                    onUpdate(true);
+            const registerListener = () => {
+                const onclick = () => {
+                    const enabled = checkbox.classList.contains('docs-material-gm-checkbox-checked');
+                    if (enabled) {
+                        // Disable
+                        checkbox.classList.remove('docs-material-gm-checkbox-checked');
+                        checkbox.classList.add('docs-material-gm-checkbox-unchecked');
+    
+                        onUpdate(false);
+                    } else {
+                        // Enable
+                        checkbox.classList.remove('docs-material-gm-checkbox-unchecked');
+                        checkbox.classList.add('docs-material-gm-checkbox-checked');
+    
+                        onUpdate(true);
+                    }
                 }
+    
+                const label = checkboxInput.querySelector('.label');
+                checkbox.onclick = onclick;
+                label.onclick = onclick;
             }
 
-            const label = checkboxInput.querySelector('.label');
-            checkbox.onclick = onclick;
-            label.onclick = onclick;
+            if (isEnabled == null) {
+                // Assume not enabled
+                registerListener();
+            } else {
+                // Disable until found otherwise
+                checkbox.classList.add('docs-material-gm-checkbox-disabled');
+                checkboxInput.classList.add('disabled');
+
+                isEnabled().then(isEnabled => {
+                    if (isEnabled) {
+                        registerListener();
+                        checkbox.classList.remove('docs-material-gm-checkbox-disabled');
+                        checkboxInput.classList.remove('disabled');
+                    };
+                });
+            }
 
             return checkboxInput;
         }
     }
 
-    static input(id, label, description, getValue, parseAndValidate, onUpdate) {
+    static input(id, label, description, getValue, parseAndValidate, onUpdate, isEnabled) {
         return () => {
             const input = document.createElement('div');
             input.classList.add('dialog-input-field');
             input.innerHTML = `
                 <div>
-                    <label>${label}</label>
+                    <label class="label">${label}</label>
                 </div>
                 <div style="margin-left: auto;">
                     <input type="text" class="kix-headerfooterdialog-input jfk-textinput">
@@ -344,35 +376,53 @@ class DialogMenu {
             const inputBox = input.querySelector('.jfk-textinput');
             inputBox.value = getValue();
 
-            inputBox.addEventListener('change', (event) => {
-                const errorMessageId = `error-message-${id}`;
+            const registerListener = () => {
+                inputBox.addEventListener('change', (event) => {
+                    const errorMessageId = `error-message-${id}`;
 
-                event.target.classList.remove('input-error');
-                const errorMessage = event.target.parentNode.parentNode.parentNode.querySelector(`#${errorMessageId}`);
-                if (errorMessage != null) {
-                    errorMessage.remove();
-                }
+                    event.target.classList.remove('input-error');
+                    const errorMessage = event.target.parentNode.parentNode.parentNode.querySelector(`#${errorMessageId}`);
+                    if (errorMessage != null) {
+                        errorMessage.remove();
+                    }
 
-                const value = event.target.value;
+                    const value = event.target.value;
 
-                const res = parseAndValidate(value);
+                    const res = parseAndValidate(value);
 
-                if (res.error) {
-                    event.target.classList.add('input-error');
+                    if (res.error) {
+                        event.target.classList.add('input-error');
 
-                    const errorMessage = document.createElement('div');
-                    errorMessage.classList.add('ln-input-error');
-                    errorMessage.id = errorMessageId;
-                    errorMessage.innerText = res.errorMessage;
-                    event.target.parentNode.parentNode.parentNode.insertBefore(
-                        errorMessage, event.target.parentNode.parentNode.nextSibling);
-                    
-                    // TODO: Do something to disable applying changes.
-                    // validInput[1] = false;
-                } else {
-                    onUpdate(res.value);
-                }
-            });
+                        const errorMessage = document.createElement('div');
+                        errorMessage.classList.add('ln-input-error');
+                        errorMessage.id = errorMessageId;
+                        errorMessage.innerText = res.errorMessage;
+                        event.target.parentNode.parentNode.parentNode.insertBefore(
+                            errorMessage, event.target.parentNode.parentNode.nextSibling);
+                        
+                        // TODO: Do something to disable applying changes.
+                        // validInput[1] = false;
+                    } else {
+                        onUpdate(res.value);
+                    }
+                });
+            }
+
+            if (isEnabled == null) {
+                // Assume enabled
+                registerListener();
+            } else {
+                // Disable until found otherwise
+                input.classList.add('disabled');
+                inputBox.disabled = true;
+                isEnabled().then(isEnabled => {
+                    if (isEnabled) {
+                        registerListener();
+                        input.classList.remove('disabled');
+                        inputBox.disabled = false;
+                    }
+                });
+            }
 
             return input;
         }
