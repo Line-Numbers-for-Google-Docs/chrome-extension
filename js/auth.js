@@ -42,7 +42,7 @@ export class Auth {
 
             chrome.identity.launchWebAuthFlow(
                 {'url': `https://linenumbers.app/api/v1/login?redirect_uri=${redirect_uri}`, 'interactive': interactive},
-                function(redirect_url) { 
+                async function(redirect_url) { 
                     /* Extract token from redirect_url */ 
                     if (redirect_url == null) {
                         // Failed to Authenticate...
@@ -51,6 +51,13 @@ export class Auth {
                         const authToken = redirect_url.split('authToken=')[1];
                         Auth.storeTokenInLocalStorage(authToken);
                         resolve(authToken);
+
+                        // New login, so query subscription status
+                        Auth.queryAndCacheSubscriptionStatus();
+
+                        // New login, so send Fcm token to server so that it can send messaged back.
+                        const fcmToken = await Auth.getFcmToken();
+                        Auth.trySendFcmTokenToServer(fcmToken);
                     }
                 },
             );
@@ -73,6 +80,41 @@ export class Auth {
     }
 
     /**
+     * Firebase Cloud Messaging
+     */
+
+    static FCM_TOKEN_KEY = "fcmToken";
+
+    static storeFcmToken(token) {
+        chrome.storage.local.set({[Auth.FCM_TOKEN_KEY]: token}, function() {});
+    }
+
+    static getFcmToken() {
+        return new Promise((resolve, _) => {
+            chrome.storage.local.get([Auth.FCM_TOKEN_KEY], function(result) {
+                resolve(result[Auth.FCM_TOKEN_KEY]);
+            });
+        });
+    }
+
+    static storeAndSendFcmToken(fcmToken) {
+        Auth.storeFcmToken(fcmToken);
+        Auth.trySendFcmTokenToServer(fcmToken);
+    }
+
+    static async trySendFcmTokenToServer(fcmToken) {
+        const authToken = await Auth.getAuthToken();
+        
+        // TODO: Figure out how to still send even if user isn't connected to receive push notifications
+        if (authToken != null) {
+            fetch(`https://linenumbers.app/api/v1/addFcmToken?authToken=${authToken}`, {
+                method: 'POST',
+                body: fcmToken,
+            });
+        }
+    }
+
+    /**
      * Subscription Status
      */
 
@@ -81,7 +123,7 @@ export class Auth {
     }
 
     static queryLocalStorageForSubscriptionStatus() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _) => {
             chrome.storage.local.get([Auth.SUBSCRIPTION_STATUS_KEY], function(result) {
                 resolve(result[Auth.SUBSCRIPTION_STATUS_KEY]);
             });
@@ -148,6 +190,6 @@ export class Auth {
         
         return subscriptionStatus != null && 
             subscriptionStatus.premium && 
-            subscriptionStatus.premium_end > new Date().getTime() / 1000;
+            subscriptionStatus.premium_end + 86400 > new Date().getTime() / 1000; // Add 1 day leeway.
     }
 }
