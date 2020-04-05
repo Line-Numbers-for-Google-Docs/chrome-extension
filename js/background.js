@@ -68,7 +68,7 @@ chrome.runtime.onInstalled.addListener((details) => {
 		case 'chrome_update':
 		case 'shared_module_update':
 		default:
-			console.warn('Unknown install events within the browser')
+			console.warn('Unknown install events within the browser');
 			break;
 	}
 });

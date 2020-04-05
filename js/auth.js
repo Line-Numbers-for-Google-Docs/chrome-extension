@@ -33,40 +33,14 @@ export class Auth {
 
     static retrieveAndCacheAuthToken(interactive = false) {
         return new Promise((resolve, _) => {
-            if (chrome.identity == null) {
-                // In content script, can't authenticate...
-                resolve(null);
-            }
-
-            const redirect_uri = chrome.identity.getRedirectURL("linenumbers");
-
-            chrome.identity.launchWebAuthFlow(
-                {'url': `https://linenumbers.app/api/v1/login?redirect_uri=${redirect_uri}`, 'interactive': interactive},
-                async function(redirect_url) { 
-                    /* Extract token from redirect_url */ 
-                    if (redirect_url == null) {
-                        // Failed to Authenticate...
-                        resolve(null);
-                    } else {
-                        const authToken = redirect_url.split('authToken=')[1];
-                        Auth.storeTokenInLocalStorage(authToken);
-                        resolve(authToken);
-
-                        // New login, so query subscription status
-                        Auth.queryAndCacheSubscriptionStatus();
-
-                        // New login, so send Fcm token to server so that it can send messaged back.
-                        const fcmToken = await Auth.getFcmToken();
-                        Auth.trySendFcmTokenToServer(fcmToken);
-                    }
-                },
-            );
+            chrome.runtime.sendMessage({authenticate: { interactive: interactive }}, function(response) {
+                resolve(response);
+            });
         });
     }
 
     static async login() {
         const authToken = await this.getAuthToken(true);
-        queryAndCacheSubscriptionStatus();
 
         return authToken;
     }
@@ -85,11 +59,11 @@ export class Auth {
 
     static FCM_TOKEN_KEY = "fcmToken";
 
-    static storeFcmToken(token) {
+    static storeFcmInLocalStorage(token) {
         chrome.storage.local.set({[Auth.FCM_TOKEN_KEY]: token}, function() {});
     }
 
-    static getFcmToken() {
+    static getFcmFromLocalStorage() {
         return new Promise((resolve, _) => {
             chrome.storage.local.get([Auth.FCM_TOKEN_KEY], function(result) {
                 resolve(result[Auth.FCM_TOKEN_KEY]);
@@ -98,7 +72,7 @@ export class Auth {
     }
 
     static storeAndSendFcmToken(fcmToken) {
-        Auth.storeFcmToken(fcmToken);
+        Auth.storeFcmInLocalStorage(fcmToken);
         Auth.trySendFcmTokenToServer(fcmToken);
     }
 
@@ -131,7 +105,11 @@ export class Auth {
     }
 
     static storeSubscriptionStatusInLocalStorage(subscriptionStatus) {
-        chrome.storage.local.set({[Auth.SUBSCRIPTION_STATUS_KEY]: subscriptionStatus}, function() {});
+        return new Promise((resolve, _) =>{
+            chrome.storage.local.set({[Auth.SUBSCRIPTION_STATUS_KEY]: subscriptionStatus}, function() {
+                resolve();
+            });
+        });
     }
 
     static async getSubscriptionStatus() {
@@ -157,8 +135,10 @@ export class Auth {
                     premium_end: null,
                 };
 
+                // Await to make sure we only resolve when subscription status is cached.
+                await Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
+
                 resolve(subscriptionStatus);
-                Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
 
                 return;
             }
@@ -168,12 +148,14 @@ export class Auth {
             subscriptionStatusRequest.open("GET", subscriptionStatusRequestUrl);
             subscriptionStatusRequest.send();
 
-            subscriptionStatusRequest.onreadystatechange = (e) => {
+            subscriptionStatusRequest.onreadystatechange = async (e) => {
                 if (subscriptionStatusRequest.readyState == 4) {
                     if (subscriptionStatusRequest.status == 200) {
                         const subscriptionStatus = JSON.parse(subscriptionStatusRequest.responseText);
+
+                        // Await to make sure we only resolve when subscription status is cached.
+                        await Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
                         resolve(subscriptionStatus);
-                        Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
                     } else {
                         // Failed to query subscription status
                         // TODO: Figure out how to handles this case properly
