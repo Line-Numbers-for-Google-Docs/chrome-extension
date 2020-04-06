@@ -34,14 +34,27 @@
 /* Document Borders */
 /* **************** */
 
-.ln-document-border::before {
+.ln-document-left-border::before {
   content: '';
   position: absolute;
-  height: 100vh;
+  height: 300vh;
+  top: -150vh;
   width: 1px;
   left: -0.5em;
   float: left;
-  border-right: 3px double black;
+  border-right: var(--ln-left-border-size) var(--ln-left-border-style) black;
+  z-index: 100;
+}
+
+.ln-document-right-border::after {
+  content: '';
+  position: absolute;
+  height: 300vh;
+  width: 1px;
+  right: -0.5em;
+  top: -150vh;
+  float: right;
+  border-right: var(--ln-right-border-size) var(--ln-right-border-style) black;
   z-index: 100;
 }
 
@@ -126,10 +139,32 @@
   height: 40px;
 }
 
-#line-numbering-dialog .dialog-input-field .label {
+#line-numbering-dialog .dialog-input-field .label.checkbox-label {
   cursor: pointer;
   padding-left: 6px;
   padding-top: 2px;
+}
+
+#line-numbering-dialog .dialog-dropdown-menu {
+  height: 36px;
+  padding: 8px 0;
+}
+
+#line-numbering-dialog .dialog-dropdown-menu .title {
+  margin-top: 10px;
+}
+
+#line-numbering-dialog .dialog-dropdown-menu .dropdown-control {
+  float: right;
+}
+
+#line-numbering-dialog .settings .section-title {
+  color: #202124;
+  font-family: "Google Sans",Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  margin-top: 10px;
 }
 
 #line-numbering-dialog .dialog-input-field.disabled .label {

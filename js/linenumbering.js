@@ -1,4 +1,4 @@
-import { SettingsManager, numbering } from "./storage.js";
+import { SettingsManager, numbering, borderStyle } from "./storage.js";
 import { Metrics } from "./metrics.js";
 import { injectMenu } from "./menu.js";
 import { findFirstParentWithClass } from "./utils.js";
@@ -43,24 +43,30 @@ class LineNumberer {
                     }
 
                     // Borders
-                    if (this.settings.pageBorders) {
-                        if (addedNode.classList.contains('kix-paragraphrenderer')) {
-                            if (addedNode.parentNode.parentNode.classList.contains('kix-page-header')) {
-                                addedNode.classList.add('ln-document-border');
-                            } else if (addedNode.parentNode.parentNode.classList.contains('kix-page-bottom')) {
-                                addedNode.classList.add('ln-document-border');
-                            } else if (addedNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.kix-paragraphrenderer') === addedNode) {
-                                addedNode.classList.add('ln-document-border');
+                    // TODO: Figure out how to handle tables
+                    if (addedNode.classList.contains('kix-paragraphrenderer')) {
+                        const pageContent = addedNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+                        if (pageContent.parentNode.classList.contains('kix-page-content-wrapper')) {
+                            const paragraphs = pageContent.querySelectorAll('.kix-paragraphrenderer');
+
+                            if (paragraphs[0] === addedNode) {
+                                addedNode.classList.add('ln-document-left-border');
+                            }
+                            if (paragraphs[paragraphs.length - 1] === addedNode) {
+                                addedNode.classList.add('ln-document-right-border');
                             }
                         }
-                        const paragraphs = Array.from(addedNode.querySelectorAll('.kix-paragraphrenderer'));
-                        for (const paragraph of paragraphs) {
-                            if (paragraph.parentNode.parentNode.classList.contains('kix-page-header')) {
-                                paragraph.classList.add('ln-document-border');
-                            } else if (paragraph.parentNode.parentNode.classList.contains('kix-page-bottom')) {
-                                paragraph.classList.add('ln-document-border');
-                            } else if (paragraph.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.kix-paragraphrenderer') === paragraph) {
-                                paragraph.classList.add('ln-document-border');
+                    }
+                    const paragraphs = Array.from(addedNode.querySelectorAll('.kix-paragraphrenderer'));
+                    for (const paragraph of paragraphs) {
+                        const pageContent = addedNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+                        if (pageContent.parentNode.classList.contains('kix-page-content-wrapper')) {
+                            const paragraphs = pageContent.querySelectorAll('.kix-paragraphrenderer');
+                            if (paragraphs[0] === paragraph) {
+                                paragraph.classList.add('ln-document-right-border');
+                            }
+                            if (paragraphs[paragraphs.length - 1] === paragraph) {
+                                addedNode.classList.add('ln-document-right-border');
                             }
                         }
                     }
@@ -172,36 +178,18 @@ class LineNumberer {
         } 
     }
 
-    // TODO: HANDLE CASE TO ADD DOCUMENT BORDERS ON NEW PAGES IN MUTATION OBSERVER.
+    // TODO: Figure out how to handle tables.
     addDocumentBorders() {
-        const pages = document.body.querySelectorAll('.kix-page.docs-page');
+        const pages = Array.from(document.body.querySelectorAll('.kix-page.docs-page'));
 
-        for (let i = 0; i < pages.length; i++) {
-            const page = pages[i];
+        for (const page of pages) {
+            const paragraphs = Array.from(page.querySelectorAll('.kix-paragraphrenderer'));
 
-            const headerFirstParagraph = page.querySelector('.kix-page-header .kix-paragraphrenderer');
-            if (headerFirstParagraph != null) {
-                headerFirstParagraph.classList.add('ln-document-border');
+            if (paragraphs.length > 0) {
+                paragraphs[0].classList.add('ln-document-left-border');
+                paragraphs[paragraphs.length - 1].classList.add('ln-document-right-border');
             }
 
-            const contentFirstParagraph = page.querySelector('.kix-page-content-wrapper .kix-paragraphrenderer');
-            if (contentFirstParagraph != null) {
-                contentFirstParagraph.classList.add('ln-document-border');
-            }
-
-            const footerFirstParagraph = page.querySelector('.kix-page-bottom .kix-paragraphrenderer');
-            if (footerFirstParagraph != null) {
-                footerFirstParagraph.classList.add('ln-document-border');
-            }
-        }
-    }
-
-    removeDocumentBorders() {
-        const elems = document.body.getElementsByClassName('ln-document-border');
-        
-        for (let i = 0; i < elems.length; i++) {
-            const elem = elems[i];
-            elem.classList.remove('ln-document-border');
         }
     }
 
@@ -209,13 +197,47 @@ class LineNumberer {
     async render(settings) {
         this.hideNumbers();
 
-        if (!this.settings.pageBorders) {
-            this.removeDocumentBorders();
-        }
-
         document.body.style['counter-reset'] = `ln ${settings.start - 1}`;
         document.body.style.setProperty('--ln-size', `${settings.numberSize}pt`);
-        document.body.style.setProperty('--ln-color', settings.numberColor);
+        document.body.style.setProperty('--ln-color', `#${settings.numberColor}`);
+
+        let leftBorderStyle = 'none';
+        let leftBorderSize = '1px';
+        switch (this.settings.leftBorderStyle) {
+            case borderStyle.NONE:
+                leftBorderStyle = 'none';
+                break;
+            case borderStyle.SOLID:
+                leftBorderStyle = 'solid';
+                leftBorderSize = '1px';
+                break;
+            case borderStyle.DOUBLE:
+                leftBorderStyle = 'double';
+                leftBorderSize = '3px';
+                break;
+
+        }
+        document.body.style.setProperty('--ln-left-border-style', leftBorderStyle);
+        document.body.style.setProperty('--ln-left-border-size', leftBorderSize);
+
+        let rightBorderStyle = 'none';
+        let rightBorderSize = '1px';
+        switch (this.settings.rightBorderStyle) {
+            case borderStyle.NONE:
+                rightBorderSize = 'none';
+                break;
+            case borderStyle.SOLID:
+                rightBorderStyle = 'solid';
+                rightBorderSize = '1px';
+                break;
+            case borderStyle.DOUBLE:
+                rightBorderStyle = 'double';
+                rightBorderSize = '3px';
+                break;
+
+        }
+        document.body.style.setProperty('--ln-right-border-style', rightBorderStyle);
+        document.body.style.setProperty('--ln-right-border-size', rightBorderSize);
 
         this.clearResetCountEachPage();
         if (this.settings.type == numbering.EACH_PAGE) {
@@ -231,9 +253,8 @@ class LineNumberer {
             this.disconnectMutationObserver();
         }
 
-        if (this.settings.pageBorders) {
-            this.addDocumentBorders();
-        }
+        this.addDocumentBorders();
+
         this.showNumbers();
     }
 

@@ -1,4 +1,4 @@
-import { SettingsManager, numbering } from "./storage.js";
+import { SettingsManager, numbering, borderStyle } from "./storage.js";
 import { Metrics } from "./metrics.js";
 import { Auth } from "./auth.js";
 
@@ -120,7 +120,11 @@ export async function injectMenu() {
      */
 
     const hexParseAndValidate = (value) => {
-        if ((/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/g).test(value)) {
+        if (value[0] == "#") {
+            value = value.substr(1);
+        }
+
+        if ((/^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/g).test(value)) {
             return {error: false, value: value}
         } else {
             return {error: true, errorMessage: "Invalid HEX color code."}
@@ -133,7 +137,7 @@ export async function injectMenu() {
         (numberSize) => {settings.numberSize = numberSize;},
         enabledIfPremium);
     
-    const numberColor = DialogMenu.input("number-color", "Color", null, 
+    const numberColor = DialogMenu.input("number-color", "Color", "(HEX color code)", 
         () => {return settings.numberColor;},
         hexParseAndValidate,
         (numberColor) => {settings.numberColor = numberColor;},
@@ -145,13 +149,71 @@ export async function injectMenu() {
      * Border Section
      */
 
-    const pageBorderCheckbox = DialogMenu.checkBox(
-        "Page Borders", 
-        () => {return settings.pageBorders}, 
-        (pageBorders) => {settings.pageBorders = pageBorders},
-        enabledIfPremium);
+    // const leftBorderStyle = DialogMenu.dropDown(
+    //     "Left Border Style"
+    // );
 
-    dialogMenu.addSection("Borders", [pageBorderCheckbox]);
+    // const rightBorderStyle = DialogMenu.dropDown(
+    //     "Right Border Style"
+    // );
+
+    const leftBorderSectionTitle = DialogMenu.sectionTitle("Left Border");
+    const leftBorderStyle = DialogMenu.radioGroup(["None", "Solid", "Double"], 
+    () => {
+        switch (settings.leftBorderStyle) {
+            case borderStyle.NONE:
+                return 0;
+            case borderStyle.SOLID:
+                return 1;
+            case borderStyle.DOUBLE:
+                return 2;
+            default:
+                return 0;
+        }
+    },
+    (selected) => {
+        switch (selected) {
+            case 0:
+                settings.leftBorderStyle = borderStyle.NONE;
+                break;
+            case 1:
+                settings.leftBorderStyle = borderStyle.SOLID;
+                break;
+            case 2:
+                settings.leftBorderStyle = borderStyle.DOUBLE;
+                break;
+        }
+    });
+
+    const rightBorderSectionTitle = DialogMenu.sectionTitle("Right Border");
+    const rightBorderStyle = DialogMenu.radioGroup(["None", "Solid", "Double"], 
+    () => {
+        switch (settings.rightBorderStyle) {
+            case borderStyle.NONE:
+                return 0;
+            case borderStyle.SOLID:
+                return 1;
+            case borderStyle.DOUBLE:
+                return 2;
+            default:
+                return 0;
+        }
+    },
+    (selected) => {
+        switch (selected) {
+            case 0:
+                settings.rightBorderStyle = borderStyle.NONE;
+                break;
+            case 1:
+                settings.rightBorderStyle = borderStyle.SOLID;
+                break;
+            case 2:
+                settings.rightBorderStyle = borderStyle.DOUBLE;
+                break;
+        }
+    });
+
+    dialogMenu.addSection("Borders", [leftBorderSectionTitle, leftBorderStyle, rightBorderSectionTitle, rightBorderStyle]);
 
     injectMenuOpenButton(() => {
         settings.save();
@@ -217,6 +279,7 @@ class DialogMenu {
         content.appendChild(dialogSectionSelector);
 
         const sectionsDiv = document.createElement('div');
+        sectionsDiv.classList.add('settings');
         content.appendChild(sectionsDiv);
 
         const sectionTitles = [];
@@ -298,7 +361,7 @@ class DialogMenu {
             checkboxInput.classList.add('dialog-input-field');
             checkboxInput.innerHTML = `
                 <div class="jfk-checkbox docs-material-gm-checkbox"></div>
-                <div class="label">${labelText}</div>`
+                <div class="label checkbox-label">${labelText}</div>`
 
             const checkbox = checkboxInput.querySelector('.jfk-checkbox');
             if (isChecked()) {
@@ -501,6 +564,67 @@ class DialogMenu {
             }
 
             return radioButton;
+        }
+    }
+
+    static dropDown(label) {
+        return () => {
+            const dropDown = document.createElement('div');
+            dropDown.classList.add('dialog-dropdown-menu');
+            dropDown.innerHTML = `
+                <div class="title goog-inline-block">
+                    <label>${label}</label>
+                </div>
+                <div class="dropdown-control goog-inline-block">
+                    <div class="goog-inline-block goog-flat-menu-button">
+                        <div class="goog-inline-block goog-flat-menu-button-caption" id="fsroc0:7ck" role="option" aria-selected="true" aria-setsize="3" aria-posinset="0">
+                            <div class="docs-icon goog-inline-block " aria-label="Select a line dash">
+                                <div class="docs-icon-img-container docs-icon-img docs-icon-line-type" aria-hidden="true">&nbsp;</div>
+                            </div>
+                        </div>
+                        <div class="goog-inline-block goog-flat-menu-button-dropdown" aria-hidden="true">&nbsp;</div>
+                    </div>
+                </div>
+
+                <div class="goog-menu goog-menu-vertical kix-bordersshadingdialog-menu" role="menu" aria-haspopup="true">
+                    <div class="goog-menuitem goog-option" role="menuitemcheckbox" aria-label="Line dash: Solid" aria-checked="false" id="1jezes:7hr" style="user-select: none;">
+                        <div class="goog-menuitem-content" style="user-select: none;">
+                            <div class="goog-menuitem-checkbox" style="user-select: none;"></div>
+                            <div style="user-select: none;">&nbsp;
+                                <div style="width: 50px; margin-bottom: 4px; display: inline-block; border-top: 2px solid rgb(0, 0, 0); user-select: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="goog-menuitem goog-option" role="menuitemcheckbox" aria-label="Line dash: Dot" aria-checked="false" id="1jezes:7hs" style="user-select: none;">
+                        <div class="goog-menuitem-content" style="user-select: none;">
+                            <div class="goog-menuitem-checkbox" style="user-select: none;"></div>
+                            <div style="user-select: none;">&nbsp;
+                                <div style="width: 50px; margin-bottom: 4px; display: inline-block; border-top: 2px dotted rgb(0, 0, 0); user-select: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="goog-menuitem goog-option" role="menuitemcheckbox" aria-label="Line dash: Dash" aria-checked="false" id="1jezes:7ht" style="user-select: none;">
+                        <div class="goog-menuitem-content" style="user-select: none;">
+                            <div class="goog-menuitem-checkbox" style="user-select: none;"></div>
+                            <div style="user-select: none;">&nbsp;
+                                <div style="width: 50px; margin-bottom: 4px; display: inline-block; border-top: 2px dashed rgb(0, 0, 0); user-select: none;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return dropDown;
+        }
+    }
+
+    static sectionTitle(title) {
+        return () => {
+            const sectionTitle = document.createElement('div');
+            sectionTitle.classList.add('section-title');
+            sectionTitle.innerText = title;
+
+            return sectionTitle;
         }
     }
 }

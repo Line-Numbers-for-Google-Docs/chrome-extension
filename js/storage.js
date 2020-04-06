@@ -42,6 +42,12 @@ export const numbering = {
     EACH_PAGE: 1,
 }
 
+export const borderStyle = {
+    NONE: 0,
+    SOLID: 1,
+    DOUBLE: 2,
+}
+
 class Settings {
     constructor() {
         // Update this to change the default settings.
@@ -57,9 +63,10 @@ class Settings {
             },
             premium: {
                 numberColumns: false,
-                pageBorders: false,
                 numberSize: 10,
-                numberColor: "#626871",
+                numberColor: "626871",
+                leftBorderStyle: borderStyle.NONE,
+                rightBorderStyle: borderStyle.NONE,
             },    
         };
 
@@ -108,7 +115,8 @@ class Settings {
         const rawSettings = {};
 
         for (const key in this.settings) {
-            if (this.settings[key] != this.defaults[key]) {
+            if (this.settings[key] != this.defaults.free[key] && 
+                this.settings[key] != this.defaults.premium[key]) {
                 rawSettings[key] = this.settings[key];
             }
         }
@@ -209,18 +217,6 @@ class Settings {
         });
     }
 
-    get pageBorders() {
-        return this.settings.pageBorders;
-    }
-
-    set pageBorders(pageBorders) {
-        Auth.isPremium().then(isPremium => {
-            if (!isPremium) return;
-            this.settings.pageBorders = pageBorders;
-            this.executeUpdateCallbacks();
-        });
-    }
-
     get numberSize() {
         return this.settings.numberSize;
     }
@@ -241,6 +237,30 @@ class Settings {
         Auth.isPremium().then(isPremium => {
             if (!isPremium) return;
             this.settings.numberColor = numberColor;
+            this.executeUpdateCallbacks();
+        });
+    }
+
+    get leftBorderStyle() {
+        return this.settings.leftBorderStyle;
+    }
+
+    set leftBorderStyle(leftBorderStyle) {
+        Auth.isPremium().then(isPremium => {
+            if (!isPremium) return;
+            this.settings.leftBorderStyle = leftBorderStyle;
+            this.executeUpdateCallbacks();
+        });
+    }
+
+    get rightBorderStyle() {
+        return this.settings.rightBorderStyle;
+    }
+
+    set rightBorderStyle(rightBorderStyle) {
+        Auth.isPremium().then(isPremium => {
+            if (!isPremium) return;
+            this.settings.rightBorderStyle = rightBorderStyle;
             this.executeUpdateCallbacks();
         });
     }
