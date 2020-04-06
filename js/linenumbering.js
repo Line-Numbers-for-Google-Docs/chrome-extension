@@ -45,16 +45,21 @@ class LineNumberer {
                     // Borders
                     // TODO: Figure out how to handle tables
                     if (addedNode.classList.contains('kix-paragraphrenderer')) {
-                        const pageContent = addedNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
-                        if (pageContent.parentNode.classList.contains('kix-page-content-wrapper')) {
-                            const paragraphs = pageContent.querySelectorAll('.kix-paragraphrenderer');
+                        try {
+                            const pageContent = addedNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
 
-                            if (paragraphs[0] === addedNode) {
-                                addedNode.classList.add('ln-document-left-border');
+                            if (pageContent.parentNode.classList.contains('kix-page-content-wrapper')) {
+                                const paragraphs = pageContent.querySelectorAll('.kix-paragraphrenderer');
+    
+                                if (paragraphs[0] === addedNode) {
+                                    addedNode.classList.add('ln-document-left-border');
+                                }
+                                if (paragraphs[paragraphs.length - 1] === addedNode) {
+                                    addedNode.classList.add('ln-document-right-border');
+                                }
                             }
-                            if (paragraphs[paragraphs.length - 1] === addedNode) {
-                                addedNode.classList.add('ln-document-right-border');
-                            }
+                        } catch(e) {
+                            console.warn(e);
                         }
                     }
                     const paragraphs = Array.from(addedNode.querySelectorAll('.kix-paragraphrenderer'));
