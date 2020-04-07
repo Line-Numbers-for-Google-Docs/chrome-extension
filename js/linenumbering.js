@@ -9,6 +9,7 @@ class LineNumberer {
         this.observerConnected = false;
         this.observer = new MutationObserver((mutationList, observer) => {
             const mutationArray = Array.from(mutationList);
+            console.log(mutationArray);
 
             for (const mutation of mutationArray) {
                 // Special case for headers and footers
@@ -21,6 +22,24 @@ class LineNumberer {
                     }
 
                     continue;
+                }
+
+                const removedNodes = Array.from(mutation.removedNodes);
+                for (const removedNode of removedNodes) {
+                    // Borders
+                    try {
+                        if (removedNode.classList.contains('ln-document-right-border')) {
+                            const pageContent = mutation.target;
+                            const paragraphs = pageContent.querySelectorAll('.kix-paragraphrenderer');
+                            paragraphs[paragraphs.length - 1].classList.add('ln-document-right-border');
+                        }
+                        if (removedNode.classList.contains('ln-document-left-border')) {
+                            const pageContent = mutation.target;
+                            pageContent.querySelector('.kix-paragraphrenderer').classList.add('ln-document-left-border');
+                        }
+                    } catch(e) {
+                        console.warn(e);
+                    }
                 }
 
                 const addedNodes = Array.from(mutation.addedNodes);
@@ -43,38 +62,37 @@ class LineNumberer {
                     }
 
                     // Borders
-                    // TODO: Figure out how to handle tables
+                    if (addedNode.classList.contains('ln-document-right-border')) {
+                        addedNode.classList.remove('ln-document-right-border');
+                    }
+                    if (addedNode.classList.contains('ln-document-left-border')) {
+                        addedNode.classList.remove('ln-document-left-border');
+                    }
+
                     if (addedNode.classList.contains('kix-paragraphrenderer')) {
                         try {
                             const pageContent = addedNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
 
                             if (pageContent.parentNode.classList.contains('kix-page-content-wrapper')) {
                                 const paragraphs = pageContent.querySelectorAll('.kix-paragraphrenderer');
-    
-                                if (paragraphs[0] === addedNode) {
-                                    addedNode.classList.add('ln-document-left-border');
-                                }
-                                if (paragraphs[paragraphs.length - 1] === addedNode) {
-                                    addedNode.classList.add('ln-document-right-border');
-                                }
+                                
+                                paragraphs[0].classList.add('ln-document-left-border');
+                                paragraphs[paragraphs.length - 1].classList.add('ln-document-right-border');
                             }
                         } catch(e) {
                             console.warn(e);
                         }
                     }
-                    const paragraphs = Array.from(addedNode.querySelectorAll('.kix-paragraphrenderer'));
-                    for (const paragraph of paragraphs) {
-                        const pageContent = addedNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
-                        if (pageContent.parentNode.classList.contains('kix-page-content-wrapper')) {
-                            const paragraphs = pageContent.querySelectorAll('.kix-paragraphrenderer');
-                            if (paragraphs[0] === paragraph) {
-                                paragraph.classList.add('ln-document-right-border');
-                            }
-                            if (paragraphs[paragraphs.length - 1] === paragraph) {
-                                addedNode.classList.add('ln-document-right-border');
-                            }
-                        }
-                    }
+                    // NOTE: This block might not actually be required...
+                    // const paragraphs = Array.from(addedNode.querySelectorAll('.kix-paragraphrenderer'));
+                    // for (const paragraph of paragraphs) {
+                    //     const pageContent = addedNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+                    //     if (pageContent.parentNode.classList.contains('kix-page-content-wrapper')) {
+                    //         const paragraphs = pageContent.querySelectorAll('.kix-paragraphrenderer');
+                    //         paragraphs[0].classList.add('ln-document-right-border');
+                    //         paragraphs[paragraphs.length - 1].classList.add('ln-document-right-border');
+                    //     }
+                    // }
                 }
             }
 
