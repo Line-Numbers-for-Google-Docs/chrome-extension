@@ -1,7 +1,5 @@
 import { Auth } from "./auth.js"
 
-// TODO: Rewrite all the then and catch with async await and resolve to null for failure.
-
 /**
  * Setup
  */
@@ -59,6 +57,7 @@ const synchronizePageWithUserState = async function() {
                     }
                 } else {
                     // Failed to get active subscription status
+                    console.error("Failed to get subscription status");
                     // TODO: Handle
                 }
             });
@@ -94,8 +93,6 @@ document.getElementById('close-popup').onclick = function() {
 /**
  * Subscriptions
  */
-
-// TODO: Add ability to update subscriptions.
 
 goPremiumButton.onclick = function() {
     landingSection.style.display = 'none';
@@ -156,26 +153,42 @@ currencyRequest.onreadystatechange = (e) => {
     }
 }
 
+const checkoutButtonText = document.getElementsByClassName('checkout-btn-text')[0];
 checkoutButton.onclick = async function() {
     let amount = Number(amountInput.value);
 
+    const text = checkoutButtonText.innerText;
+    checkoutButtonText.innerText = 'Loading...';
+
     const authToken = await Auth.getAuthToken();
 
-    const checkoutUrlRequest = new XMLHttpRequest();
-    const checkoutUrlRequestUrl = `https://linenumbers.app/api/v1/checkoutURL?authToken=${authToken}&amount=${amount}`;
-    checkoutUrlRequest.open("GET", checkoutUrlRequestUrl);
-    checkoutUrlRequest.send();
+    const handleFailure = (message = "Failed!", timeout = 1000) => {
+        checkoutButton.style['background-image'] = '-webkit-linear-gradient(left, #FA6E6E, #F06B6C)';
+        checkoutButtonText.innerText = message;
 
-    checkoutUrlRequest.onreadystatechange = (e) => {
-        if (checkoutUrlRequest.readyState == 4) {
-            if (checkoutUrlRequest.status == 200 && checkoutUrlRequest.responseText) {
-                const checkOutURL = checkoutUrlRequest.responseText;
-                chrome.tabs.create({ url: checkOutURL });
-            } else {
-                console.error("Failed to get checkout url", e);
-                // TODO: Let user know checkout failed and what to do
-            }
+        setTimeout(() => {
+            checkoutButton.style['background-image'] = null;
+            checkoutButtonText.innerText = text;
+        }, timeout);
+    }
+    
+    try {
+        const response = await fetch(`https://linenumbers.app/api/v1/checkoutURL?authToken=${authToken}&amount=${amount}`, { method : "GET" });
+
+        const success = response.ok;
+        if (success) {
+            // Successfully fetched checkout url
+            const checkOutURL = await response.text();
+            chrome.tabs.create({ url: checkOutURL }).then(() => {
+                checkoutButtonText.innerText = text;
+            });
+        } else {
+            // Failed to get checkout url...
+            handleFailure();
         }
+    } catch (e) {
+        console.warn(e);
+        handleFailure("Failed!\nCheck your internet connection!", 2000);
     }
 }
 

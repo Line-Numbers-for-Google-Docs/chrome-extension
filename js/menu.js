@@ -255,7 +255,7 @@ class DialogMenu {
         const dialog = document.createElement('div');
         dialog.id = "line-numbering-dialog"
 
-        // TODO: Add reset button, but in Format > Paragraph Style > Borders and shading
+        // TODO: Add reset button, like in Format > Paragraph Style > Borders and shading
         dialog.innerHTML = `
         <div class="modal-dialog-bg" style="opacity: 0.75; width: 100vw; height: 100vh;" aria-hidden="true"></div>
 
@@ -465,7 +465,7 @@ class DialogMenu {
                         event.target.parentNode.parentNode.parentNode.insertBefore(
                             errorMessage, event.target.parentNode.parentNode.nextSibling);
                         
-                        // TODO: Do something to disable applying changes.
+                        // TODO: Do something to disable applying changes if not all inputs have been validated
                         // validInput[1] = false;
                     } else {
                         onUpdate(res.value);

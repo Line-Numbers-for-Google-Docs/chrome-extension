@@ -200,7 +200,6 @@ class LineNumberer {
         } 
     }
 
-    // TODO: Figure out how to handle tables.
     addDocumentBorders() {
         const pages = Array.from(document.body.querySelectorAll('.kix-page.docs-page'));
 

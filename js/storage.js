@@ -25,15 +25,26 @@ export class SettingsManager {
 
                 resolve(true);
             });
-        });        
+        });
     }
 
     get settings() {
         return this._settings;
     }
 
-    store() {
-        chrome.storage.sync.set({[this.documentId]: this.settings.raw}, function() {});
+    async store() {
+        const rawSettings = this.settings.raw;
+        chrome.storage.sync.set({[this.documentId]: rawSettings}, function() {});
+
+        // Send update to server
+        const authToken = await Auth.getAuthToken();
+        if (authToken != null) {
+            fetch(`https://linenumbers.app/api/v1/storeSettings?document=${this.documentId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(rawSettings),
+            });
+        }
     }
 }
 
@@ -106,7 +117,11 @@ class Settings {
 
     async executeUpdateCallbacks() {
         for (const callback of this.updateCallbacks) {
-            callback(this);
+            try {
+                callback(this);
+            } catch(e) {
+                console.error("Failed to execute callback", e);
+            }
         }
     }
 
