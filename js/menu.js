@@ -313,7 +313,7 @@ class DialogMenu {
             if (!isPremium) {
                 const goPremium = document.createElement('div');
                 goPremium.classList.add('go-premium');
-                goPremium.innerHTML = "<p><a target='_blank' href='https://linenumbers.app/#/premium'>Go Premium</a> to enable all settings.</p>"
+                goPremium.innerHTML = "<p><a target='_blank' href='https://linenumbers.app/#/premium'>Go Premium</a> to enable all settings <br />and support development and costs!</p>"
                 dialog.querySelector('.modal-dialog').appendChild(goPremium);
             }
         });

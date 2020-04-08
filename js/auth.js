@@ -79,7 +79,7 @@ export class Auth {
     static async trySendFcmTokenToServer(fcmToken) {
         const authToken = await Auth.getAuthToken();
         
-        // TODO: Figure out how to still send even if user isn't connected to receive push notifications
+        // TODO: Figure out how to still send even if user isn't connected so that non logged in user can also receive push notifications
         if (authToken != null) {
             fetch(`https://linenumbers.app/api/v1/addFcmToken?authToken=${authToken}`, {
                 method: 'POST',

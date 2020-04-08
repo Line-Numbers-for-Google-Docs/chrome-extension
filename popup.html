@@ -44,14 +44,18 @@
           Line Numbers is active, but premium features are disabled!
         </div>
 
+        <div class="support-description">
+          Please consider going <a target="_blank" href="https://linenumbers.app/#/premium">Premium</a> to support the development and <a target="_blank" href="https://linenumbers.app/#/premium#costs">running costs</a> of this extension.
+        </div>
+
         <div class="premium-description">
-          Go premium now to unlock the following:
+          Go Premium now and unlock the following:
           <ul>
             <!-- TODO: Make these features link to a description of them on the website -->
-            <li><a target="_blank" href="">Enable on more than 3 documents at once</a></li>
-            <li><a target="_blank" href="">Advanced settings for more customization</a></li>
-            <li><a target="_blank" href="">Sync your settings across all your devices</a></li>
-            <li><a target="_blank" href="">Sync line numbering on shared documents</a></li>
+            <!-- <li><a target="_blank" href="">Enable on more than 3 documents at once</a></li> -->
+            <li><a target="_blank" href="https://linenumbers.app/#/premium">Advanced settings for more customization</a></li>
+            <li><a target="_blank" href="https://linenumbers.app/#/premium">Sync your settings across all your devices</a></li>
+            <li><a target="_blank" href="https://linenumbers.app/#/premium">Sync line numbering on shared documents</a></li>
           </ul>
         </div>
 
@@ -70,7 +74,7 @@
           <p>Thank you for your support!</p>
         </div>
         
-        <button id="manage-subscription" class="manage-subscription-btn">
+        <button id="manage-subscription-btn" class="manage-subscription-btn">
           <span class="manage-subscription-btn-text">Manage Subscription</span>
         </button>
       </section>
@@ -80,30 +84,81 @@
   </div>
 
   <!-- CHECKOUT - MAIN CONTENT 2 -->
-  <div id="checkout" style="display: none;">
-    <div id="selector">
-      <input checked type="radio" name="subscription-selection" id="monthly-subscription">
-      <label class="left-radius" for="monthly-subscription">
-        <span class="radio__interval">Monthly</span>
-        <span class="radio__price">
-          <span id="monthly-price">$0.49</span>
-          <span>/ Month</small>
-        </span>
-      </label>
+  <div id="checkout" class="vertical-flex" style="display: none;">
+    <div class="checkout-title">
+      Help support the development <br />and costs of the extension!
+    </div>
 
-      <input type="radio" name="subscription-selection" id="yearly-subscription">
-      <label class="right-radius best-value" for="yearly-subscription">
-        <span class="radio__interval">Yearly</span>
-        <span class="radio__price">
-          <span id="yearly-price">$2.99</span>
-          <span>/ Year</small>
-        </span>
-      </label>
+    <div class="checkout-question">
+      How much do you want to pay per year?
+    </div>
+
+    <div class="amount-selection">
+      <span class="currency">$</span>
+      <input id="subscription-amount" class="amount-input" name="amount" value="5" min="1" max="1000" type="number">
+      <span>/ year</span>
     </div>
 
     <button id="checkout-btn" class="checkout-btn">
-      <span class="checkout-btn-text">Check Out</span>
+      <span class="checkout-btn-text">Support</span>
     </button>
+    <div class="checkout-subscript">
+      You can cancel and/or update your subscription at anytime!
+    </div>
+  </div>
+
+  <!-- MANAGE SUBSCRIPTION - MAIN CONTENT 3 -->
+  <div id="manage-subscription" style="display: none;">
+
+    <div id="active-subscription-content" class="vertical-flex" style="display: none;">
+      <div class="checkout-title">
+        Thank you for your support!
+      </div>
+
+      <div class="checkout-question">
+        Want to change how much you pay for your premium subscription?
+      </div>
+
+      <div class="checkout-subscript" style="margin-bottom: 15px;">
+        This change will only be apply to your next billing cycle.
+      </div>
+
+      <div class="amount-selection" style="padding-top: 0;">
+        <span class="currency">$</span>
+        <input id="subscription-update-amount" class="amount-input" name="amount" value="5" min="1" max="1000" type="number">
+        <span>/ year</span>
+      </div>
+
+      <button id="update-subscription-btn" class="update-subscription-btn">
+        <span class="update-subscription-btn-text">Update Subscription</span>
+      </button>
+
+      <hr />
+
+      <div class="checkout-question">
+        Looking to cancel your subscription?
+      </div>
+      <div class="checkout-subscript" style="margin-bottom: 15px;">
+        You will still have access to all the premium features until the end of your current subscription's term.
+      </div>
+      <button id="cancel-subscription-btn" class="cancel-subscription-btn">
+        <span class="cancel-subscription-btn-text">Cancel Subscription</span>
+      </button>
+    </div>
+
+    <div id="canceled-subscription-content" class="vertical-flex" style="display: none;">
+      <div class="checkout-question">
+        Restart your subscription now?
+      </div>
+      <div class="checkout-subscript" style="margin-bottom: 15px;">
+        Your subscription has been canceled.<br />
+        Restart it now to make sure you don't loose your premium features!
+      </div>
+      <button id="restart-subscription-btn" class="restart-subscription-btn">
+        <span class="restart-subscription-btn-text">Restart Subscription</span>
+      </button>
+    </div>
+    
   </div>
 
   <!-- FOOTER -->
