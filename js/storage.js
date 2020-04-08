@@ -15,15 +15,85 @@ export class SettingsManager {
     constructor(documentId) {
         this.documentId = documentId;
         this._settings = new Settings();
-        this.available = new Promise((resolve, reject) => {
-            chrome.storage.sync.get([this.documentId], async (result) => {
-                if (result[this.documentId] != null) {
-                    await this._settings.set(result[this.documentId]);
-                } else {
-                    await this._settings.set({});
+        this.available = new Promise(async (resolve, _) => {
+            
+            const localSettings = await this.retrieveSettingsFromLocalStorage();
+            const serverSettings = await this.retrieveSettingsFromServer();
+
+            if (localSettings == null && serverSettings == null) {
+                await this._settings.set({});
+                resolve(true);
+
+                return;
+            }
+
+            if (localSettings == null) {
+                await this._settings.set(serverSettings);
+                resolve(true);
+
+                this.storeLocally(serverSettings);
+
+                return;
+            }
+
+            if (serverSettings == null) {
+                if (localSettings.lastUpdated == null) {
+                    localSettings.lastUpdated = Date.now();
+                    this.storeLocally(localSettings);
                 }
 
+                await this._settings.set(localSettings);
                 resolve(true);
+
+                this.storeOnServer(localSettings);
+
+                return;
+            }
+
+            if ( localSettings.lastUpdated > serverSettings.lastUpdated ) {
+                await this._settings.set(localSettings);
+                resolve(true);
+
+                this.storeOnServer(localSettings);
+            } else {
+                await this._settings.set(serverSettings);
+                resolve(true);
+
+                this.storeLocally(serverSettings);
+            }
+        });
+    }
+
+    async retrieveSettingsFromServer() {
+        const authToken = await Auth.getAuthToken();
+
+        if (!authToken) {
+            return null;
+        }
+
+        try {
+            const response = await fetch(`https://linenumbers.app/api/v1/documentSettings?authToken=${authToken}&document=${this.documentId}`, { 
+                method: 'GET',
+            });
+
+            if (response.ok) {
+                // Successfully retrieved from server
+                const rawSettings = await response.json();
+
+                return rawSettings;
+            }
+        } catch(e) {
+            console.warn(e);
+            return null;
+        }
+
+        return null;
+    }
+
+    retrieveSettingsFromLocalStorage() {
+        return new Promise((resolve, _) => {
+            chrome.storage.sync.get([this.documentId], result => {
+                resolve(result[this.documentId]);
             });
         });
     }
@@ -32,19 +102,28 @@ export class SettingsManager {
         return this._settings;
     }
 
-    async store() {
-        const rawSettings = this.settings.raw;
+    storeLocally(rawSettings) {
         chrome.storage.sync.set({[this.documentId]: rawSettings}, function() {});
+    }
 
+    async storeOnServer(rawSettings) {
         // Send update to server
         const authToken = await Auth.getAuthToken();
         if (authToken != null) {
-            fetch(`https://linenumbers.app/api/v1/storeSettings?document=${this.documentId}`, {
+            fetch(`https://linenumbers.app/api/v1/documentSettings?document=${this.documentId}&authToken=${authToken}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(rawSettings),
             });
         }
+    }
+
+    async store() {
+        const rawSettings = this.settings.raw;
+        rawSettings.lastUpdated = Date.now();
+
+        this.storeLocally(rawSettings);
+        this.storeOnServer(rawSettings);
     }
 }
 
