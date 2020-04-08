@@ -9,7 +9,6 @@ class LineNumberer {
         this.observerConnected = false;
         this.observer = new MutationObserver((mutationList, observer) => {
             const mutationArray = Array.from(mutationList);
-            console.log(mutationArray);
 
             for (const mutation of mutationArray) {
                 // Special case for headers and footers

@@ -43,14 +43,14 @@ messaging.getToken().then((currentToken) => {
     console.log('An error occurred while retrieving token. ', err);
 });
 
-  // Callback fired if Instance ID token is updated.
-messaging.onTokenRefresh(() => {
-    messaging.getToken().then((refreshedToken) => {
-        console.log('Token refreshed.');
-        // Send Instance ID token to app server.
-        Auth.storeAndSendFcmToken(refreshedToken);
-    }).catch((err) => {
-        console.log('Unable to retrieve refreshed token ', err);
-        showToken('Unable to retrieve refreshed token ', err);
-    });
-});
+// // Callback fired if Instance ID token is updated.
+// messaging.onTokenRefresh(() => {
+//     messaging.getToken().then((refreshedToken) => {
+//         console.log('Token refreshed.');
+//         // Send Instance ID token to app server.
+//         Auth.storeAndSendFcmToken(refreshedToken);
+//     }).catch((err) => {
+//         console.log('Unable to retrieve refreshed token ', err);
+//         showToken('Unable to retrieve refreshed token ', err);
+//     });
+// });

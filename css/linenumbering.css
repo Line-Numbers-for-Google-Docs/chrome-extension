@@ -167,7 +167,7 @@
   margin-top: 10px;
 }
 
-#line-numbering-dialog .dialog-input-field.disabled .label {
+#line-numbering-dialog .dialog-input-field.disabled .label, #line-numbering-dialog .dialog-input-field.disabled span {
   opacity: .38;
   cursor: default;
 }
@@ -205,6 +205,11 @@
   left: 2px;
   width: 16px;
   border: 2px solid #5f6368;
+}
+
+.ln-control .jfk-radiobutton-disabled .jfk-radiobutton-radio {
+  border-color: #5f6368;
+  opacity: .38;
 }
 
 .ln-control .jfk-radiobutton.jfk-radiobutton-checked .jfk-radiobutton-radio {

@@ -183,7 +183,8 @@ export async function injectMenu() {
                 settings.leftBorderStyle = borderStyle.DOUBLE;
                 break;
         }
-    });
+    },
+    enabledIfPremium);
 
     const rightBorderSectionTitle = DialogMenu.sectionTitle("Right Border");
     const rightBorderStyle = DialogMenu.radioGroup(["None", "Solid", "Double"], 
@@ -211,7 +212,8 @@ export async function injectMenu() {
                 settings.rightBorderStyle = borderStyle.DOUBLE;
                 break;
         }
-    });
+    },
+    enabledIfPremium);
 
     dialogMenu.addSection("Borders", [leftBorderSectionTitle, leftBorderStyle, rightBorderSectionTitle, rightBorderStyle]);
 
@@ -491,7 +493,7 @@ class DialogMenu {
         }
     }
 
-    static radioGroup(labels, selected, onSelect) {
+    static radioGroup(labels, selected, onSelect, isEnabled) {
         return () => {
             const radioGroup = document.createElement('div');
             radioGroup.classList.add('ln-radio-button-group-controls');
@@ -508,14 +510,29 @@ class DialogMenu {
                 
                 const radio = radioButton.querySelector('.jfk-radiobutton');
                 radio.attributes.index = i;
-                radio.onclick = () => {
-                    for (const r of radios) {
-                        r.classList.remove('jfk-radiobutton-checked');
-                    }
-                    radio.classList.add('jfk-radiobutton-checked');
 
-                    onSelect(radio.attributes.index);
+                const registerListener = () => {
+                    radio.onclick = () => {
+                        for (const r of radios) {
+                            r.classList.remove('jfk-radiobutton-checked');
+                        }
+                        radio.classList.add('jfk-radiobutton-checked');
+
+                        onSelect(radio.attributes.index);
+                    };
                 };
+
+                if (isEnabled == null) {
+                    registerListener();
+                } else {
+                    radio.classList.add('jfk-radiobutton-disabled');
+                    isEnabled().then(enabled => {
+                        if (enabled) {
+                            registerListener();
+                            radio.classList.remove('jfk-radiobutton-disabled');
+                        }
+                    });
+                }
 
                 radios.push(radio);
                 radioGroup.appendChild(radioButton);
