@@ -33,11 +33,6 @@
     "https://docs.google.com/document/d/*",
     "http://docs.google.com/document/d/*",
     "https://linenumbers.app/*",
-    "*://*.linenumbers.app/*",
-    "https://accounts.google.com/*",
-    "https://www.googleapis.com/*",
-    "*://*.google.com/*",
-    "tabs",
     "storage",
     "identity",
     "notifications"

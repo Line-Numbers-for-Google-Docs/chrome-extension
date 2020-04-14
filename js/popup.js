@@ -32,6 +32,8 @@ const synchronizePageWithUserState = async function() {
 
     const authToken = await Auth.getAuthToken();
 
+    document.getElementById('loading').style.display = 'none';
+
     if (authToken == null) {
         // User not signed in
         signedOutContent.style.display = null;
