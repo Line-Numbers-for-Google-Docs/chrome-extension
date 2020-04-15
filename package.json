@@ -1,0 +1,30 @@
+{
+  "name": "line-numbers-for-gdocs-chrome-extension",
+  "version": "1.0.0",
+  "description": "A Chrome extension to add line numbers to Google Docs documents",
+  "main": "index.js",
+  "repository": "git@github.com:Line-Numbers-for-Google-Docs/chrome-extension.git",
+  "author": "Pablo Gamito <pablo@gamito.me>",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-livereload": "^4.0.2",
+    "gulp-replace": "^1.0.0"
+  },
+  "scripts": {
+    "dev": "NODE_ENV='development' gulp dev",
+    "build": "NODE_ENV='production' gulp build"
+  },
+  "dependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/polyfill": "^7.8.7",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/register": "^7.9.0"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ]
+  }
+}

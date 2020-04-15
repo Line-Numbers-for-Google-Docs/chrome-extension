@@ -72,7 +72,7 @@ export class SettingsManager {
         }
 
         try {
-            const response = await fetch(`https://linenumbers.app/api/v1/documentSettings?authToken=${authToken}&document=${this.documentId}`, { 
+            const response = await fetch(`${ENV.API_URL}/documentSettings?authToken=${authToken}&document=${this.documentId}`, { 
                 method: 'GET',
             });
 
@@ -110,7 +110,7 @@ export class SettingsManager {
         // Send update to server
         const authToken = await Auth.getAuthToken();
         if (authToken != null) {
-            fetch(`https://linenumbers.app/api/v1/documentSettings?document=${this.documentId}&authToken=${authToken}`, {
+            fetch(`${ENV.API_URL}/documentSettings?document=${this.documentId}&authToken=${authToken}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(rawSettings),

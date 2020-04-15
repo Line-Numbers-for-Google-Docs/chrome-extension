@@ -81,7 +81,7 @@ export class Auth {
         
         // TODO: Figure out how to still send even if user isn't connected so that non logged in user can also receive push notifications
         if (authToken != null) {
-            fetch(`https://linenumbers.app/api/v1/addFcmToken?authToken=${authToken}`, {
+            fetch(`${ENV.API_URL}/addFcmToken?authToken=${authToken}`, {
                 method: 'POST',
                 body: fcmToken,
             });
@@ -144,7 +144,7 @@ export class Auth {
             }
 
             const subscriptionStatusRequest = new XMLHttpRequest();
-            const subscriptionStatusRequestUrl = `https://linenumbers.app/api/v1/subscriptionStatus?authToken=${authToken}`;
+            const subscriptionStatusRequestUrl = `${ENV.API_URL}/subscriptionStatus?authToken=${authToken}`;
             subscriptionStatusRequest.open("GET", subscriptionStatusRequestUrl);
             subscriptionStatusRequest.send();
 

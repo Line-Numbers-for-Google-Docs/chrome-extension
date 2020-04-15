@@ -7,7 +7,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         const redirect_uri = chrome.identity.getRedirectURL("linenumbers");
 
         const authFlowConfig = {
-            'url': `https://linenumbers.app/api/v1/login?redirect_uri=${redirect_uri}`, 
+            'url': `${ENV.API_URL}/login?redirect_uri=${redirect_uri}`, 
             'interactive': interactive
         }
 

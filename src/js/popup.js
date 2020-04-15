@@ -44,7 +44,7 @@ const synchronizePageWithUserState = async function() {
             // User signed in and premium
             premiumContent.style.display = null;
 
-            fetch(`https://linenumbers.app/api/v1/activeSubscription?authToken=${authToken}`, {
+            fetch(`${ENV.API_URL}/activeSubscription?authToken=${authToken}`, {
                 method : "GET",
             }).then(async (response) => {
                 if (response.ok) {
@@ -121,7 +121,7 @@ manageSubscriptionButton.onclick = function() {
 }
 
 const currencyRequest = new XMLHttpRequest();
-const currencyRequestUrl = "https://linenumbers.app/api/v1/currency";
+const currencyRequestUrl = "${ENV.API_URL}/currency";
 currencyRequest.open("GET", currencyRequestUrl);
 currencyRequest.send();
 
@@ -175,7 +175,7 @@ checkoutButton.onclick = async function() {
     }
     
     try {
-        const response = await fetch(`https://linenumbers.app/api/v1/checkoutURL?authToken=${authToken}&amount=${amount}`, { method : "GET" });
+        const response = await fetch(`${ENV.API_URL}/checkoutURL?authToken=${authToken}&amount=${amount}`, { method : "GET" });
 
         const success = response.ok;
         if (success) {
@@ -223,7 +223,7 @@ updateSubscriptionButton.onclick = async () => {
     const text = updateSubscriptionButtonText.innerText;
     updateSubscriptionButtonText.innerText = 'Updating...';
 
-    fetch(`https://linenumbers.app/api/v1/updateSubscription?authToken=${authToken}&amount=${amount}`, {
+    fetch(`${ENV.API_URL}/updateSubscription?authToken=${authToken}&amount=${amount}`, {
         method : "POST",
     }).then((response) => {
       if (response.ok) {
@@ -256,7 +256,7 @@ cancelSubscriptionButton.onclick = async () => {
     const text = cancelSubscriptionButtonText.innerText;
     cancelSubscriptionButtonText.innerText = 'Canceling...';
 
-    fetch(`https://linenumbers.app/api/v1/cancelSubscription?authToken=${authToken}`, {
+    fetch(`${ENV.API_URL}/cancelSubscription?authToken=${authToken}`, {
         method : "POST",
     }).then((response) => {
       if (response.ok) {
@@ -285,7 +285,7 @@ restartSubscriptionButton.onclick = async () => {
 
     const authToken = await Auth.getAuthToken();
 
-    const response = await fetch(`https://linenumbers.app/api/v1/restartSubscription?authToken=${authToken}`, { method : "POST" });
+    const response = await fetch(`${ENV.API_URL}/restartSubscription?authToken=${authToken}`, { method : "POST" });
 
     const success = response.ok;
     if (success) {
