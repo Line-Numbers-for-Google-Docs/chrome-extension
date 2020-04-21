@@ -32,7 +32,7 @@
   "permissions": [
     "https://docs.google.com/document/d/*",
     "http://docs.google.com/document/d/*",
-    "https://linenumbers.app/*",
+    "${ENV.API_URL}/*",
     "storage",
     "identity",
     "notifications"
