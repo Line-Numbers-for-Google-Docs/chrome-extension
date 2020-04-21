@@ -82,29 +82,30 @@ class LineNumberer {
                             console.warn(e);
                         }
                     }
-                    // NOTE: This block might not actually be required...
-                    // const paragraphs = Array.from(addedNode.querySelectorAll('.kix-paragraphrenderer'));
-                    // for (const paragraph of paragraphs) {
-                    //     const pageContent = addedNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
-                    //     if (pageContent.parentNode.classList.contains('kix-page-content-wrapper')) {
-                    //         const paragraphs = pageContent.querySelectorAll('.kix-paragraphrenderer');
-                    //         paragraphs[0].classList.add('ln-document-right-border');
-                    //         paragraphs[paragraphs.length - 1].classList.add('ln-document-right-border');
-                    //     }
-                    // }
                 }
             }
 
-            const lines = Array.from(document.getElementsByClassName('numbered'));
-            for (let i = 0, ln = this.settings.start; i < lines.length; i++, ln++) {
-                const line = lines[i];
-                if (ln % this.settings.step == 0) {
-                    line.classList.add('visible');
-                } else {
-                    line.classList.remove('visible');
+            const lineBlocks = []
+            if (this.settings.type == numbering.EACH_PAGE) {        
+                const pages = Array.from(document.body.querySelectorAll(".kix-page"));
+                for (const page of pages) {
+                    lineBlocks.push(Array.from(page.querySelectorAll(".numbered")));
                 }
+            } else {
+                lineBlocks.push(Array.from(document.getElementsByClassName('numbered')))
             }
 
+            for (const lines of lineBlocks) {
+                for (let i = 0, ln = this.settings.start; i < lines.length; i++, ln++) {
+                    const line = lines[i];
+                    if (ln % this.settings.step == 0) {
+                        line.classList.add('visible');
+                    } else {
+                        line.classList.remove('visible');
+                    }
+                }
+            }
+            
             return;
         });
     }
@@ -151,11 +152,11 @@ class LineNumberer {
          * @return list of list of line objects
          */
 
-        if (this.resetCountOnNewPage) {
+        if (this.settings.type == numbering.EACH_PAGE) {
             const lineBlocks = []
             
-            const pages = document.body.querySelectorAll(".kix-page");
-            for (const page in pages) {
+            const pages = Array.from(document.body.querySelectorAll(".kix-page"));
+            for (const page of pages) {
                 lineBlocks.push(Array.from(page.querySelectorAll(".kix-lineview")));
             }
 
@@ -297,7 +298,7 @@ class LineNumberer {
 
         for (const lines of this.lineBlocks) {
             const consideredLines = lines.filter(line => this.shouldCountLine(line));
-            this.numberLinesSequentially(consideredLines, 1, this.settingsManager.settings.step);
+            this.numberLinesSequentially(consideredLines, this.settingsManager.settings.start, this.settingsManager.settings.step);
         }
     }
 
