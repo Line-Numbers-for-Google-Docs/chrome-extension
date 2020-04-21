@@ -225,3 +225,9 @@
   top: 2px;
   width: 8px;
 }
+
+.numbering-selection-popup {
+  position: fixed;
+  bottom: 25px;
+  left: 25px;
+}

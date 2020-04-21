@@ -1,6 +1,7 @@
 import { SettingsManager, numbering, borderStyle } from "./storage.js";
 import { Metrics } from "./metrics.js";
 import { Auth } from "./auth.js";
+import { getIndexesOfSelectedLines } from "./utils.js";
 
 export async function injectMenu() {
     const settingsManager = await SettingsManager.getInstance();
@@ -116,6 +117,49 @@ export async function injectMenu() {
     dialogMenu.addSection("Numbering", [enableCheckbox, numberingStyleRadioGroup, startAtInput, countByInput, checkBoxGroup1, checkBoxGroup2]);
 
     /**
+     * Selection section
+     */
+
+    const numberSelectionCheckbox = DialogMenu.checkBox(
+        "Selection", 
+        () => {return false}, 
+        (active, popupMenu) => {
+            if (active) {
+                popupMenu.hide()
+                // console.log(getIndexesOfSelectedLines())
+
+                document.body.style['pointer-events'] = 'none'
+                document.querySelector('.kix-appview-editor').style['pointer-events'] = 'all'
+
+                const selectLinesPopup = document.createElement('div')
+                selectLinesPopup.classList.add('numbering-selection-popup')
+                selectLinesPopup.innerHTML = 'Select a section of text to number'
+                document.body.appendChild(selectLinesPopup)
+
+                const mouseupHandler = (event) => {
+                    const selection = Array.from(document.getElementsByClassName('kix-selection-overlay'))
+                    if (selection.length > 0) {
+                        console.log(getIndexesOfSelectedLines())
+
+                        for (const elem of selection) {
+                            elem.remove()
+                        }
+                        
+                        document.body.style['pointer-events'] = null
+                        document.body.removeEventListener('mouseup', mouseupHandler)
+                        selectLinesPopup.remove()
+                        popupMenu.show()
+                    }
+                }
+
+                document.body.addEventListener('mouseup', mouseupHandler)
+            }
+        },
+        enabledIfPremium);
+
+    dialogMenu.addSection("Selection", [numberSelectionCheckbox]);
+
+    /**
      * Style Section
      */
 
@@ -219,7 +263,7 @@ export async function injectMenu() {
 
     injectMenuOpenButton(() => {
         settings.save();
-        dialogMenu.show();
+        dialogMenu.render();
     });
 }
 
@@ -293,7 +337,7 @@ class DialogMenu {
             dialogSectionSelector.appendChild(sectionTitle);
             sectionTitles.push(sectionTitle);
 
-            const section = generator[1](); // [1] Generator function
+            const section = generator[1](this); // [1] Generator function
             section.style.display = 'none';
             sectionsDiv.appendChild(section); 
             sections.push(section);
@@ -334,6 +378,14 @@ class DialogMenu {
     }
 
     show() {
+        this.dialog.style.display = null
+    }
+
+    hide() {
+        this.dialog.style.display = 'none'
+    }
+
+    render() {
         this.dialog = this.build();
         document.body.appendChild(this.dialog);
     }
@@ -343,12 +395,12 @@ class DialogMenu {
     }
 
     addSection(title, elementGenerators) {
-        const sectionGenerator = () => {
+        const sectionGenerator = (self) => {
             const section = document.createElement('div');
             section.classList.add('dialog-section');
 
             for (const generator of elementGenerators) {
-                section.appendChild(generator());
+                section.appendChild(generator(self));
             }
 
             return section;
@@ -358,7 +410,7 @@ class DialogMenu {
     }
 
     static checkBox(labelText, isChecked, onUpdate, isEnabled) {
-        return () => {
+        return (self) => {
             const checkboxInput = document.createElement('div');
             checkboxInput.classList.add('dialog-input-field');
             checkboxInput.innerHTML = `
@@ -380,13 +432,13 @@ class DialogMenu {
                         checkbox.classList.remove('docs-material-gm-checkbox-checked');
                         checkbox.classList.add('docs-material-gm-checkbox-unchecked');
     
-                        onUpdate(false);
+                        onUpdate(false, self);
                     } else {
                         // Enable
                         checkbox.classList.remove('docs-material-gm-checkbox-unchecked');
                         checkbox.classList.add('docs-material-gm-checkbox-checked');
     
-                        onUpdate(true);
+                        onUpdate(true, self);
                     }
                 }
     
