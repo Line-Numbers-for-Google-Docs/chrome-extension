@@ -16,7 +16,7 @@ export class SettingsManager {
         this.documentId = documentId;
         this._settings = new Settings();
         this.available = new Promise(async (resolve, _) => {
-            
+
             const localSettings = await this.retrieveSettingsFromLocalStorage();
             const serverSettings = await this.retrieveSettingsFromServer();
 
@@ -50,7 +50,7 @@ export class SettingsManager {
                 return;
             }
 
-            if ( localSettings.lastUpdated > serverSettings.lastUpdated ) {
+            if (localSettings.lastUpdated > serverSettings.lastUpdated) {
                 await this._settings.set(localSettings);
                 resolve(true);
 
@@ -72,7 +72,10 @@ export class SettingsManager {
         }
 
         try {
-            const response = await fetch(`${ENV.API_URL}/documentSettings?authToken=${authToken}&document=${this.documentId}`, { 
+            const response = await fetch(`${ENV.API_URL}/document/settings?document=${this.documentId}`, {
+                headers: {
+                    AUTHORIZATION: authToken
+                },
                 method: 'GET',
             });
 
@@ -82,7 +85,7 @@ export class SettingsManager {
 
                 return rawSettings;
             }
-        } catch(e) {
+        } catch (e) {
             console.warn(e);
             return null;
         }
@@ -103,16 +106,19 @@ export class SettingsManager {
     }
 
     storeLocally(rawSettings) {
-        chrome.storage.sync.set({[this.documentId]: rawSettings}, function() {});
+        chrome.storage.sync.set({ [this.documentId]: rawSettings }, function () { });
     }
 
     async storeOnServer(rawSettings) {
         // Send update to server
         const authToken = await Auth.getAuthToken();
         if (authToken != null) {
-            fetch(`${ENV.API_URL}/documentSettings?document=${this.documentId}&authToken=${authToken}`, {
+            fetch(`${ENV.API_URL}/document/settings?document=${this.documentId}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    AUTHORIZATION: authToken
+                },
                 body: JSON.stringify(rawSettings),
             });
         }
@@ -130,6 +136,11 @@ export class SettingsManager {
 export const numbering = {
     CONTINUOUS: 0,
     EACH_PAGE: 1,
+}
+
+export const selection = {
+    NUMBER: 0,
+    NO_NUMBER: 1,
 }
 
 export const borderStyle = {
@@ -157,7 +168,8 @@ class Settings {
                 numberColor: "626871",
                 leftBorderStyle: borderStyle.NONE,
                 rightBorderStyle: borderStyle.NONE,
-            },    
+                selectionType: selection.NUMBER,
+            },
         };
 
         this.updateCallbacks = [];
@@ -198,7 +210,7 @@ class Settings {
         for (const callback of this.updateCallbacks) {
             try {
                 callback(this);
-            } catch(e) {
+            } catch (e) {
                 console.error("Failed to execute callback", e);
             }
         }
@@ -209,7 +221,7 @@ class Settings {
         const rawSettings = {};
 
         for (const key in this.settings) {
-            if (this.settings[key] != this.defaults.free[key] && 
+            if (this.settings[key] != this.defaults.free[key] &&
                 this.settings[key] != this.defaults.premium[key]) {
                 rawSettings[key] = this.settings[key];
             }
@@ -355,6 +367,18 @@ class Settings {
         Auth.isPremium().then(isPremium => {
             if (!isPremium) return;
             this.settings.rightBorderStyle = rightBorderStyle;
+            this.executeUpdateCallbacks();
+        });
+    }
+
+    get selectionType() {
+        return this.settings.selectionType;
+    }
+
+    set selectionType(selectionType) {
+        Auth.isPremium().then(isPremium => {
+            if (!isPremium) return;
+            this.settings.selectionType = selectionType;
             this.executeUpdateCallbacks();
         });
     }

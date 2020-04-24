@@ -1,4 +1,4 @@
-import { SettingsManager, numbering, borderStyle } from "./storage.js";
+import { SettingsManager, numbering, borderStyle, selection } from "./storage.js";
 import { Metrics } from "./metrics.js";
 import { Auth } from "./auth.js";
 import { getIndexesOfSelectedLines } from "./utils.js";
@@ -11,13 +11,13 @@ export async function injectMenu() {
 
     const positiveNumberParseAndValidate = (value) => {
         if (isNaN(value)) {
-            return {error: true, errorMessage: "Must be numeric."}
+            return { error: true, errorMessage: "Must be numeric." }
         }
 
         const number = Number(value);
 
         if (number <= 0) {
-            return {error: true, errorMessage: "Must be strictly positive."}
+            return { error: true, errorMessage: "Must be strictly positive." }
         }
 
         return { error: false, value: number };
@@ -33,13 +33,13 @@ export async function injectMenu() {
         const number = res.value;
 
         if (!Number.isInteger(number)) {
-            return {error: true, errorMessage: "Must be a whole number."}
+            return { error: true, errorMessage: "Must be a whole number." }
         }
 
-        return {error: false, value: number}
+        return { error: false, value: number }
     };
 
-    const dialogMenu = new DialogMenu("Line Numbering", 
+    const dialogMenu = new DialogMenu("Line Numbering",
         () => {
             settings.restoreLastSave();
         },
@@ -52,8 +52,8 @@ export async function injectMenu() {
      * Numbering section
      */
 
-    const enableCheckbox = DialogMenu.checkBox("Show line numbering", 
-        () => {return settings.enabled}, 
+    const enableCheckbox = DialogMenu.checkBox("Show line numbering",
+        () => { return settings.enabled },
         (enabled) => {
             settings.enabled = enabled;
 
@@ -64,15 +64,15 @@ export async function injectMenu() {
             }
         });
 
-    const startAtInput = DialogMenu.input("start-at", "Start at", null, 
-        () => {return settings.start;},
+    const startAtInput = DialogMenu.input("start-at", "Start at", null,
+        () => { return settings.start; },
         positiveIntegerParseAndValidate,
-        (start) => {settings.start = start;});
-    const countByInput = DialogMenu.input("count-by", "Count by", "(number every X line)", 
-        () => {return settings.step;},
+        (start) => { settings.start = start; });
+    const countByInput = DialogMenu.input("count-by", "Count by", "(number every X line)",
+        () => { return settings.step; },
         positiveIntegerParseAndValidate,
-        (countBy) => {settings.step = countBy;});
-    const numberingStyleRadioGroup = DialogMenu.radioGroup(["Continuous", "Restart Each Page"], 
+        (countBy) => { settings.step = countBy; });
+    const numberingStyleRadioGroup = DialogMenu.radioGroup(["Continuous", "Restart Each Page"],
         () => {
             switch (settings.type) {
                 case numbering.CONTINUOUS:
@@ -94,23 +94,23 @@ export async function injectMenu() {
             }
         });
     const blankLinesCheckbox = DialogMenu.checkBox(
-        "Blank lines", 
-        () => {return settings.numberBlankLines}, 
-        (numberBlankLines) => {settings.numberBlankLines = numberBlankLines});
+        "Blank lines",
+        () => { return settings.numberBlankLines },
+        (numberBlankLines) => { settings.numberBlankLines = numberBlankLines });
     const headersCheckbox = DialogMenu.checkBox(
-        "Headers", 
-        () => {return settings.numberHeaders}, 
-        (numberHeaders) => {settings.numberHeaders = numberHeaders});
+        "Headers",
+        () => { return settings.numberHeaders },
+        (numberHeaders) => { settings.numberHeaders = numberHeaders });
     const footersCheckbox = DialogMenu.checkBox(
-        "Footers", 
-        () => {return settings.numberFooters}, 
-        (numberFooters) => {settings.numberFooters = numberFooters});
+        "Footers",
+        () => { return settings.numberFooters },
+        (numberFooters) => { settings.numberFooters = numberFooters });
     const checkBoxGroup1 = DialogMenu.inLineGroup([blankLinesCheckbox, headersCheckbox, footersCheckbox]);
 
     const columnsCheckbox = DialogMenu.checkBox(
-        "Columns", 
-        () => {return settings.numberColumns}, 
-        (numberColumns) => {settings.numberColumns = numberColumns},
+        "Columns",
+        () => { return settings.numberColumns },
+        (numberColumns) => { settings.numberColumns = numberColumns },
         enabledIfPremium);
     const checkBoxGroup2 = DialogMenu.inLineGroup([columnsCheckbox]);
 
@@ -120,9 +120,31 @@ export async function injectMenu() {
      * Selection section
      */
 
+    const selectionTypeRadioGroup = DialogMenu.radioGroup(["Number", "Don't Number"],
+        () => {
+            switch (settings.type) {
+                case selection.NUMBER:
+                    return 0;
+                case selection.NO_NUMBER:
+                    return 1;
+                default:
+                    return 0;
+            }
+        },
+        (selected) => {
+            switch (selected) {
+                case 0:
+                    settings.selectionType = selection.NUMBER;
+                    break;
+                case 1:
+                    settings.selectionType = selection.NO_NUMBER;
+                    break;
+            }
+        });
+
     const numberSelectionCheckbox = DialogMenu.checkBox(
-        "Selection", 
-        () => {return false}, 
+        "Selection",
+        () => { return false },
         (active, popupMenu) => {
             if (active) {
                 popupMenu.hide()
@@ -144,7 +166,7 @@ export async function injectMenu() {
                         for (const elem of selection) {
                             elem.remove()
                         }
-                        
+
                         document.body.style['pointer-events'] = null
                         document.body.removeEventListener('mouseup', mouseupHandler)
                         selectLinesPopup.remove()
@@ -157,7 +179,8 @@ export async function injectMenu() {
         },
         enabledIfPremium);
 
-    dialogMenu.addSection("Selection", [numberSelectionCheckbox]);
+    // TODO: Add 'Add selection button' and list selections with checkboxes ([ ] "start of text ... end of text (l.x-y)")
+    dialogMenu.addSection("Selection", [selectionTypeRadioGroup, numberSelectionCheckbox]);
 
     /**
      * Style Section
@@ -169,26 +192,26 @@ export async function injectMenu() {
         }
 
         if ((/^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/g).test(value)) {
-            return {error: false, value: value}
+            return { error: false, value: value }
         } else {
-            return {error: true, errorMessage: "Invalid HEX color code."}
+            return { error: true, errorMessage: "Invalid HEX color code." }
         }
     }
 
-    const numberSize = DialogMenu.input("number-size", "Size", null, 
-        () => {return settings.numberSize;},
+    const numberSize = DialogMenu.input("number-size", "Size", null,
+        () => { return settings.numberSize; },
         positiveNumberParseAndValidate,
-        (numberSize) => {settings.numberSize = numberSize;},
+        (numberSize) => { settings.numberSize = numberSize; },
         enabledIfPremium);
-    
-    const numberColor = DialogMenu.input("number-color", "Color", "(HEX color code)", 
-        () => {return settings.numberColor;},
+
+    const numberColor = DialogMenu.input("number-color", "Color", "(HEX color code)",
+        () => { return settings.numberColor; },
         hexParseAndValidate,
-        (numberColor) => {settings.numberColor = numberColor;},
+        (numberColor) => { settings.numberColor = numberColor; },
         enabledIfPremium);
 
     dialogMenu.addSection("Style", [numberSize, numberColor]);
-    
+
     /**
      * Border Section
      */
@@ -202,62 +225,62 @@ export async function injectMenu() {
     // );
 
     const leftBorderSectionTitle = DialogMenu.sectionTitle("Left Border");
-    const leftBorderStyle = DialogMenu.radioGroup(["None", "Solid", "Double"], 
-    () => {
-        switch (settings.leftBorderStyle) {
-            case borderStyle.NONE:
-                return 0;
-            case borderStyle.SOLID:
-                return 1;
-            case borderStyle.DOUBLE:
-                return 2;
-            default:
-                return 0;
-        }
-    },
-    (selected) => {
-        switch (selected) {
-            case 0:
-                settings.leftBorderStyle = borderStyle.NONE;
-                break;
-            case 1:
-                settings.leftBorderStyle = borderStyle.SOLID;
-                break;
-            case 2:
-                settings.leftBorderStyle = borderStyle.DOUBLE;
-                break;
-        }
-    },
-    enabledIfPremium);
+    const leftBorderStyle = DialogMenu.radioGroup(["None", "Solid", "Double"],
+        () => {
+            switch (settings.leftBorderStyle) {
+                case borderStyle.NONE:
+                    return 0;
+                case borderStyle.SOLID:
+                    return 1;
+                case borderStyle.DOUBLE:
+                    return 2;
+                default:
+                    return 0;
+            }
+        },
+        (selected) => {
+            switch (selected) {
+                case 0:
+                    settings.leftBorderStyle = borderStyle.NONE;
+                    break;
+                case 1:
+                    settings.leftBorderStyle = borderStyle.SOLID;
+                    break;
+                case 2:
+                    settings.leftBorderStyle = borderStyle.DOUBLE;
+                    break;
+            }
+        },
+        enabledIfPremium);
 
     const rightBorderSectionTitle = DialogMenu.sectionTitle("Right Border");
-    const rightBorderStyle = DialogMenu.radioGroup(["None", "Solid", "Double"], 
-    () => {
-        switch (settings.rightBorderStyle) {
-            case borderStyle.NONE:
-                return 0;
-            case borderStyle.SOLID:
-                return 1;
-            case borderStyle.DOUBLE:
-                return 2;
-            default:
-                return 0;
-        }
-    },
-    (selected) => {
-        switch (selected) {
-            case 0:
-                settings.rightBorderStyle = borderStyle.NONE;
-                break;
-            case 1:
-                settings.rightBorderStyle = borderStyle.SOLID;
-                break;
-            case 2:
-                settings.rightBorderStyle = borderStyle.DOUBLE;
-                break;
-        }
-    },
-    enabledIfPremium);
+    const rightBorderStyle = DialogMenu.radioGroup(["None", "Solid", "Double"],
+        () => {
+            switch (settings.rightBorderStyle) {
+                case borderStyle.NONE:
+                    return 0;
+                case borderStyle.SOLID:
+                    return 1;
+                case borderStyle.DOUBLE:
+                    return 2;
+                default:
+                    return 0;
+            }
+        },
+        (selected) => {
+            switch (selected) {
+                case 0:
+                    settings.rightBorderStyle = borderStyle.NONE;
+                    break;
+                case 1:
+                    settings.rightBorderStyle = borderStyle.SOLID;
+                    break;
+                case 2:
+                    settings.rightBorderStyle = borderStyle.DOUBLE;
+                    break;
+            }
+        },
+        enabledIfPremium);
 
     dialogMenu.addSection("Borders", [leftBorderSectionTitle, leftBorderStyle, rightBorderSectionTitle, rightBorderStyle]);
 
@@ -339,7 +362,7 @@ class DialogMenu {
 
             const section = generator[1](this); // [1] Generator function
             section.style.display = 'none';
-            sectionsDiv.appendChild(section); 
+            sectionsDiv.appendChild(section);
             sections.push(section);
 
             sectionTitle.onclick = function () {
@@ -368,8 +391,8 @@ class DialogMenu {
         const cancelButton = dialog.querySelector('.ln-modal-dialog-cancel');
         const applyButton = dialog.querySelector('.ln-modal-dialog-apply');
 
-        const closeAndCancel = () => {this.close(); this.cancel();};
-        const closeAndApply = () => {this.close(); this.apply();};
+        const closeAndCancel = () => { this.close(); this.cancel(); };
+        const closeAndApply = () => { this.close(); this.apply(); };
         closeCross.onclick = closeAndCancel;
         cancelButton.onclick = closeAndCancel;
         applyButton.onclick = closeAndApply;
@@ -431,17 +454,17 @@ class DialogMenu {
                         // Disable
                         checkbox.classList.remove('docs-material-gm-checkbox-checked');
                         checkbox.classList.add('docs-material-gm-checkbox-unchecked');
-    
+
                         onUpdate(false, self);
                     } else {
                         // Enable
                         checkbox.classList.remove('docs-material-gm-checkbox-unchecked');
                         checkbox.classList.add('docs-material-gm-checkbox-checked');
-    
+
                         onUpdate(true, self);
                     }
                 }
-    
+
                 const label = checkboxInput.querySelector('.label');
                 checkbox.onclick = onclick;
                 label.onclick = onclick;
@@ -485,7 +508,7 @@ class DialogMenu {
                 const span = document.createElement('span');
                 span.style['font-size'] = '10px';
                 span.innerText = description;
-                
+
                 div.appendChild(document.createElement('br'));
                 div.appendChild(span);
             }
@@ -516,7 +539,7 @@ class DialogMenu {
                         errorMessage.innerText = res.errorMessage;
                         event.target.parentNode.parentNode.parentNode.insertBefore(
                             errorMessage, event.target.parentNode.parentNode.nextSibling);
-                        
+
                         // TODO: Do something to disable applying changes if not all inputs have been validated
                         // validInput[1] = false;
                     } else {
@@ -557,9 +580,9 @@ class DialogMenu {
             for (let i = 0; i < labels.length; i++) {
                 const label = labels[i];
 
-                radioButton = this.radioButton(label, () => {return (i == selectedIndex);})();
+                radioButton = this.radioButton(label, () => { return (i == selectedIndex); })();
                 radioButton.style['padding-right'] = '24px';
-                
+
                 const radio = radioButton.querySelector('.jfk-radiobutton');
                 radio.attributes.index = i;
 
@@ -596,7 +619,7 @@ class DialogMenu {
     }
 
     static inLineGroup(itemsGenerators) {
-        return() => {
+        return () => {
             const group = document.createElement('div');
             group.classList.add('ln-inline-group');
 

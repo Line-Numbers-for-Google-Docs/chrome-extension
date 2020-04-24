@@ -25,7 +25,7 @@ const manageActiveSubscriptionSection = document.getElementById('active-subscrip
 const manageCanceledSubscriptionSection = document.getElementById('canceled-subscription-content');
 
 // Figure out what to display based on user state
-const synchronizePageWithUserState = async function() {
+const synchronizePageWithUserState = async function () {
     signedOutContent.style.display = 'none';
     premiumContent.style.display = 'none';
     nonPremiumContent.style.display = 'none';
@@ -44,14 +44,17 @@ const synchronizePageWithUserState = async function() {
             // User signed in and premium
             premiumContent.style.display = null;
 
-            fetch(`${ENV.API_URL}/activeSubscription?authToken=${authToken}`, {
-                method : "GET",
+            fetch(`${ENV.API_URL}/subscription`, {
+                headers: {
+                    AUTHORIZATION: authToken
+                },
+                method: "GET",
             }).then(async (response) => {
                 if (response.ok) {
                     const activeSubscription = await response.json();
                     console.log(activeSubscription);
                     subscriptionUpdateAmountInput.value = activeSubscription.quantity;
-                    
+
                     if (activeSubscription.cancel_at_period_end) {
                         manageCanceledSubscriptionSection.style.display = null;
                     } else {
@@ -88,7 +91,7 @@ signInButton.onclick = async function () {
     }
 };
 
-document.getElementById('close-popup').onclick = function() {
+document.getElementById('close-popup').onclick = function () {
     window.close();
 }
 
@@ -96,24 +99,24 @@ document.getElementById('close-popup').onclick = function() {
  * Subscriptions
  */
 
-goPremiumButton.onclick = function() {
+goPremiumButton.onclick = function () {
     landingSection.style.display = 'none';
     checkoutSection.style.display = "";
     goBackButton.style.display = "";
 
-    goBackButton.onclick = function() {
+    goBackButton.onclick = function () {
         landingSection.style.display = "";
         checkoutSection.style.display = "none";
         goBackButton.style.display = "none";
     }
 }
 
-manageSubscriptionButton.onclick = function() {
+manageSubscriptionButton.onclick = function () {
     landingSection.style.display = 'none';
     manageSubscriptionSection.style.display = "";
     goBackButton.style.display = "";
 
-    goBackButton.onclick = function() {
+    goBackButton.onclick = function () {
         landingSection.style.display = "";
         manageSubscriptionSection.style.display = "none";
         goBackButton.style.display = "none";
@@ -121,15 +124,15 @@ manageSubscriptionButton.onclick = function() {
 }
 
 const currencyRequest = new XMLHttpRequest();
-const currencyRequestUrl = "${ENV.API_URL}/currency";
+const currencyRequestUrl = "${ENV.API_URL}/helpers/currency";
 currencyRequest.open("GET", currencyRequestUrl);
 currencyRequest.send();
 
 currencyRequest.onreadystatechange = (e) => {
     if (currencyRequest.readyState == 4 && currencyRequest.status == 200) {
-        if (currencyRequest.responseText){
+        if (currencyRequest.responseText) {
             const currency = currencyRequest.responseText;
-            
+
             let currencySymbol = ""
             switch (currency) {
                 case "USD":
@@ -156,7 +159,7 @@ currencyRequest.onreadystatechange = (e) => {
 }
 
 const checkoutButtonText = document.getElementsByClassName('checkout-btn-text')[0];
-checkoutButton.onclick = async function() {
+checkoutButton.onclick = async function () {
     let amount = Number(amountInput.value);
 
     const text = checkoutButtonText.innerText;
@@ -173,9 +176,13 @@ checkoutButton.onclick = async function() {
             checkoutButtonText.innerText = text;
         }, timeout);
     }
-    
+
     try {
-        const response = await fetch(`${ENV.API_URL}/checkoutURL?authToken=${authToken}&amount=${amount}`, { method : "GET" });
+        const response = await fetch(`${ENV.API_URL}/subscription/checkoutURL?amount=${amount}`, {
+            headers: {
+                AUTHORIZATION: authToken
+            }, method: "GET"
+        });
 
         const success = response.ok;
         if (success) {
@@ -223,28 +230,31 @@ updateSubscriptionButton.onclick = async () => {
     const text = updateSubscriptionButtonText.innerText;
     updateSubscriptionButtonText.innerText = 'Updating...';
 
-    fetch(`${ENV.API_URL}/updateSubscription?authToken=${authToken}&amount=${amount}`, {
-        method : "POST",
+    fetch(`${ENV.API_URL}/subscription/update?amount=${amount}`, {
+        headers: {
+            AUTHORIZATION: authToken
+        },
+        method: "POST",
     }).then((response) => {
-      if (response.ok) {
-        // Successfully updated
-        updateSubscriptionButton.style['background-image'] = '-webkit-linear-gradient(left, #77D183, #62C887)';
-        updateSubscriptionButtonText.innerText = 'Success!';
+        if (response.ok) {
+            // Successfully updated
+            updateSubscriptionButton.style['background-image'] = '-webkit-linear-gradient(left, #77D183, #62C887)';
+            updateSubscriptionButtonText.innerText = 'Success!';
 
-        setTimeout(() => {
-            updateSubscriptionButton.style['background-image'] = null;
-            updateSubscriptionButtonText.innerText = text;
-        }, 1000);
-      } else {
-        // Failed to update...
-        updateSubscriptionButton.style['background-image'] = '-webkit-linear-gradient(left, #FA6E6E, #F06B6C)';
-        updateSubscriptionButtonText.innerText = 'Failed!';
+            setTimeout(() => {
+                updateSubscriptionButton.style['background-image'] = null;
+                updateSubscriptionButtonText.innerText = text;
+            }, 1000);
+        } else {
+            // Failed to update...
+            updateSubscriptionButton.style['background-image'] = '-webkit-linear-gradient(left, #FA6E6E, #F06B6C)';
+            updateSubscriptionButtonText.innerText = 'Failed!';
 
-        setTimeout(() => {
-            updateSubscriptionButton.style['background-image'] = null;
-            updateSubscriptionButtonText.innerText = text;
-        }, 1000);
-      }
+            setTimeout(() => {
+                updateSubscriptionButton.style['background-image'] = null;
+                updateSubscriptionButtonText.innerText = text;
+            }, 1000);
+        }
     });
 }
 
@@ -256,24 +266,27 @@ cancelSubscriptionButton.onclick = async () => {
     const text = cancelSubscriptionButtonText.innerText;
     cancelSubscriptionButtonText.innerText = 'Canceling...';
 
-    fetch(`${ENV.API_URL}/cancelSubscription?authToken=${authToken}`, {
-        method : "POST",
+    fetch(`${ENV.API_URL}/subscription/cancel`, {
+        headers: {
+            AUTHORIZATION: authToken
+        },
+        method: "POST",
     }).then((response) => {
-      if (response.ok) {
-        // Successfully canceled
-        manageActiveSubscriptionSection.style.display = 'none';
-        manageCanceledSubscriptionSection.style.display = null;
-        cancelSubscriptionButtonText.innerText = text;
-      } else {
-        // Failed to cancel...
-        cancelSubscriptionButton.style['background-image'] = '-webkit-linear-gradient(left, #FA6E6E, #F06B6C)';
-        cancelSubscriptionButtonText.innerText = 'Failed!';
-
-        setTimeout(() => {
-            cancelSubscriptionButton.style['background-image'] = null;
+        if (response.ok) {
+            // Successfully canceled
+            manageActiveSubscriptionSection.style.display = 'none';
+            manageCanceledSubscriptionSection.style.display = null;
             cancelSubscriptionButtonText.innerText = text;
-        }, 1000);
-      }
+        } else {
+            // Failed to cancel...
+            cancelSubscriptionButton.style['background-image'] = '-webkit-linear-gradient(left, #FA6E6E, #F06B6C)';
+            cancelSubscriptionButtonText.innerText = 'Failed!';
+
+            setTimeout(() => {
+                cancelSubscriptionButton.style['background-image'] = null;
+                cancelSubscriptionButtonText.innerText = text;
+            }, 1000);
+        }
     });
 }
 
@@ -285,7 +298,11 @@ restartSubscriptionButton.onclick = async () => {
 
     const authToken = await Auth.getAuthToken();
 
-    const response = await fetch(`${ENV.API_URL}/restartSubscription?authToken=${authToken}`, { method : "POST" });
+    const response = await fetch(`${ENV.API_URL}/subscription/restart`, {
+        headers: {
+            AUTHORIZATION: authToken
+        }, method: "POST"
+    });
 
     const success = response.ok;
     if (success) {

@@ -1,53 +1,46 @@
 import { Auth } from './auth.js';
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+const newAuthTokenHandlers = []
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.authenticate) {
         const interactive = request.authenticate.interactive;
 
-        const redirect_uri = chrome.identity.getRedirectURL("linenumbers");
-
-        const authFlowConfig = {
-            'url': `${ENV.API_URL}/login?redirect_uri=${redirect_uri}`, 
-            'interactive': interactive
+        if (interactive) {
+            // Launch login page
+            chrome.tabs.create({ url: `${ENV.LOGIN_URL}?extensionId=${chrome.runtime.id}`, active: true }, (tab) => {
+                newAuthTokenHandlers.push((authToken) => {
+                    chrome.tabs.remove([tab.id])
+                    sendResponse(authToken)
+                })
+            });
+        } else {
+            // TODO: Handle non-interactive login if possible
+            sendResponse(null)
         }
-
-        const launchWebAuthFlow = (isSecondAttempt) => {
-            console.log("Launching Auth Flow! Interactive:", interactive);
-            chrome.identity.launchWebAuthFlow(
-                authFlowConfig,
-                async redirect_url => {
-                    /* Extract token from redirect_url */ 
-                    if (redirect_url == null) {
-                        // Failed to Authenticate...
-                        if (!interactive || isSecondAttempt) {
-                            sendResponse(null);
-                        } else {
-                            // Query second time, KEEP THIS HERE
-                            // For some reason on first attempt you get 'Authorization page could not be loaded'.
-                            // Re-querying it is required to actually retrieve the Auth Token.
-                            launchWebAuthFlow(true);
-                        }
-                    } else {
-                        const authToken = redirect_url.split('authToken=')[1];
-                        
-                        Auth.storeTokenInLocalStorage(authToken);
-
-                        // New login, so query subscription status
-                        // Await to make sure we only resolve when we have fully updated subscription status.
-                        await Auth.queryAndCacheSubscriptionStatus();
-
-                        // New login, so send FCM token to server so that it can send messaged back.
-                        const fcmToken = await Auth.getFcmFromLocalStorage();
-                        Auth.trySendFcmTokenToServer(fcmToken);
-
-                        sendResponse(authToken);
-                    }
-                },
-            );
-        }
-        
-        launchWebAuthFlow();
 
         return true; // Inform Chrome that we will make a delayed sendResponse
+    }
+});
+
+chrome.runtime.onMessageExternal.addListener(async (request, sender, sendResponse) => {
+    if (request.authToken) {
+        console.log("Got auth token", request.authToken)
+        sendResponse(true)
+
+        Auth.storeTokenInLocalStorage(request.authToken);
+
+        // New login, so query subscription status
+        // Await to make sure we only resolve when we have fully updated subscription status.
+        await Auth.queryAndCacheSubscriptionStatus();
+
+        // New login, so send FCM token to server so that it can send messaged back.
+        const fcmToken = await Auth.getFcmFromLocalStorage();
+        Auth.trySendFcmTokenToServer(fcmToken);
+
+        let newAuthTokenHandler
+        while (newAuthTokenHandler = newAuthTokenHandlers.pop()) {
+            newAuthTokenHandler(request.authToken);
+        }
     }
 });

@@ -20,8 +20,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://docs.google.com/document/d/*",
-        "http://docs.google.com/document/d/*"
+        "https://docs.google.com/document/d/*"
       ],
       "js": [
         "js/content.js"
@@ -31,10 +30,8 @@
   ],
   "permissions": [
     "https://docs.google.com/document/d/*",
-    "http://docs.google.com/document/d/*",
     "${ENV.API_URL}/*",
     "storage",
-    "identity",
     "notifications"
   ],
   "web_accessible_resources": [
@@ -45,5 +42,10 @@
     "js/menu.js",
     "js/utils.js",
     "js/auth.js"
-  ]
+  ],
+  "externally_connectable": {
+    "matches": [
+      "${ENV.OAUTH_CALLBACK_URL}*"
+    ]
+  }
 }

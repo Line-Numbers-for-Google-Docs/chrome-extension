@@ -1,5 +1,5 @@
 export class Auth {
-    
+
     /**
      * Authentication
      */
@@ -10,14 +10,14 @@ export class Auth {
 
     static queryLocalStorageForToken() {
         return new Promise((resolve, _) => {
-            chrome.storage.local.get([Auth.AUTH_TOKEN_KEY], function(result) {
+            chrome.storage.local.get([Auth.AUTH_TOKEN_KEY], function (result) {
                 resolve(result[Auth.AUTH_TOKEN_KEY]);
             });
         });
     }
 
     static storeTokenInLocalStorage(token) {
-        chrome.storage.local.set({[Auth.AUTH_TOKEN_KEY]: token}, function() {});
+        chrome.storage.local.set({ [Auth.AUTH_TOKEN_KEY]: token }, function () { });
     }
 
     static async getAuthToken(interactive = false) {
@@ -33,7 +33,7 @@ export class Auth {
 
     static retrieveAndCacheAuthToken(interactive = false) {
         return new Promise((resolve, _) => {
-            chrome.runtime.sendMessage({authenticate: { interactive: interactive }}, function(response) {
+            chrome.runtime.sendMessage({ authenticate: { interactive: interactive } }, function (response) {
                 resolve(response);
             });
         });
@@ -60,12 +60,12 @@ export class Auth {
     static FCM_TOKEN_KEY = "fcmToken";
 
     static storeFcmInLocalStorage(token) {
-        chrome.storage.local.set({[Auth.FCM_TOKEN_KEY]: token}, function() {});
+        chrome.storage.local.set({ [Auth.FCM_TOKEN_KEY]: token }, function () { });
     }
 
     static getFcmFromLocalStorage() {
         return new Promise((resolve, _) => {
-            chrome.storage.local.get([Auth.FCM_TOKEN_KEY], function(result) {
+            chrome.storage.local.get([Auth.FCM_TOKEN_KEY], function (result) {
                 resolve(result[Auth.FCM_TOKEN_KEY]);
             });
         });
@@ -78,11 +78,14 @@ export class Auth {
 
     static async trySendFcmTokenToServer(fcmToken) {
         const authToken = await Auth.getAuthToken();
-        
+
         // TODO: Figure out how to still send even if user isn't connected so that non logged in user can also receive push notifications
         if (authToken != null) {
-            fetch(`${ENV.API_URL}/addFcmToken?authToken=${authToken}`, {
+            fetch(`${ENV.API_URL}/helpers/addFcmToken`, {
                 method: 'POST',
+                headers: {
+                    AUTHORIZATION: authToken
+                },
                 body: fcmToken,
             });
         }
@@ -98,15 +101,15 @@ export class Auth {
 
     static queryLocalStorageForSubscriptionStatus() {
         return new Promise((resolve, _) => {
-            chrome.storage.local.get([Auth.SUBSCRIPTION_STATUS_KEY], function(result) {
+            chrome.storage.local.get([Auth.SUBSCRIPTION_STATUS_KEY], function (result) {
                 resolve(result[Auth.SUBSCRIPTION_STATUS_KEY]);
             });
         });
     }
 
     static storeSubscriptionStatusInLocalStorage(subscriptionStatus) {
-        return new Promise((resolve, _) =>{
-            chrome.storage.local.set({[Auth.SUBSCRIPTION_STATUS_KEY]: subscriptionStatus}, function() {
+        return new Promise((resolve, _) => {
+            chrome.storage.local.set({ [Auth.SUBSCRIPTION_STATUS_KEY]: subscriptionStatus }, function () {
                 resolve();
             });
         });
@@ -143,35 +146,33 @@ export class Auth {
                 return;
             }
 
-            const subscriptionStatusRequest = new XMLHttpRequest();
-            const subscriptionStatusRequestUrl = `${ENV.API_URL}/subscriptionStatus?authToken=${authToken}`;
-            subscriptionStatusRequest.open("GET", subscriptionStatusRequestUrl);
-            subscriptionStatusRequest.send();
+            fetch(`${ENV.API_URL}/subscription/status`, {
+                headers: {
+                    AUTHORIZATION: authToken
+                },
+                method: "GET",
+            }).then(async (response) => {
+                if (response.ok) {
+                    const subscriptionStatus = JSON.parse(await response.text());
 
-            subscriptionStatusRequest.onreadystatechange = async (e) => {
-                if (subscriptionStatusRequest.readyState == 4) {
-                    if (subscriptionStatusRequest.status == 200) {
-                        const subscriptionStatus = JSON.parse(subscriptionStatusRequest.responseText);
-
-                        // Await to make sure we only resolve when subscription status is cached.
-                        await Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
-                        resolve(subscriptionStatus);
-                    } else {
-                        // Failed to query subscription status
-                        // TODO: Figure out how to handles this case properly
-                        reject("Failed to query subscription status...");
-                        console.log("Failed!", subscriptionStatusRequest);
-                    }
+                    // Await to make sure we only resolve when subscription status is cached.
+                    await Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
+                    resolve(subscriptionStatus);
+                } else {
+                    // Failed to query subscription status
+                    // TODO: Figure out how to handles this case properly
+                    reject("Failed to query subscription status...");
+                    console.log("Failed!", subscriptionStatusRequest);
                 }
-            }
+            });
         });
     }
 
     static async isPremium() {
         const subscriptionStatus = await Auth.getSubscriptionStatus();
-        
-        return subscriptionStatus != null && 
-            subscriptionStatus.premium && 
+
+        return subscriptionStatus != null &&
+            subscriptionStatus.premium &&
             subscriptionStatus.premium_end + 86400 > new Date().getTime() / 1000; // Add 1 day leeway.
     }
 }
