@@ -86,6 +86,9 @@
   max-height: 95vh;
   display: flex;
   flex-direction: column;
+  /* TODO: Keep these updated if dialog size changes */
+  min-width: 285px; 
+  min-height: 355px;
 }
 
 #line-numbering-dialog .dialog-section {
@@ -96,7 +99,7 @@
 }
 
 #line-numbering-dialog .modal-dialog-buttons {
-  margin-top: 0;
+  margin-top: auto;
 }
 
 #line-numbering-dialog .dialog-title {
@@ -105,7 +108,6 @@
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
-  border-bottom: 1px solid #dadce0;
   margin: 0 -24px 8px -24px;
   padding: 0 24px;
 }
@@ -230,4 +232,33 @@
   position: fixed;
   bottom: 25px;
   left: 25px;
+}
+
+.google-button {
+  cursor: pointer;
+  height: 40px;
+  border-width: 0;
+  background: white;
+  color: #737373!important;
+  border-radius: 5px;
+  white-space: nowrap;
+  padding: 0!important;
+  outline: 0;
+}
+
+.google-button__icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 8px 0 8px 8px;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+}
+
+.google-button__text {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: bold;
 }

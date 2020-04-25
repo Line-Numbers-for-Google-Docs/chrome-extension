@@ -1,7 +1,7 @@
 import { SettingsManager, numbering, borderStyle } from "./storage.js";
 import { Metrics } from "./metrics.js";
 import { injectMenu } from "./menu.js";
-import { findFirstParentWithClass } from "./utils.js";
+import { findFirstParentWithClass, lineViewLength } from "./utils.js";
 
 class LineNumberer {
     constructor() {
@@ -36,7 +36,7 @@ class LineNumberer {
                             const pageContent = mutation.target;
                             pageContent.querySelector('.kix-paragraphrenderer').classList.add('ln-document-left-border');
                         }
-                    } catch(e) {
+                    } catch (e) {
                         console.warn(e);
                     }
                 }
@@ -74,11 +74,11 @@ class LineNumberer {
 
                             if (pageContent.parentNode.classList.contains('kix-page-content-wrapper')) {
                                 const paragraphs = pageContent.querySelectorAll('.kix-paragraphrenderer');
-                                
+
                                 paragraphs[0].classList.add('ln-document-left-border');
                                 paragraphs[paragraphs.length - 1].classList.add('ln-document-right-border');
                             }
-                        } catch(e) {
+                        } catch (e) {
                             console.warn(e);
                         }
                     }
@@ -86,7 +86,7 @@ class LineNumberer {
             }
 
             const lineBlocks = []
-            if (this.settings.type == numbering.EACH_PAGE) {        
+            if (this.settings.type == numbering.EACH_PAGE) {
                 const pages = Array.from(document.body.querySelectorAll(".kix-page"));
                 for (const page of pages) {
                     lineBlocks.push(Array.from(page.querySelectorAll(".numbered")));
@@ -105,7 +105,7 @@ class LineNumberer {
                     }
                 }
             }
-            
+
             return;
         });
     }
@@ -142,7 +142,6 @@ class LineNumberer {
         this.observer.disconnect();
     }
 
-    // TODO: Use this to page section numbering
     get lineBlocks() {
         /**
          * Gets the blocks of objects to number.
@@ -154,7 +153,7 @@ class LineNumberer {
 
         if (this.settings.type == numbering.EACH_PAGE) {
             const lineBlocks = []
-            
+
             const pages = Array.from(document.body.querySelectorAll(".kix-page"));
             for (const page of pages) {
                 lineBlocks.push(Array.from(page.querySelectorAll(".kix-lineview")));
@@ -198,7 +197,7 @@ class LineNumberer {
         if (this.hideNumbersStyle != null) {
             this.hideNumbersStyle.remove();
             this.hideNumbersStyle = null;
-        } 
+        }
     }
 
     addDocumentBorders() {
@@ -296,13 +295,18 @@ class LineNumberer {
          * Splits the lines into "blocks" of lines to each be numbered independently.
          */
 
+        let index = 1
+
         for (const lines of this.lineBlocks) {
-            const consideredLines = lines.filter(line => this.shouldCountLine(line));
+            const consideredLines = lines.filter(line => {
+                index += lineViewLength(line)
+                return this.shouldCountLine(line)
+            });
             this.numberLinesSequentially(consideredLines, this.settingsManager.settings.start, this.settingsManager.settings.step);
         }
     }
 
-    numberLinesSequentially(lines, start=1, step=1) {
+    numberLinesSequentially(lines, start = 1, step = 1) {
         /**
          * Display the line numbering according to the documents settings for the lines passed in as an argument.
          * 
@@ -344,9 +348,9 @@ class LineNumberer {
         //         maxY2 = y2;
         //     }
         // }
-        const top = minY1 + (maxY2 - minY1)/2 - line.getBoundingClientRect().y;
+        const top = minY1 + (maxY2 - minY1) / 2 - line.getBoundingClientRect().y;
         line.style.setProperty("--ln-top", `${top}px`);
-        
+
         if (line.style.direction) {
             if (line.style.direction == 'rtl') {
                 line.classList.add('right');
@@ -402,9 +406,9 @@ class LineNumberer {
         try {
             line.classList.remove('numbered');
             line.classList.remove('visible');
-        } finally {};
+        } finally { };
     }
-    
+
 }
 
 export async function main() {

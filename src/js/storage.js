@@ -72,7 +72,7 @@ export class SettingsManager {
         }
 
         try {
-            const response = await fetch(`${ENV.API_URL}/document/settings?document=${this.documentId}`, {
+            const response = await fetch(`${ENV.API_URL}/document/settings?documentId=${this.documentId}`, {
                 headers: {
                     AUTHORIZATION: authToken
                 },
@@ -113,7 +113,7 @@ export class SettingsManager {
         // Send update to server
         const authToken = await Auth.getAuthToken();
         if (authToken != null) {
-            fetch(`${ENV.API_URL}/document/settings?document=${this.documentId}`, {
+            fetch(`${ENV.API_URL}/document/settings?documentId=${this.documentId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -169,6 +169,7 @@ class Settings {
                 leftBorderStyle: borderStyle.NONE,
                 rightBorderStyle: borderStyle.NONE,
                 selectionType: selection.NUMBER,
+                selections: [],
             },
         };
 
@@ -380,6 +381,27 @@ class Settings {
             if (!isPremium) return;
             this.settings.selectionType = selectionType;
             this.executeUpdateCallbacks();
+        });
+    }
+
+    newSelection(start, end) {
+        Auth.isPremium().then(isPremium => {
+            if (!isPremium) return;
+
+            const newSelection = {
+                start: start,
+                end: end,
+            }
+
+            // for (const selection of this.settings.selections) {
+            //     selection.start
+            // }
+
+            this.settings.selections.push(newSelection)
+            console.log('Selection', newSelection)
+
+            // this.settings.selectionType = selectionType;
+            // this.executeUpdateCallbacks();
         });
     }
 }

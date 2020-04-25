@@ -38,8 +38,7 @@ export function getIndexesOfSelectedLines() {
             firstIndex = index;
         }
 
-        index += lineView.textContent.replace(/(\u200C)/g, "").length +
-            lineView.querySelectorAll('.kix-embeddedobject-view').length;
+        index += lineViewLength(lineView)
 
         if (lineView == lastSelectedLineView) {
             lastIndex = index;
@@ -47,4 +46,9 @@ export function getIndexesOfSelectedLines() {
     }
 
     return [firstIndex, lastIndex];
+}
+
+export function lineViewLength(lineView) {
+    return lineView.textContent.replace(/(\u200C)/g, "").length +
+        lineView.querySelectorAll('.kix-embeddedobject-view').length;
 }
