@@ -2,7 +2,7 @@ import { Auth } from './auth.js';
 
 Auth.queryAndCacheSubscriptionStatus();
 
-chrome.runtime.setUninstallURL("https://linenumbers.app/#/uninstall");
+chrome.runtime.setUninstallURL("https://link.linenumbers.app/uninstalled");
 
 function reloadGDocs() {
 	/**
@@ -22,19 +22,19 @@ chrome.runtime.onInstalled.addListener((details) => {
 	const currentVersion = chrome.runtime.getManifest().version
 	const previousVersion = details.previousVersion
 	const reason = details.reason
- 
-	console.log(`Previous Version: ${previousVersion }`)
-	console.log(`Current Version: ${currentVersion }`)
-	
+
+	console.log(`Previous Version: ${previousVersion}`)
+	console.log(`Current Version: ${currentVersion}`)
+
 	switch (reason) {
 		case 'install':
 			console.log('Extension installed!');
 
 			reloadGDocs();
 
-			const welcomePage = `https://linenumbers.app/#/welcome`;
+			const welcomePage = `https://link.linenumbers.app/installed`;
 
-			chrome.tabs.create({url: welcomePage}, function (tab) {
+			chrome.tabs.create({ url: welcomePage }, function (tab) {
 				console.log(`New tab launched with ${welcomePage}`);
 			});
 
@@ -51,11 +51,11 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 			reloadGDocs();
 
-			const versionWelcomePage = `https://linenumbers.app/#/version/${currentVersion}/welcome`;
+			// const versionWelcomePage = `https://linenumbers.app/#/version/${currentVersion}/welcome`;
 
-			chrome.tabs.create({url: versionWelcomePage}, function (tab) {
-				console.log(`New tab launched with ${versionWelcomePage}`);
-			});
+			// chrome.tabs.create({ url: versionWelcomePage }, function (tab) {
+			// 	console.log(`New tab launched with ${versionWelcomePage}`);
+			// });
 
 			dataLayer.push({
 				event: 'updated',
