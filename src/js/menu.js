@@ -283,6 +283,7 @@ export async function injectMenu() {
             <ul style="margin-left: -15px">
                 <li><a href="https://link.linenumbers.app/settings-descriptions" target="_blank">Description of Settings</a></li>
                 <li><a href="https://link.linenumbers.app/faq" target="_blank">Frequently Asked Questions</a></li>
+                <li><a href="https://link.linenumbers.app/export" target="_blank">Export Line Numbers</a></li>
                 <!-- <li><a>Report a Bug or Request a Feature</a></li> -->
                 <li><a href="https://link.linenumbers.app/contact" target="_blank">Contact Developer</a></li>
             </ul>`

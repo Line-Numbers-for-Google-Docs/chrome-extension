@@ -113,7 +113,7 @@ export class SettingsManager {
         // Send update to server
         const authToken = await Auth.getAuthToken();
         if (authToken != null) {
-            fetch(`${ENV.API_URL}/document/settings?documentId=${this.documentId}`, {
+            const result = await fetch(`${ENV.API_URL}/document/settings?documentId=${this.documentId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -121,6 +121,44 @@ export class SettingsManager {
                 },
                 body: JSON.stringify(rawSettings),
             });
+
+            if (result.status == 403) {
+                // Unauthorized, show popup requesting permissions to update document settings
+                const dialog = document.createElement('div')
+                dialog.innerHTML = `
+                    <div class="modal-dialog-bg" style="opacity: 0.75; width: 100vw; height: 100vh;" aria-hidden="true"></div>
+            
+                    <div class="modal-dialog docs-dialog" tabindex="0" role="dialog" aria-labelledby="evb5a0:70g" style="left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 1;">
+                        <div class="modal-dialog-title modal-dialog-title-draggable">
+                            <span class="modal-dialog-title-text" id="evb5a0:70g" role="heading">Line Numbering</span>
+                            <span class="modal-dialog-title-close" role="button" tabindex="0" aria-label="Close" data-tooltip="Close"></span>
+                        </div>
+                        <div class="modal-dialog-content">
+                            <div class="ln-auth-request">
+                                <p>
+                                    Line Numbers requires access to your documents to modify the line numbering settings of this document.
+                                    <a href="https://link.linenumbers.app/why-docs-permissions" target="_blank">Learn more</a>.
+                                </p>
+                            </div>
+                        </div> 
+                        <div class="modal-dialog-buttons">
+                            <button class="ln-modal-dialog-cancel" name="cancel">Cancel</button>
+                            <button name="grant" class="ln-modal-dialog-apply goog-buttonset-default goog-buttonset-action">Grant</button>
+                        </div>
+                    </div>`
+
+                dialog.querySelector('button[name="grant"]').addEventListener('click', e => {
+                    const authWindow = window.open(`${ENV.GOOGLE_AUTH_URL}?scopes=["documents"]`)
+
+                    window.setInterval(() => {
+                        if (authWindow.closed) {
+                            dialog.remove()
+                        }
+                    }, 500);
+                })
+
+                document.body.append(dialog)
+            }
         }
     }
 

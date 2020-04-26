@@ -263,11 +263,14 @@
   font-weight: bold;
 }
 
-.ln-login {
+.ln-login, .ln-auth-request {
   width: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
   margin-bottom: 15px;
+}
+
+.ln-login {
+  text-align: center;
 }
