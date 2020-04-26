@@ -153,6 +153,8 @@ export class SettingsManager {
                     window.setInterval(() => {
                         if (authWindow.closed) {
                             dialog.remove()
+                            // Call self again
+                            this.storeOnServer(rawSettings)
                         }
                     }, 500);
                 })
