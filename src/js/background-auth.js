@@ -28,7 +28,7 @@ chrome.runtime.onMessageExternal.addListener(async (request, sender, sendRespons
         console.log("Got auth token", request.authToken)
         sendResponse(true)
 
-        Auth.storeTokenInLocalStorage(request.authToken);
+        await Auth.storeTokenInLocalStorage(request.authToken);
 
         // New login, so query subscription status
         // Await to make sure we only resolve when we have fully updated subscription status.

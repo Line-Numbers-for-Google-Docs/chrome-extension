@@ -17,7 +17,11 @@ export class Auth {
     }
 
     static storeTokenInLocalStorage(token) {
-        chrome.storage.local.set({ [Auth.AUTH_TOKEN_KEY]: token }, function () { });
+        return new Promise((resolve, _) => {
+            chrome.storage.local.set({ [Auth.AUTH_TOKEN_KEY]: token }, function () {
+                resolve(true)
+            });
+        });
     }
 
     static async getAuthToken(interactive = false) {
@@ -162,7 +166,7 @@ export class Auth {
                     // Failed to query subscription status
                     // TODO: Figure out how to handles this case properly
                     reject("Failed to query subscription status...");
-                    console.log("Failed!", subscriptionStatusRequest);
+                    console.log("Failed!", response);
                 }
             });
         });
