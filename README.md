@@ -19,7 +19,7 @@
   <h3 align="center">Line Numbers for Google Docs</h3>
 
   <p align="center">
-    A seamless way to numbers the lines of your Google Docs!
+    A seamless way to number the lines of your Google Docs documents!
     <br />
     <a href="#download"><strong>Get it now »</strong></a>
     <br />
