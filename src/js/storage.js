@@ -159,6 +159,14 @@ export class SettingsManager {
                     }, 500);
                 })
 
+                dialog.querySelector('button[name="grant"]').addEventListener('click', e => {
+                    dialog.remove()
+                });
+
+                dialog.querySelector('.modal-dialog-title-close').addEventListener('click', e => {
+                    dialog.remove()
+                });
+
                 document.body.append(dialog)
             }
         }
