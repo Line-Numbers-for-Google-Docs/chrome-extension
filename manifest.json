@@ -34,8 +34,7 @@
     "http://docs.google.com/document/d/*",
     "https://linenumbers.app/*",
     "storage",
-    "identity",
-    "notifications"
+    "identity"
   ],
   "web_accessible_resources": [
     "css/linenumbering.css",
