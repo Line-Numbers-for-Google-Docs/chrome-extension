@@ -33,8 +33,7 @@
     "https://docs.google.com/document/d/*",
     "http://docs.google.com/document/d/*",
     "https://linenumbers.app/*",
-    "storage",
-    "identity"
+    "storage"
   ],
   "web_accessible_resources": [
     "css/linenumbering.css",

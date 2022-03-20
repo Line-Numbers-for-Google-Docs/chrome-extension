@@ -110,11 +110,15 @@ export class SettingsManager {
         // Send update to server
         const authToken = await Auth.getAuthToken();
         if (authToken != null) {
-            fetch(`https://linenumbers.app/api/v1/documentSettings?document=${this.documentId}&authToken=${authToken}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(rawSettings),
-            });
+            try {
+                fetch(`https://linenumbers.app/api/v1/documentSettings?document=${this.documentId}&authToken=${authToken}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(rawSettings),
+                });
+            } catch (e) {
+                console.error("storeOnServer failed", e)
+            }
         }
     }
 

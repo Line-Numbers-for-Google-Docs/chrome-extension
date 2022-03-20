@@ -51,11 +51,11 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 			reloadGDocs();
 
-			const versionWelcomePage = `https://linenumbers.app/#/version/${currentVersion}/welcome`;
+			// const versionWelcomePage = `https://linenumbers.app/#/version/${currentVersion}/welcome`;
 
-			chrome.tabs.create({url: versionWelcomePage}, function (tab) {
-				console.log(`New tab launched with ${versionWelcomePage}`);
-			});
+			// chrome.tabs.create({url: versionWelcomePage}, function (tab) {
+			// 	console.log(`New tab launched with ${versionWelcomePage}`);
+			// });
 
 			dataLayer.push({
 				event: 'updated',

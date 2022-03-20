@@ -125,6 +125,26 @@ export class Auth {
     }
 
     static queryAndCacheSubscriptionStatus() {
+        return Auth.queryAndCacheSubscriptionStatus_mock();
+    }
+
+    static queryAndCacheSubscriptionStatus_mock() {
+        return new Promise(async (resolve, reject) => {
+            const ONE_DAY = 86400;
+            const subscriptionStatus = {
+                premium: true,
+                premium_end: Date.now() / 1000 + ONE_DAY * 30,
+            };
+
+            await Auth.storeSubscriptionStatusInLocalStorage(subscriptionStatus);
+
+            resolve(subscriptionStatus);
+
+            return;
+        });
+    }
+
+    static queryAndCacheSubscriptionStatus_real() {
         return new Promise(async (resolve, reject) => {
             const authToken = await Auth.getAuthToken();
 
